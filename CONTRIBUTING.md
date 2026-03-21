@@ -35,7 +35,7 @@ webdesign/
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/phcdevworks/coast-ai-skills.git
+   git clone https://github.com/coastdigitalgroup/coast-ai-skills.git
    cd coast-ai-skills
    ```
 2. Open in VS Code using the workspace file:

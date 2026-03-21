@@ -44,7 +44,7 @@ Issues and pull requests are welcome. See **[CONTRIBUTING.md](CONTRIBUTING.md)**
 
 ## License
 
-MIT © PHCDevworks — See **[LICENSE](LICENSE)** for details.
+MIT © CoastDigitalGroup — See **[LICENSE](LICENSE)** for details.
 
 ---
 
@@ -52,5 +52,5 @@ MIT © PHCDevworks — See **[LICENSE](LICENSE)** for details.
 
 If Coast AI Skills helps your workflow, consider sponsoring:
 
-- [GitHub Sponsors](https://github.com/sponsors/phcdevworks)
-- [Buy Me a Coffee](https://buymeacoffee.com/phcdevworks)
+- [GitHub Sponsors](https://github.com/sponsors/coastdigitalgroup)
+- [Buy Me a Coffee](https://buymeacoffee.com/coastdigitalgroup)

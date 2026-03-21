@@ -19,7 +19,7 @@ If you discover a security vulnerability, please **DO NOT** open a public issue.
 
 ### How to Report
 
-**Preferred method**: Use [GitHub Security Advisories](https://github.com/phcdevworks/coast-ai-skills/security/advisories/new) to privately report vulnerabilities
+**Preferred method**: Use [GitHub Security Advisories](https://github.com/coastdigitalgroup/coast-ai-skills/security/advisories/new) to privately report vulnerabilities
 
 **Alternative methods**:
 
@@ -82,7 +82,7 @@ This policy does **NOT** cover:
 
 For security-related questions that aren't vulnerabilities:
 
-- Open a [GitHub Discussion](https://github.com/phcdevworks/coast-ai-skills/discussions)
+- Open a [GitHub Discussion](https://github.com/coastdigitalgroup/coast-ai-skills/discussions)
 - Tag maintainers in relevant issues
 
 Thank you for helping keep this Skill library and our community safe!

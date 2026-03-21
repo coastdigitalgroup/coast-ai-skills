@@ -38,8 +38,8 @@ This Code of Conduct applies within all community spaces, and also applies when 
 
 Instances of abusive, harassing, or otherwise unacceptable behavior may be reported to the community leaders responsible for enforcement via:
 
-- GitHub Issues: [coast-ai-gemini-gems/issues](https://github.com/phcdevworks/coast-ai-gemini-gems/issues)
-- Email: [Contact maintainers through GitHub](https://github.com/phcdevworks)
+- GitHub Issues: [coast-ai-gemini-gems/issues](https://github.com/coastdigitalgroup/coast-ai-gemini-gems/issues)
+- Email: [Contact maintainers through GitHub](https://github.com/coastdigitalgroup)
 
 All complaints will be reviewed and investigated promptly and fairly.
 
