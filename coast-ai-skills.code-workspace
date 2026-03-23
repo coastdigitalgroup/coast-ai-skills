@@ -62,7 +62,12 @@
 		"[markdown]": {
 			"editor.wordWrap": "on",
 			"editor.formatOnSave": true,
-			"editor.defaultFormatter": "vscode.markdown-language-features"
+			"editor.defaultFormatter": "esbenp.prettier-vscode",
+			"editor.quickSuggestions": {
+				"comments": "off",
+				"strings": "off",
+				"other": "off"
+			}
 		},
 		"files.associations": {
 			"*.css": "css",
@@ -120,6 +125,8 @@
 			"dbaeumer.vscode-eslint",
 			"esbenp.prettier-vscode",
 			"editorconfig.editorconfig",
+			"yzhang.markdown-all-in-one",
+			"davidanson.vscode-markdownlint",
 			"streetsidesoftware.code-spell-checker",
 			"usernamehw.errorlens",
 			"yoavbls.pretty-ts-errors",
