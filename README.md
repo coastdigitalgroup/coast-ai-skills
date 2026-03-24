@@ -51,12 +51,5 @@ We encourage the addition of new skills that broaden the capabilities of the Coa
 
 MIT © CoastDigitalGroup — See **[LICENSE](LICENSE)** for details.
 
----
 
-## ❤️ Support Coast Digital Group
-
-If Coast AI Skills helps your workflow, consider supporting our development:
-
-- [GitHub Sponsors](https://github.com/sponsors/coastdigitalgroup)
-- [Buy Me a Coffee](https://buymeacoffee.com/coastdigitalgroup)
 
