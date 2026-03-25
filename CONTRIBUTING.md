@@ -1,55 +1,75 @@
 # Contributing to Coast AI Skills
 
-Thanks for helping build the library of reusable AI skills! This repository
-contains modules and tools to be used across the Coast AI ecosystem.
+Thanks for helping build a public library of high-quality AI skills.
 
-## How to Contribute
+## What We Want
 
-1. **New Skills**: We welcome any new skills that broaden the capabilities of
-   Coast AI agents.
-2. **Bug Fixes**: Open an issue if you find a bug in an existing skill.
-3. **Enhancements**: Propose improvements to existing skills via feature
-   requests or PRs.
+Contribute skills that are:
 
-## File Organization
+- broadly useful
+- easy for agents to trigger correctly
+- concise in core instructions
+- practical in real engineering or operations work
+- maintained like open-source artifacts, not one-off prompts
 
-Skills are categorized by their function:
+## Skill Structure
 
-- `webdesign/`: Style and layout related skills.
-- `data/`: Data extraction and processing.
-- `integrations/`: Third-party service connectors.
+Each skill lives in its own top-level folder and must include a `SKILL.md`.
 
-Example structure for a new skill:
+Recommended layout:
 
-```
-webdesign/
-├── my-new-skill/
-│   ├── SKILL.md      # Documentation and instructions
-│   ├── scripts/      # Any helper scripts
-│   └── examples/     # Code examples
+```text
+my-skill/
+  SKILL.md
+  references/
+  scripts/
+  assets/
 ```
 
-## Pull Request Process
+Rules:
 
-1. **Branch from `main`**.
-2. **Document your skill**: Every skill must have a `SKILL.md` explaining how to
-   use it.
-3. **Include examples**: Show how the skill functions.
-4. **Open a PR** describing the new skill or enhancement.
+- `SKILL.md` is required.
+- `references/` is for detailed docs that should only be loaded when needed.
+- `scripts/` is for deterministic helpers.
+- `assets/` is for templates or reusable files used in outputs.
 
-## Development Setup
+## Writing Good Skills
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/coastdigitalgroup/coast-ai-skills.git
-   cd coast-ai-skills
-   ```
-2. Open in VS Code using the workspace file:
-   ```bash
-   code coast-ai-skills.code-workspace
-   ```
+- Use clear YAML frontmatter with `name` and `description`.
+- Put trigger language in the `description`.
+- Keep the body lean and procedural.
+- Link to reference files instead of stuffing everything into `SKILL.md`.
+- Avoid extra docs inside a skill folder such as `README.md` or `CHANGELOG.md`.
+
+## Pull Requests
+
+When submitting a new skill or revising an existing one:
+
+1. Add or update the skill folder.
+2. Make sure `SKILL.md` is valid and readable.
+3. Include only the support files that materially improve the skill.
+4. Explain what user requests should trigger the skill.
+5. Describe any notable scripts, references, or assets included.
+
+## Quality Bar
+
+Prefer one strong skill over ten shallow ones.
+
+A good contribution usually has:
+
+- a tight description that triggers well
+- a workflow another agent can actually follow
+- references or scripts only where they add real value
+- examples grounded in realistic work
+
+## Development
+
+```bash
+git clone https://github.com/coastdigitalgroup/coast-ai-skills.git
+cd coast-ai-skills
+```
 
 ## License
 
-By contributing, you agree that your contributions will be licensed under the
-MIT License.
+By contributing, you agree that your contributions are licensed under the MIT
+License.

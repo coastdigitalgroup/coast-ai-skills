@@ -1,55 +1,90 @@
 # coast-ai-skills
 
-[![GitHub issues](https://img.shields.io/github/issues/coastdigitalgroup/coast-ai-skills)](https://github.com/coastdigitalgroup/coast-ai-skills/issues) [![GitHub pulls](https://img.shields.io/github/issues-pr/coastdigitalgroup/coast-ai-skills)](https://github.com/coastdigitalgroup/coast-ai-skills/pulls) [![License](https://img.shields.io/github/license/coastdigitalgroup/coast-ai-skills)](LICENSE)
+[![GitHub issues](https://img.shields.io/github/issues/coastdigitalgroup/coast-ai-skills)](https://github.com/coastdigitalgroup/coast-ai-skills/issues)
+[![GitHub pulls](https://img.shields.io/github/issues-pr/coastdigitalgroup/coast-ai-skills)](https://github.com/coastdigitalgroup/coast-ai-skills/pulls)
+[![License](https://img.shields.io/github/license/coastdigitalgroup/coast-ai-skills)](LICENSE)
 
-Reusable AI skill modules for the Coast AI agent framework.
+Open-source AI skills organized in standardized, generic folders.
 
+This repository is meant to be a practical skills library:
 
-🤝 **[Contributing Guide](CONTRIBUTING.md)** | 📝 **[Changelog](CHANGELOG.md)** | 🛡️ **[Security Policy](SECURITY.md)**
+- high-quality, reusable skills
+- simple folder-per-skill organization
+- lightweight instructions with progressive disclosure
+- optional bundled references, scripts, and assets
 
-## Overview
+## What Is A Skill?
 
-`coast-ai-skills` is a repository of specialized modules and high-performance toolsets designed for consumption by Coast AI agents. These skills encompass various domains, from web design automation to complex data processing.
+A skill is a self-contained folder that helps an AI agent perform a class of tasks
+more reliably.
 
-## Key Categories
+Each skill should include:
 
-- **Web Design**: Skills for layout generation, CSS application, and aesthetic styling.
-- **Data Processing**: Focused modules for extracting and transforming information.
-- **Integrations**: Ready-to-use connector sets for external APIs and services.
-
-## Usage
-
-### 1. Integration with Agents
-
-Coast AI agents are built to discover and load these skills automatically based on the capability requirements defined in the agent's persona.
-
-### 2. Manual Installation
-
-```bash
-git clone https://github.com/coastdigitalgroup/coast-ai-skills.git
+```text
+skill-name/
+  SKILL.md
 ```
 
-## Project Structure
+It may also include:
 
-| Path            | Responsibility                                      |
-| --------------- | --------------------------------------------------- |
-| `webdesign/`    | Skills for visual layout and web styling automation |
-| `data/`         | Data extraction, cleaning, and processing modules   |
-| `integrations/` | Connectors for 3rd party services and platforms     |
+```text
+skill-name/
+  SKILL.md
+  references/
+  scripts/
+  assets/
+```
 
-## Part of the Coast AI Suite
+## Repository Layout
 
-- **[Coast AI Agents](https://github.com/coastdigitalgroup/coast-ai-agents)** - Autonomous agent frameworks
-- **[Coast AI Gemini Gems](https://github.com/coastdigitalgroup/coast-ai-gemini-gems)** - Gemini Gem instruction library
-- **[Coast AI Skills](https://github.com/coastdigitalgroup/coast-ai-skills)** - Reusable skill modules for AI agents (this project)
+This repo keeps one folder per skill at the repository root.
+
+```text
+coast-ai-skills/
+  typescript/
+    SKILL.md
+    references/
+      basics.md
+```
+
+This keeps the library easy to browse, easy to copy from, and easy to consume
+from other repos or agent runtimes.
+
+## Design Principles
+
+- Keep `SKILL.md` concise and focused on workflow.
+- Put detailed material in `references/` instead of bloating the main skill.
+- Add `scripts/` only when determinism or repeatability matters.
+- Add `assets/` only when the skill needs templates or reusable artifacts.
+- Prefer skills that are broadly useful in real engineering work.
+- Treat each skill as a production-quality open-source artifact, not a prompt dump.
+
+## Current Skills
+
+| Skill | Focus |
+| --- | --- |
+| `api-design/` | API contracts, resource modeling, naming, and evolution |
+| `customer-support/` | Clear and actionable support responses |
+| `debugging/` | Systematic bug investigation and verification |
+| `meeting-notes/` | Decisions, action items, and follow-up summaries |
+| `project-planning/` | Scope, milestones, sequencing, and risks |
+| `react/` | Maintainable React component and state patterns |
+| `research-brief/` | Decision-friendly synthesis of information |
+| `technical-writing/` | Clear technical docs and procedural writing |
+| `typescript/` | Strict TypeScript architecture, validation, and maintainable type-system patterns |
 
 ## Contributing
 
-We encourage the addition of new skills that broaden the capabilities of the Coast AI ecosystem. Please see **[CONTRIBUTING.md](CONTRIBUTING.md)** for detailed submission guidelines.
+We want this repo to become a strong public library of agent skills. Contributions
+should prioritize clarity, reuse, and quality over volume.
+
+Start with [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## Related Projects
+
+- [Coast AI Agents](https://github.com/coastdigitalgroup/coast-ai-agents)
+- [Coast AI Gemini Gems](https://github.com/coastdigitalgroup/coast-ai-gemini-gems)
 
 ## License
 
-MIT © CoastDigitalGroup — See **[LICENSE](LICENSE)** for details.
-
-
-
+MIT. See [LICENSE](LICENSE).
