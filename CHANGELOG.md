@@ -5,4 +5,4 @@ All notable changes to this project will be documented here. The format follows
 
 ## [Unreleased]
 
-- Standardize repository documentation and branding to Coast AI.
+- Standardize repository documentation and branding to CoastAi.

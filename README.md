@@ -82,8 +82,8 @@ Start with [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Related Projects
 
-- [Coast AI Agents](https://github.com/coastdigitalgroup/coast-ai-agents)
-- [Coast AI Gemini Gems](https://github.com/coastdigitalgroup/coast-ai-gemini-gems)
+- [CoastAi Agents](https://github.com/coastdigitalgroup/coast-ai-agents)
+- [CoastAi Instructions](https://github.com/coastdigitalgroup/coast-ai-instructions)
 
 ## License
 

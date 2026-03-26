@@ -1,4 +1,4 @@
-# Contributing to Coast AI Skills
+# Contributing to CoastAi Skills
 
 Thanks for helping build a public library of high-quality AI skills.
 

@@ -2,7 +2,7 @@
 
 ## Supported Versions
 
-We aim to support the latest published version of Coast AI Skills. Security updates are applied to the current major version only.
+We aim to support the latest published version of CoastAi Skills. Security updates are applied to the current major version only.
 
 | Version | Supported          |
 | ------- | ------------------ |
@@ -57,7 +57,7 @@ We appreciate responsible disclosure and will work with you to:
 
 ## Security Best Practices
 
-When using Coast AI Skills:
+When using CoastAi Skills:
 
 1. **Keep the repository private** if it contains proprietary Skill instructions or sensitive system prompts
 2. **Review access permissions** regularly for collaborators
