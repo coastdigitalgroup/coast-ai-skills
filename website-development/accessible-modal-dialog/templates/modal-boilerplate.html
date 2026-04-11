@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Accessible Modal Boilerplate</title>
+  <style>
+    /* Basic reset for the modal */
+    .modal-dialog {
+      padding: 0;
+      border: none;
+      border-radius: 0.5rem;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+
+    .modal-dialog::backdrop {
+      background: rgba(0, 0, 0, 0.4);
+    }
+
+    .modal-content {
+      padding: 1.5rem;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .modal-close-btn {
+      cursor: pointer;
+      background: none;
+      border: 1px solid transparent;
+      padding: 0.5rem;
+    }
+
+    .modal-close-btn:focus-visible {
+      border-color: currentColor;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Trigger -->
+  <button type="button" id="modal-trigger" aria-haspopup="dialog">
+    Open Modal
+  </button>
+
+  <!-- Modal -->
+  <dialog id="main-modal" class="modal-dialog" aria-labelledby="modal-title">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modal-title">Modal Title</h2>
+        <button type="button" class="modal-close-btn" id="modal-close" aria-label="Close modal">
+          &times;
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Add content here -->
+        <p>Your content goes here.</p>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" id="modal-cancel">Cancel</button>
+        <button type="button" id="modal-confirm">Confirm</button>
+      </div>
+    </div>
+  </dialog>
+
+  <script>
+    const trigger = document.getElementById('modal-trigger');
+    const modal = document.getElementById('main-modal');
+    const closeBtn = document.getElementById('modal-close');
+    const cancelBtn = document.getElementById('modal-cancel');
+
+    const openModal = () => modal.showModal();
+    const closeModal = () => modal.close();
+
+    trigger.addEventListener('click', openModal);
+    closeBtn.addEventListener('click', closeModal);
+    cancelBtn.addEventListener('click', closeModal);
+
+    // Close on click outside (backdrop)
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
+  </script>
+</body>
+</html>
