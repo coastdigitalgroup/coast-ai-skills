@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fluid Typography System Template</title>
+    <style>
+        :root {
+            /*
+               FLUID TYPOGRAPHY CONFIGURATION
+               Min Viewport: 320px (20rem)
+               Max Viewport: 1200px (75rem)
+               Base Min: 16px (1rem)
+               Base Max: 20px (1.25rem)
+               Ratio: 1.25 (Major Third)
+            */
+
+            /* Slope & Intercept calculations for Base */
+            /* slope = (20 - 16) / (1200 - 320) = 0.004545 */
+            /* intercept = 16 - (0.004545 * 320) = 14.545 */
+            /* preferred = 0.909rem + 0.4545vw */
+            --step--2: clamp(0.64rem, 0.618rem + 0.11vw, 0.8rem);
+            --step--1: clamp(0.8rem, 0.745rem + 0.273vw, 1rem);
+            --step-0: clamp(1rem, 0.909rem + 0.455vw, 1.25rem);
+            --step-1: clamp(1.25rem, 1.111rem + 0.693vw, 1.563rem);
+            --step-2: clamp(1.563rem, 1.358rem + 1.023vw, 1.953rem);
+            --step-3: clamp(1.953rem, 1.659rem + 1.47vw, 2.441rem);
+            --step-4: clamp(2.441rem, 2.025rem + 2.083vw, 3.052rem);
+            --step-5: clamp(3.052rem, 2.47rem + 2.909vw, 3.815rem);
+
+            /* Spacing (Fluid Scale based on step-0) */
+            --space-s: var(--step-0);
+            --space-m: calc(var(--step-0) * 1.5);
+            --space-l: calc(var(--step-0) * 3);
+        }
+
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            font-size: var(--step-0);
+            line-height: 1.5;
+            color: #333;
+            max-width: 60rem;
+            margin: 0 auto;
+            padding: var(--space-m);
+        }
+
+        h1 { font-size: var(--step-5); line-height: 1.1; margin-bottom: var(--space-m); }
+        h2 { font-size: var(--step-4); line-height: 1.2; margin-top: var(--space-l); }
+        h3 { font-size: var(--step-3); line-height: 1.2; }
+        h4 { font-size: var(--step-2); }
+        small { font-size: var(--step--1); }
+
+        .container {
+            border: 1px solid #eee;
+            padding: var(--space-m);
+            border-radius: 8px;
+        }
+
+        .label {
+            font-size: var(--step--2);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="label">Step 5</div>
+        <h1>Modern Fluid Typography</h1>
+        <p>Resize your browser to see the typography scale smoothly without breakpoints.</p>
+    </header>
+
+    <main>
+        <section>
+            <div class="label">Step 4</div>
+            <h2>Consistent Hierarchy</h2>
+            <p>This template uses a <strong>Major Third (1.25)</strong> ratio. The base font size scales from 16px at 320px viewport to 20px at 1200px viewport.</p>
+
+            <div class="label">Step 3</div>
+            <h3>Heading Level 3</h3>
+            <p>Notice how the line height and spacing also feel proportional as the text scales. This is achieved by using relative units for margins and padding.</p>
+
+            <div class="label">Step 2</div>
+            <h4>Heading Level 4</h4>
+            <p>Even the small text scales appropriately, ensuring it remains legible on mobile while not looking out of place on desktop.</p>
+
+            <p><small>This is small text using --step--1.</small></p>
+        </section>
+    </main>
+</body>
+</html>
