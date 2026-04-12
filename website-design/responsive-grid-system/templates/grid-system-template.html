@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Responsive 12-Column Grid Template</title>
+    <style>
+        :root {
+            /* Grid Configuration */
+            --grid-max-width: 1200px;
+            --grid-gutter: 24px;
+            --grid-margin: 20px;
+            --grid-columns: 4; /* Mobile default */
+        }
+
+        @media (min-width: 768px) {
+            :root {
+                --grid-columns: 8;
+                --grid-margin: 32px;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            :root {
+                --grid-columns: 12;
+                --grid-margin: 40px;
+            }
+        }
+
+        /* Base Layout Styles */
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: #f4f4f9;
+        }
+
+        .container {
+            max-width: var(--grid-max-width);
+            margin: 0 auto;
+            padding: 0 var(--grid-margin);
+        }
+
+        /* The Grid System */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(var(--grid-columns), 1fr);
+            gap: var(--grid-gutter);
+        }
+
+        /* Utility Classes for Spanning */
+        .col-span-full { grid-column: span var(--grid-columns); }
+
+        /* Desktop-specific spans (using 12-column logic) */
+        @media (min-width: 1024px) {
+            .col-d-2 { grid-column: span 2; }
+            .col-d-3 { grid-column: span 3; }
+            .col-d-4 { grid-column: span 4; }
+            .col-d-6 { grid-column: span 6; }
+            .col-d-7 { grid-column: span 7; }
+            .col-d-8 { grid-column: span 8; }
+        }
+
+        /* Tablet-specific spans (using 8-column logic) */
+        @media (min-width: 768px) and (max-width: 1023px) {
+            .col-t-2 { grid-column: span 2; }
+            .col-t-4 { grid-column: span 4; }
+            .col-t-6 { grid-column: span 6; }
+            .col-t-8 { grid-column: span 8; }
+        }
+
+        /* Demo Styles */
+        .grid-item {
+            background-color: #ffffff;
+            border: 1px solid #ddd;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px;
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #555;
+        }
+
+        header, section {
+            margin-bottom: 40px;
+        }
+
+        .header-demo {
+            padding: 20px 0;
+            background: #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            margin-bottom: 60px;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header-demo">
+        <div class="container">
+            <div class="grid">
+                <!-- Logo: 2 cols on Desktop/Tablet, 4 (full) on Mobile -->
+                <div class="grid-item col-d-2 col-t-2 col-span-full">Logo</div>
+                <!-- Navigation: 7 cols on Desktop, 4 on Tablet, 4 (full) on Mobile -->
+                <div class="grid-item col-d-7 col-t-4 col-span-full">Navigation</div>
+                <!-- CTA: 3 cols on Desktop, 2 on Tablet, 4 (full) on Mobile -->
+                <div class="grid-item col-d-3 col-t-2 col-span-full">CTA</div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+
+        <!-- Hero Section -->
+        <section class="grid">
+            <div class="grid-item col-span-full" style="min-height: 300px; background-color: #e0e7ff; color: #4338ca;">
+                Hero Content (Full Width)
+            </div>
+        </section>
+
+        <!-- Feature Section -->
+        <section class="grid">
+            <div class="grid-item col-d-4 col-t-4 col-span-full">Feature 1</div>
+            <div class="grid-item col-d-4 col-t-4 col-span-full">Feature 2</div>
+            <div class="grid-item col-d-4 col-t-8 col-span-full">Feature 3</div>
+        </section>
+
+        <!-- Content + Sidebar Section -->
+        <section class="grid">
+            <div class="grid-item col-d-8 col-t-8 col-span-full">Main Content (8 Columns Desktop)</div>
+            <div class="grid-item col-d-4 col-t-8 col-span-full">Sidebar (4 Columns Desktop)</div>
+        </section>
+
+    </main>
+
+</body>
+</html>
