@@ -1,0 +1,73 @@
+/**
+ * ACCESSIBLE COLOR SYSTEM TEMPLATE
+ * --------------------------------
+ * This template provides a structured approach to defining CSS custom properties
+ * for a design system that prioritizes WCAG 2.1 accessibility.
+ */
+
+:root {
+  /* 1. PRIMARY SCALE (Brand Identity) */
+  --clr-primary-50: #e6eeff;
+  --clr-primary-100: #ccddff;
+  --clr-primary-200: #99bbff;
+  --clr-primary-300: #6699ff;
+  --clr-primary-400: #3377ff;
+  --clr-primary-500: #0055ff; /* Base Brand */
+  --clr-primary-600: #0044cc; /* AA Safe Text on Light */
+  --clr-primary-700: #003399;
+  --clr-primary-800: #002266;
+  --clr-primary-900: #001133;
+
+  /* 2. NEUTRAL SCALE (Surfaces & Text) */
+  --clr-neutral-50: #f9f9f9;
+  --clr-neutral-100: #f0f0f0;
+  --clr-neutral-200: #e0e0e0;
+  --clr-neutral-300: #cccccc;
+  --clr-neutral-400: #aaaaaa;
+  --clr-neutral-500: #888888;
+  --clr-neutral-600: #666666; /* AA Safe for UI/Icons on Light */
+  --clr-neutral-700: #444444; /* AA Safe Text on Light */
+  --clr-neutral-800: #2d2d2d;
+  --clr-neutral-900: #121212;
+
+  /* 3. SEMANTIC ROLES (Functional Application) */
+
+  /* Backgrounds */
+  --surface-default: var(--clr-neutral-50);
+  --surface-muted: var(--clr-neutral-100);
+  --surface-overlay: var(--clr-neutral-900);
+  --surface-primary: var(--clr-primary-500);
+
+  /* Content */
+  --text-main: var(--clr-neutral-900);
+  --text-muted: var(--clr-neutral-700);
+  --text-inverse: var(--clr-neutral-50);
+  --text-action: var(--clr-primary-600);
+
+  /* Borders & Dividers */
+  --border-default: var(--clr-neutral-200);
+  --border-strong: var(--clr-neutral-400);
+  --border-action: var(--clr-primary-500);
+
+  /* Status */
+  --status-error-bg: #fff5f5;
+  --status-error-text: #c53030; /* AA Safe */
+  --status-success-bg: #f0fff4;
+  --status-success-text: #2f855a; /* AA Safe */
+}
+
+/* 4. ACCESSIBILITY UTILITIES */
+
+/* Ensure focus states are never hidden */
+:focus-visible {
+  outline: 3px solid var(--clr-primary-500);
+  outline-offset: 2px;
+}
+
+/* High contrast mode / Force colors adjustments */
+@media (prefers-contrast: more) {
+  :root {
+    --text-muted: var(--clr-neutral-900);
+    --border-default: var(--clr-neutral-600);
+  }
+}
