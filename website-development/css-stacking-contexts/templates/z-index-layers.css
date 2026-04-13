@@ -1,0 +1,55 @@
+/*
+  Z-Index Layering System
+
+  Purpose: Prevent "z-index wars" by using a centralized scale of CSS variables.
+  Usage: Apply these variables to your components instead of hardcoded numbers.
+*/
+
+:root {
+  /*
+    Base Layers
+    Used for standard content that needs slight elevation
+  */
+  --z-below: -1;
+  --z-base: 0;
+  --z-above: 1;
+
+  /*
+    Component Layers
+    Standard UI patterns
+  */
+  --z-sticky: 100;
+  --z-header: 200;
+  --z-navigation: 300;
+
+  /*
+    Overlay Layers
+    Content that sits on top of the entire UI
+  */
+  --z-backdrop: 1000;
+  --z-modal: 1010;
+  --z-popover: 1020;
+  --z-tooltip: 1030;
+  --z-toast: 1040;
+
+  /*
+    The "Emergency" Layer
+    Use ONLY for critical overrides (e.g., full-screen loaders)
+  */
+  --z-maximum: 9999;
+}
+
+/*
+  Implementation Example:
+
+  .main-header {
+    position: sticky;
+    top: 0;
+    z-index: var(--z-header);
+  }
+
+  .modal-container {
+    position: fixed;
+    z-index: var(--z-modal);
+  }
+*/
