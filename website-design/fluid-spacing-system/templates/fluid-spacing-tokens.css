@@ -1,0 +1,115 @@
+/*
+  FLUID SPACING SYSTEM TEMPLATE
+
+  This template provides a standard, linear spacing scale that scales
+  smoothly between a mobile viewport (320px) and a desktop viewport (1240px).
+
+  Base Unit: 16px (Mobile) -> 20px (Desktop)
+*/
+
+:root {
+  /* Viewport widths */
+  --fluid-min-width: 320;
+  --fluid-max-width: 1240;
+
+  /* Base sizes (px) */
+  --fluid-min-size: 16;
+  --fluid-max-size: 20;
+
+  /* Base scaling factor (Slope) */
+  /* Formula: (max_size - min_size) / (max_width - min_width) * 100 */
+  --fluid-slope: calc(
+    (var(--fluid-max-size) - var(--fluid-min-size)) /
+      (var(--fluid-max-width) - var(--fluid-min-width)) * 100
+  );
+  --fluid-intercept: calc(
+    (
+        var(--fluid-min-size) -
+          (var(--fluid-slope) * var(--fluid-min-width) / 100)
+      ) /
+      16
+  );
+
+  /*
+     FLUID SCALE
+     Using a multiplier-based system for maximum consistency.
+  */
+
+  /* 0.25x - Tiny (4px -> 5px) */
+  --space-3xs: clamp(
+    0.25rem,
+    calc(var(--fluid-intercept) * 0.25rem + (var(--fluid-slope) * 0.25 * 1vw)),
+    0.3125rem
+  );
+
+  /* 0.5x - Extra Small (8px -> 10px) */
+  --space-2xs: clamp(
+    0.5rem,
+    calc(var(--fluid-intercept) * 0.5rem + (var(--fluid-slope) * 0.5 * 1vw)),
+    0.625rem
+  );
+
+  /* 0.75x - Small (12px -> 15px) */
+  --space-xs: clamp(
+    0.75rem,
+    calc(var(--fluid-intercept) * 0.75rem + (var(--fluid-slope) * 0.75 * 1vw)),
+    0.9375rem
+  );
+
+  /* 1x - Base / Medium (16px -> 20px) */
+  --space-s: clamp(
+    1rem,
+    calc(var(--fluid-intercept) * 1rem + (var(--fluid-slope) * 1 * 1vw)),
+    1.25rem
+  );
+
+  /* 1.5x - Large (24px -> 30px) */
+  --space-m: clamp(
+    1.5rem,
+    calc(var(--fluid-intercept) * 1.5rem + (var(--fluid-slope) * 1.5 * 1vw)),
+    1.875rem
+  );
+
+  /* 2x - Extra Large (32px -> 40px) */
+  --space-l: clamp(
+    2rem,
+    calc(var(--fluid-intercept) * 2rem + (var(--fluid-slope) * 2 * 1vw)),
+    2.5rem
+  );
+
+  /* 3x - 2XL (48px -> 60px) */
+  --space-xl: clamp(
+    3rem,
+    calc(var(--fluid-intercept) * 3rem + (var(--fluid-slope) * 3 * 1vw)),
+    3.75rem
+  );
+
+  /* 4x - 3XL (64px -> 80px) */
+  --space-2xl: clamp(
+    4rem,
+    calc(var(--fluid-intercept) * 4rem + (var(--fluid-slope) * 4 * 1vw)),
+    5rem
+  );
+
+  /* 8x - Huge (128px -> 160px) */
+  --space-3xl: clamp(
+    8rem,
+    calc(var(--fluid-intercept) * 8rem + (var(--fluid-slope) * 8 * 1vw)),
+    10rem
+  );
+}
+
+/* SEMANTIC MAPPINGS EXAMPLE */
+.layout-section {
+  padding-block: var(--space-2xl);
+  padding-inline: var(--space-l);
+}
+
+.component-card {
+  padding: var(--space-m);
+  gap: var(--space-s);
+}
+
+.text-group {
+  margin-bottom: var(--space-xs);
+}
