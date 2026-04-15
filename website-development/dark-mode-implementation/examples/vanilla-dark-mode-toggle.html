@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dark Mode Implementation Example</title>
+
+    <!-- 1. THE CRITICAL INITIALIZATION SCRIPT (FOUC PREVENTION) -->
+    <script>
+      ;(function () {
+        const savedTheme = localStorage.getItem('theme')
+        const systemPrefersDark = window.matchMedia(
+          '(prefers-color-scheme: dark)'
+        ).matches
+
+        const theme = savedTheme || (systemPrefersDark ? 'dark' : 'light')
+
+        document.documentElement.setAttribute('data-theme', theme)
+        document.documentElement.style.colorScheme = theme
+      })()
+    </script>
+
+    <style>
+      /* 2. VARIABLE ARCHITECTURE */
+      :root {
+        /* Light Theme Defaults */
+        --bg-primary: #ffffff;
+        --text-primary: #1a1a1a;
+        --accent: #0066cc;
+        --card-bg: #f5f5f5;
+        --border: #dddddd;
+      }
+
+      [data-theme='dark'] {
+        /* Dark Theme Overrides */
+        --bg-primary: #121212;
+        --text-primary: #eeeeee;
+        --accent: #4da6ff;
+        --card-bg: #1e1e1e;
+        --border: #333333;
+      }
+
+      /* 3. BASIC STYLING */
+      body {
+        background-color: var(--bg-primary);
+        color: var(--text-primary);
+        font-family: system-ui, sans-serif;
+        transition:
+          background-color 0.3s ease,
+          color 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        margin: 0;
+      }
+
+      .card {
+        background-color: var(--card-bg);
+        border: 1px solid var(--border);
+        padding: 2rem;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        max-width: 400px;
+      }
+
+      button {
+        background-color: var(--accent);
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 1rem;
+        margin-top: 1rem;
+      }
+
+      button:hover {
+        opacity: 0.9;
+      }
+
+      /* Responsive image example */
+      .theme-image {
+        max-width: 100%;
+        border-radius: 4px;
+      }
+
+      [data-theme='dark'] .theme-image {
+        filter: brightness(0.8) contrast(1.2);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Theme Switcher</h1>
+      <p>
+        This page respects your system settings but allows you to override them
+        manually. Notice there is no "flash" on reload!
+      </p>
+
+      <button id="theme-toggle" aria-label="Toggle dark mode">
+        Switch Theme
+      </button>
+    </div>
+
+    <!-- 4. TOGGLE LOGIC -->
+    <script>
+      const toggleBtn = document.getElementById('theme-toggle')
+
+      toggleBtn.addEventListener('click', () => {
+        const currentTheme = document.documentElement.getAttribute('data-theme')
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark'
+
+        // Apply theme
+        document.documentElement.setAttribute('data-theme', newTheme)
+        document.documentElement.style.colorScheme = newTheme
+
+        // Persist preference
+        localStorage.setItem('theme', newTheme)
+      })
+
+      // 5. LISTEN FOR SYSTEM CHANGES
+      window
+        .matchMedia('(prefers-color-scheme: dark)')
+        .addEventListener('change', (e) => {
+          // Only update if the user hasn't set a manual preference
+          if (!localStorage.getItem('theme')) {
+            const newTheme = e.matches ? 'dark' : 'light'
+            document.documentElement.setAttribute('data-theme', newTheme)
+            document.documentElement.style.colorScheme = newTheme
+          }
+        })
+    </script>
+  </body>
+</html>

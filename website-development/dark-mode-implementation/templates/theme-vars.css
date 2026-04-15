@@ -1,0 +1,63 @@
+/**
+ * Standard Theme Variable Scale
+ * Defines a consistent naming convention for semantic color roles.
+ */
+
+:root {
+  /* LIGHT MODE (Default) */
+  --color-scheme: light;
+
+  /* Neutrals */
+  --color-bg-base: #ffffff;
+  --color-bg-surface: #f8f9fa;
+  --color-bg-overlay: #ffffff;
+
+  --color-text-main: #1a1a1a;
+  --color-text-muted: #6c757d;
+  --color-text-inverse: #ffffff;
+
+  /* Brand / Action */
+  --color-primary: #007bff;
+  --color-primary-hover: #0056b3;
+
+  /* Borders & Dividers */
+  --color-border-main: #dee2e6;
+  --color-border-subtle: #e9ecef;
+
+  /* Status */
+  --color-success: #28a745;
+  --color-error: #dc3545;
+  --color-warning: #ffc107;
+}
+
+[data-theme='dark'] {
+  /* DARK MODE OVERRIDES */
+  --color-scheme: dark;
+
+  /* Neutrals */
+  --color-bg-base: #121212;
+  --color-bg-surface: #1e1e1e;
+  --color-bg-overlay: #2d2d2d;
+
+  --color-text-main: #f8f9fa;
+  --color-text-muted: #adb5bd;
+  --color-text-inverse: #121212;
+
+  /* Brand / Action */
+  --color-primary: #375a7f;
+  --color-primary-hover: #2b4764;
+
+  /* Borders & Dividers */
+  --color-border-main: #444444;
+  --color-border-subtle: #2d2d2d;
+
+  /* Status */
+  --color-success: #28a745; /* Often remains similar but can be adjusted for contrast */
+  --color-error: #e74c3c;
+  --color-warning: #f39c12;
+}
+
+/* Global property application */
+html {
+  color-scheme: var(--color-scheme);
+}
