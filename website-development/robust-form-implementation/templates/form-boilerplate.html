@@ -1,0 +1,96 @@
+<!--
+  Robust Form Boilerplate
+  Includes:
+  - Semantic HTML5 structure
+  - ARIA-ready error and helper text containers
+  - Error summary pattern
+  - Basic Constraint Validation integration
+-->
+<div
+  id="form-error-summary"
+  class="error-summary"
+  role="alert"
+  aria-labelledby="summary-title"
+  tabindex="-1"
+  style="display: none"
+>
+  <h2 id="summary-title">Please correct the following errors:</h2>
+  <ul id="error-list"></ul>
+</div>
+
+<form id="robust-form" novalidate>
+  <!-- Field Group Example -->
+  <div class="field-container">
+    <label for="field-id">Field Label</label>
+    <span id="field-helper" class="helper-text"
+      >Descriptive helper text for the user.</span
+    >
+
+    <input
+      type="text"
+      id="field-id"
+      name="field-name"
+      required
+      aria-describedby="field-helper field-error"
+      aria-invalid="false"
+    />
+
+    <span id="field-error" class="error-text" aria-live="assertive"></span>
+  </div>
+
+  <!-- Submit Section -->
+  <div class="form-actions">
+    <button type="submit" id="submit-button">Submit</button>
+    <div id="submit-status" role="status" aria-live="polite"></div>
+  </div>
+</form>
+
+<script>
+  /**
+   * Minimal Robust Form Helper
+   */
+  const setupRobustForm = (formId, options = {}) => {
+    const form = document.getElementById(formId)
+    const summary = document.getElementById(
+      options.summaryId || 'form-error-summary'
+    )
+    const errorList = summary?.querySelector('ul')
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault()
+
+      // Clear previous errors
+      summary.style.display = 'none'
+      if (errorList) errorList.innerHTML = ''
+      form
+        .querySelectorAll('[aria-invalid]')
+        .forEach((el) => el.setAttribute('aria-invalid', 'false'))
+
+      if (!form.checkValidity()) {
+        summary.style.display = 'block'
+
+        form.querySelectorAll(':invalid').forEach((input) => {
+          input.setAttribute('aria-invalid', 'true')
+
+          // Map error to UI
+          const errorContainer = document.getElementById(`${input.id}-error`)
+          if (errorContainer) {
+            errorContainer.textContent = input.validationMessage
+          }
+
+          // Add to summary
+          if (errorList) {
+            const li = document.createElement('li')
+            li.innerHTML = `<a href="#${input.id}">${document.querySelector(`label[for="${input.id}"]`).textContent}: ${input.validationMessage}</a>`
+            errorList.appendChild(li)
+          }
+        })
+
+        summary.focus()
+      } else {
+        // Handle valid submission...
+        options.onValid?.(new FormData(form))
+      }
+    })
+  }
+</script>
