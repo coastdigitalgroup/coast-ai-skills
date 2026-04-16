@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Robust Form Implementation - Example</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        line-height: 1.5;
+        max-width: 40rem;
+        margin: 2rem auto;
+        padding: 0 1rem;
+      }
+      .form-group {
+        margin-bottom: 1.5rem;
+      }
+      label {
+        display: block;
+        font-weight: bold;
+        margin-bottom: 0.25rem;
+      }
+      .helper-text {
+        font-size: 0.875rem;
+        color: #666;
+        margin-bottom: 0.5rem;
+        display: block;
+      }
+      input {
+        width: 100%;
+        padding: 0.5rem;
+        font-size: 1rem;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+      }
+      input[aria-invalid='true'] {
+        border-color: #d32f2f;
+        background-color: #fff8f8;
+      }
+      .error-message {
+        color: #d32f2f;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+        display: none;
+      }
+      input[aria-invalid='true'] + .error-message {
+        display: block;
+      }
+      .error-summary {
+        border: 2px solid #d32f2f;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        background-color: #fff8f8;
+        display: none;
+      }
+      .error-summary h2 {
+        margin-top: 0;
+        font-size: 1.125rem;
+      }
+      .error-summary ul {
+        margin-bottom: 0;
+      }
+      button {
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+        background-color: #0056b3;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      button:disabled {
+        background-color: #ccc;
+        cursor: not-allowed;
+      }
+      .loading-indicator {
+        display: none;
+        margin-left: 1rem;
+        font-style: italic;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Join our Newsletter</h1>
+
+    <div
+      id="error-summary"
+      class="error-summary"
+      role="alert"
+      aria-labelledby="error-summary-title"
+      tabindex="-1"
+    >
+      <h2 id="error-summary-title">There is a problem</h2>
+      <ul id="error-list"></ul>
+    </div>
+
+    <form id="registration-form" novalidate>
+      <div class="form-group">
+        <label for="full-name">Full Name</label>
+        <span id="name-helper" class="helper-text"
+          >Enter your name as it appears on your ID.</span
+        >
+        <input
+          type="text"
+          id="full-name"
+          name="full-name"
+          required
+          aria-describedby="name-helper name-error"
+        />
+        <span id="name-error" class="error-message">Name is required.</span>
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          required
+          aria-describedby="email-error"
+        />
+        <span id="email-error" class="error-message"
+          >Please enter a valid email address.</span
+        >
+      </div>
+
+      <div class="form-group">
+        <button type="submit" id="submit-btn">Register</button>
+        <span id="loading" class="loading-indicator" aria-live="polite"
+          >Processing...</span
+        >
+      </div>
+    </form>
+
+    <div id="success-message" aria-live="polite" style="display: none">
+      <h2>Thank you for registering!</h2>
+      <p>We've sent a confirmation email to <span id="user-email"></span>.</p>
+    </div>
+
+    <script>
+      const form = document.getElementById('registration-form')
+      const submitBtn = document.getElementById('submit-btn')
+      const loading = document.getElementById('loading')
+      const errorSummary = document.getElementById('error-summary')
+      const errorList = document.getElementById('error-list')
+      const successMessage = document.getElementById('success-message')
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault()
+        console.log("Form submit triggered");
+
+        // 1. Reset state
+        resetErrors()
+
+        // 2. Client-side validation using Constraint Validation API
+        const isValid = form.checkValidity();
+        console.log("form.checkValidity() returned", isValid);
+
+        if (!isValid) {
+          console.log("Validity check failed");
+          showErrors()
+          return
+        }
+
+        console.log("Validity check passed");
+
+        // 3. Prevent double-submit
+        submitBtn.disabled = true
+        loading.style.display = 'inline'
+
+        // 4. Simulate API call
+        try {
+          const formData = new FormData(form)
+          const email = formData.get('email')
+          console.log("Simulating API call for", email);
+
+          await new Promise((resolve) => setTimeout(resolve, 1500))
+
+          // 5. Handle Success
+          console.log("Submission success");
+          form.style.display = 'none'
+          document.getElementById('user-email').textContent = email
+          successMessage.style.display = 'block'
+        } catch (err) {
+          console.error("Submission error", err);
+          // 6. Handle Server Errors (Generic example)
+          submitBtn.disabled = false
+          loading.style.display = 'none'
+          alert('Submission failed. Please try again.')
+        }
+      })
+
+      function resetErrors() {
+        errorSummary.style.display = 'none'
+        errorList.innerHTML = ''
+        const inputs = form.querySelectorAll('input')
+        inputs.forEach((input) => {
+          input.setAttribute('aria-invalid', 'false')
+        })
+      }
+
+      function showErrors() {
+        const inputs = form.querySelectorAll('input:invalid')
+        console.log("Showing errors for", inputs.length, "inputs");
+        errorSummary.style.display = 'block'
+
+        inputs.forEach((input) => {
+          input.setAttribute('aria-invalid', 'true')
+
+          // Create link in summary
+          const label = document.querySelector(`label[for="${input.id}"]`)
+          const li = document.createElement('li')
+          const a = document.createElement('a')
+          a.href = `#${input.id}`
+          a.textContent = label.textContent
+          a.onclick = (e) => {
+            e.preventDefault()
+            input.focus()
+          }
+          li.appendChild(a)
+          errorList.appendChild(li)
+        })
+
+        // Move focus to summary
+        errorSummary.focus()
+      }
+
+      // Real-time validation after first attempt
+      form.querySelectorAll('input').forEach((input) => {
+        input.addEventListener('blur', () => {
+          if (input.checkValidity()) {
+            input.setAttribute('aria-invalid', 'false')
+          } else {
+            // Only show invalid if the user has already tried to submit
+            if (errorSummary.style.display === 'block') {
+              input.setAttribute('aria-invalid', 'true')
+            }
+          }
+        })
+      })
+    </script>
+  </body>
+</html>
