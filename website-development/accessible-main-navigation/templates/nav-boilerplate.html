@@ -1,0 +1,84 @@
+<!--
+  Accessible Navigation Boilerplate
+  A foundation for responsive, accessible website headers.
+-->
+
+<header class="site-header">
+  <div class="container">
+    <div class="site-logo">
+      <a href="/">Company Name</a>
+    </div>
+
+    <!--
+      Mobile Toggle Button
+      - aria-expanded: updated via JS
+      - aria-controls: matches the ID of the <nav>
+    -->
+    <button
+      type="button"
+      class="nav-toggle"
+      aria-controls="primary-navigation"
+      aria-expanded="false"
+      aria-label="Toggle Menu"
+    >
+      <span class="hamburger" aria-hidden="true"></span>
+    </button>
+
+    <!--
+      Primary Navigation
+      - aria-label: clarifies the landmark if others exist
+    -->
+    <nav
+      id="primary-navigation"
+      class="primary-nav"
+      aria-label="Main Navigation"
+    >
+      <ul class="nav-list">
+        <li>
+          <!-- aria-current="page" used for the active link -->
+          <a href="/" aria-current="page">Home</a>
+        </li>
+        <li>
+          <a href="/services">Services</a>
+        </li>
+        <li>
+          <a href="/about">About</a>
+        </li>
+        <li>
+          <a href="/contact">Contact</a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<script>
+  /**
+   * Minimal script to handle the toggle state.
+   */
+  ;(function () {
+    const toggle = document.querySelector('.nav-toggle')
+    const nav = document.querySelector('#primary-navigation')
+
+    if (!toggle || !nav) return
+
+    toggle.addEventListener('click', () => {
+      const isExpanded = toggle.getAttribute('aria-expanded') === 'true'
+      toggle.setAttribute('aria-expanded', !isExpanded)
+
+      // Toggle a class on the nav or body for visual styling
+      // nav.classList.toggle('is-open');
+    })
+
+    // Handle Escape key to close
+    window.addEventListener('keydown', (e) => {
+      if (
+        e.key === 'Escape' &&
+        toggle.getAttribute('aria-expanded') === 'true'
+      ) {
+        toggle.setAttribute('aria-expanded', 'false')
+        toggle.focus()
+      }
+    })
+  })()
+</script>
