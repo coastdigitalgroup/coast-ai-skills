@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accessible Responsive Navigation Example</title>
+    <style>
+        :root {
+            --nav-bg: #fff;
+            --nav-text: #333;
+            --nav-accent: #0056b3;
+            --focus-outline: 3px solid #ffbf47;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        /* Skip link */
+        .skip-link {
+            position: absolute;
+            top: -40px;
+            left: 0;
+            background: var(--nav-accent);
+            color: white;
+            padding: 8px;
+            z-index: 100;
+            transition: top 0.2s;
+        }
+
+        .skip-link:focus {
+            top: 0;
+        }
+
+        header {
+            background: var(--nav-bg);
+            border-bottom: 1px solid #eee;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+        }
+
+        .logo {
+            font-weight: bold;
+            font-size: 1.25rem;
+            text-decoration: none;
+            color: var(--nav-text);
+        }
+
+        /* Nav Layout */
+        .main-nav {
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: none; /* Hidden by default on mobile */
+        }
+
+        .nav-list.is-active {
+            display: block;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--nav-bg);
+            border-bottom: 1px solid #eee;
+            padding: 1rem;
+            z-index: 10;
+        }
+
+        @media (min-width: 768px) {
+            .nav-list {
+                display: flex;
+                position: static;
+                border: none;
+                padding: 0;
+            }
+        }
+
+        .nav-item {
+            margin: 0;
+            position: relative;
+        }
+
+        .nav-link, .dropdown-toggle {
+            display: block;
+            padding: 0.75rem 1rem;
+            text-decoration: none;
+            color: var(--nav-text);
+            font-weight: 500;
+            background: none;
+            border: none;
+            font-size: 1rem;
+            cursor: pointer;
+            width: 100%;
+            text-align: left;
+        }
+
+        .nav-link:hover, .dropdown-toggle:hover {
+            color: var(--nav-accent);
+            background-color: #f8f9fa;
+        }
+
+        .nav-link:focus, .dropdown-toggle:focus {
+            outline: var(--focus-outline);
+            outline-offset: -3px;
+        }
+
+        /* Mobile Menu Toggle */
+        .menu-toggle {
+            display: block;
+            background: none;
+            border: 1px solid #ccc;
+            padding: 0.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        @media (min-width: 768px) {
+            .menu-toggle {
+                display: none;
+            }
+        }
+
+        .menu-toggle[aria-expanded="true"] {
+            background-color: #eee;
+        }
+
+        /* Dropdowns */
+        .dropdown-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: none;
+            background: #fdfdfd;
+            border-left: 2px solid var(--nav-accent);
+            margin-left: 1rem;
+        }
+
+        .dropdown-menu.is-active {
+            display: block;
+        }
+
+        @media (min-width: 768px) {
+            .dropdown-menu {
+                position: absolute;
+                top: 100%;
+                left: 0;
+                min-width: 200px;
+                border: 1px solid #eee;
+                border-left: none;
+                margin-left: 0;
+                box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            }
+        }
+
+        .dropdown-toggle::after {
+            content: ' ▼';
+            font-size: 0.7em;
+        }
+
+        .dropdown-toggle[aria-expanded="true"]::after {
+            content: ' ▲';
+        }
+
+        main {
+            padding: 2rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+    <a href="#main-content" class="skip-link">Skip to content</a>
+
+    <header>
+        <a href="/" class="logo" aria-label="Home">CompanyLogo</a>
+
+        <nav class="main-nav" aria-label="Main Navigation">
+            <button class="menu-toggle" aria-expanded="false" aria-controls="primary-nav" aria-label="Toggle Menu">
+                <span aria-hidden="true">☰</span>
+            </button>
+
+            <ul id="primary-nav" class="nav-list">
+                <li class="nav-item"><a href="/" class="nav-link">Home</a></li>
+                <li class="nav-item">
+                    <button class="dropdown-toggle" aria-expanded="false" aria-haspopup="true">
+                        Services
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a href="/web" class="nav-link">Web Design</a></li>
+                        <li><a href="/seo" class="nav-link">SEO</a></li>
+                        <li><a href="/apps" class="nav-link">App Development</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item"><a href="/about" class="nav-link">About</a></li>
+                <li class="nav-item"><a href="/contact" class="nav-link">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main id="main-content">
+        <h1>Welcome to Our Site</h1>
+        <p>This is an example of an accessible, responsive navigation system.</p>
+        <p>Try resizing your browser or using your keyboard to navigate through the menu and its dropdowns.</p>
+    </main>
+
+    <script>
+        const menuToggle = document.querySelector('.menu-toggle');
+        const primaryNav = document.querySelector('#primary-nav');
+        const dropdownToggles = document.querySelectorAll('.dropdown-toggle');
+
+        // Toggle Mobile Menu
+        menuToggle.addEventListener('click', () => {
+            const isExpanded = menuToggle.getAttribute('aria-expanded') === 'true';
+            menuToggle.setAttribute('aria-expanded', !isExpanded);
+            primaryNav.classList.toggle('is-active');
+        });
+
+        // Toggle Dropdowns
+        dropdownToggles.forEach(toggle => {
+            toggle.addEventListener('click', (e) => {
+                const isExpanded = toggle.getAttribute('aria-expanded') === 'true';
+
+                // Close other dropdowns
+                dropdownToggles.forEach(t => {
+                    if (t !== toggle) {
+                        t.setAttribute('aria-expanded', 'false');
+                        t.nextElementSibling.classList.remove('is-active');
+                    }
+                });
+
+                toggle.setAttribute('aria-expanded', !isExpanded);
+                toggle.nextElementSibling.classList.toggle('is-active');
+            });
+        });
+
+        // Close dropdowns on click outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.nav-item')) {
+                dropdownToggles.forEach(toggle => {
+                    toggle.setAttribute('aria-expanded', 'false');
+                    toggle.nextElementSibling.classList.remove('is-active');
+                });
+            }
+        });
+
+        // Close on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                // Close mobile menu
+                if (menuToggle.getAttribute('aria-expanded') === 'true') {
+                    menuToggle.setAttribute('aria-expanded', 'false');
+                    primaryNav.classList.remove('is-active');
+                    menuToggle.focus();
+                }
+
+                // Close dropdowns
+                dropdownToggles.forEach(toggle => {
+                    if (toggle.getAttribute('aria-expanded') === 'true') {
+                        toggle.setAttribute('aria-expanded', 'false');
+                        toggle.nextElementSibling.classList.remove('is-active');
+                        toggle.focus();
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
