@@ -1,0 +1,117 @@
+<!--
+  Template: Accessible Responsive Navigation Boilerplate
+  Description: A minimalist starting point for building accessible, keyboard-friendly navigation.
+-->
+
+<nav class="nav-container" aria-label="Primary">
+  <!-- Mobile Toggle Button -->
+  <button
+    class="nav-toggle"
+    aria-expanded="false"
+    aria-controls="nav-list"
+    aria-label="Open menu"
+  >
+    <span class="nav-toggle-icon" aria-hidden="true"></span>
+  </button>
+
+  <!-- Navigation List -->
+  <ul id="nav-list" class="nav-list">
+    <li class="nav-item">
+      <a href="/" class="nav-link">Home</a>
+    </li>
+
+    <!-- Dropdown Item -->
+    <li class="nav-item has-dropdown">
+      <button
+        class="dropdown-trigger"
+        aria-expanded="false"
+        aria-haspopup="true"
+      >
+        Products
+      </button>
+      <ul class="dropdown-content">
+        <li><a href="/p1">Product 1</a></li>
+        <li><a href="/p2">Product 2</a></li>
+      </ul>
+    </li>
+
+    <li class="nav-item">
+      <a href="/about" class="nav-link">About</a>
+    </li>
+  </ul>
+</nav>
+
+<style>
+  /* Base Styles */
+  .nav-list {
+    display: none; /* Mobile first: hide list */
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .nav-list.is-visible {
+    display: block;
+  }
+
+  /* Desktop View */
+  @media (min-width: 768px) {
+    .nav-toggle {
+      display: none;
+    }
+    .nav-list {
+      display: flex !important;
+    }
+    .dropdown-content {
+      position: absolute;
+      display: none;
+    }
+    .dropdown-content.is-visible {
+      display: block;
+    }
+  }
+
+  /* Interaction Styles */
+  .nav-toggle[aria-expanded="true"] + .nav-list {
+    display: block;
+  }
+
+  /* Accessibility: Ensure focus indicators are visible */
+  .nav-link:focus,
+  .nav-toggle:focus,
+  .dropdown-trigger:focus {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+  }
+</style>
+
+<script>
+  (function() {
+    const toggle = document.querySelector('.nav-toggle');
+    const menu = document.querySelector('#nav-list');
+    const dropdowns = document.querySelectorAll('.dropdown-trigger');
+
+    // Toggle Mobile Menu
+    toggle.addEventListener('click', () => {
+      const expanded = toggle.getAttribute('aria-expanded') === 'true';
+      toggle.setAttribute('aria-expanded', !expanded);
+      menu.classList.toggle('is-visible');
+    });
+
+    // Handle Dropdowns
+    dropdowns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const expanded = btn.getAttribute('aria-expanded') === 'true';
+        btn.setAttribute('aria-expanded', !expanded);
+        btn.nextElementSibling.classList.toggle('is-visible');
+      });
+    });
+
+    // Close on Escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        // Add logic to close open menus and return focus
+      }
+    });
+  })();
+</script>
