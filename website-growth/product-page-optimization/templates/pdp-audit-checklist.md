@@ -62,4 +62,4 @@ to any of these indicates a potential conversion leak.
 - **4-7 "No"s:** Moderate Friction. Prioritize ATC visibility and shipping
   transparency.
 - **8+ "No"s:** Critical Failure. Significant revenue is being lost due to
-  shoper anxiety.
+  shopper anxiety.
