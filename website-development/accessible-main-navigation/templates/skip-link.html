@@ -1,0 +1,26 @@
+<!--
+  Skip to Main Content Template
+  Place this as the first element inside the <body> tag.
+  Ensure the href matches the ID of your <main> or content container.
+-->
+
+<style>
+  .skip-to-content {
+    position: absolute;
+    top: -100%;
+    left: 0;
+    padding: 1rem;
+    background-color: #000;
+    color: #fff;
+    text-decoration: none;
+    z-index: 9999;
+  }
+
+  .skip-to-content:focus {
+    top: 0;
+    outline: 2px solid #fff;
+    outline-offset: -4px;
+  }
+</style>
+
+<a href="#main-content" class="skip-to-content">Skip to main content</a>
