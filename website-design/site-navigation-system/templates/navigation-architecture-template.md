@@ -1,54 +1,54 @@
-# Template: Navigation Architecture
+# Navigation Architecture Template
 
-Use this template to map out your site's navigation hierarchy before
-implementation.
+Use this template to map out your website's navigation structure before moving
+into UI design or development.
 
-## 1. Global Navigation (Primary)
+## 1. Information Architecture Map
 
-_List the top 5-7 links that represent the core site structure._
+| Level | Label          | URL / Path   | Priority  | Notes               |
+| :---- | :------------- | :----------- | :-------- | :------------------ |
+| 1     | Home           | /            | Primary   | Logo link           |
+| 1     | [Section Name] | /section     | Primary   | e.g., Products      |
+| 2     | [Sub-section]  | /section/sub | Secondary | Appears in dropdown |
+| 1     | [Section Name] | /section-2   | Primary   | e.g., Pricing       |
+| 1     | Login          | /login       | Utility   |                     |
+| 1     | Sign Up        | /signup      | Action    | Main CTA            |
 
-- [ ] Item 1: [Label] -> [Destination]
-- [ ] Item 2: [Label] -> [Destination]
-- [ ] Item 3: [Label] -> [Destination]
-- [ ] Item 4: [Label] -> [Destination]
-- [ ] Item 5: [Label] -> [Destination]
+## 2. Global Header Specification
 
-## 2. Utility Navigation
+### Desktop (Layout: [e.g., Logo-Left / Nav-Center / Action-Right])
 
-_List actions like Search, Account, Cart, or Language selection._
+- **Link Style:** [e.g., Uppercase, 14px, Bold]
+- **Spacing (Gap):** [e.g., 24px]
+- **Sticky:** [Yes / No]
+- **Transition:** [e.g., 200ms ease-in-out]
 
-- [ ] Primary Action (Button): [Label]
-- [ ] Secondary Action (Link): [Label]
-- [ ] Search: [Icon/Input]
+### Mobile (Layout: [e.g., Logo-Left / Menu-Right])
 
-## 3. Mobile Strategy
+- **Breakpoint:** [e.g., 1024px]
+- **Drawer Side:** [Left / Right / Full-screen]
+- **Toggle Icon:** [Hamburger / Menu Text]
 
-_Select one and define the behavior._
+## 3. Global Footer Specification
 
-- **Pattern:** [Hamburger / Tab Bar / Priority+]
-- **Trigger Position:** [Top Right / Top Left / Bottom]
-- **Drawer Hierarchy:** [Same as Global / Modified for Mobile]
+### Layout: [e.g., 4-column Grid]
 
-## 4. Footer Hierarchy
+- **Col 1:** [Logo + Brief Bio + Social Icons]
+- **Col 2:** [Primary Links]
+- **Col 3:** [Resources / Support Links]
+- **Col 4:** [Newsletter Signup / Contact]
 
-_Organize links into 3-4 columns based on theme._
+---
 
-| Column 1 (Product/Service) | Column 2 (Company) | Column 3 (Resources) |
-| :------------------------- | :----------------- | :------------------- |
-| Link 1                     | Link 1             | Link 1               |
-| Link 2                     | Link 2             | Link 2               |
-| Link 3                     | Link 3             | Link 3               |
+## 4. Wayfinding Rules
 
-**Bottom Row:**
-
-- [ ] Copyright Notice
-- [ ] Privacy Policy
-- [ ] Terms of Service
-- [ ] Social Icons
+- **Active State Indicator:** [e.g., Underline / Color Change / Bold]
+- **Breadcrumbs Trigger:** [e.g., Only on pages deeper than level 2]
+- **Current Page Logic:** [e.g., Link is disabled and styled differently]
 
 ## 5. Interaction Checklist
 
-- [ ] **Active State:** [e.g., Underline, Bold, or Color change]
-- [ ] **Hover State:** [e.g., Background shift or Opacity change]
-- [ ] **Focus State:** [e.g., 2px solid outline with 2px offset]
-- [ ] **Transition:** [e.g., 200ms ease-in-out for dropdowns]
+- [ ] **Hover:** Color shift from `--color-text` to `--color-primary`.
+- [ ] **Focus:** 2px solid `--color-focus-ring` with 4px offset.
+- [ ] **Active:** 10% darkening of background or underline appearance.
+- [ ] **Dropdowns:** Trigger on [Hover (Desktop) / Click (Mobile)].
