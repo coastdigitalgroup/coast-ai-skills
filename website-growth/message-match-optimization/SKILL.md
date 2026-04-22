@@ -1,137 +1,136 @@
 ---
 name: message-match-optimization
 description:
-  Audit and optimize the consistency between an external traffic source (ads,
-  emails, social) and the destination landing page. Trigger this skill when ad
-  CTR is high but landing page bounce rate is also high, or when conversion
-  rates are low despite strong individual components.
+  Audit and optimize the alignment between traffic sources (ads, emails, social)
+  and landing pages to maintain the "scent of information" and reduce bounce
+  rates. Trigger this skill when paid traffic has high bounce rates despite
+  strong ad performance.
 ---
 
 # Message Match Optimization
 
 ## Purpose
 
-The Message Match Optimization skill provides a protocol for ensuring a seamless
-transition for users moving from a traffic source (like a Google Ad, Facebook
-Post, or Email) to a landing page. It focuses on maintaining the "Scent of
-Information" by aligning headlines, visuals, keywords, and offers. High message
-match reduces cognitive friction and bounce rates by immediately confirming to
-the user that they have landed in the right place.
+The Message Match Optimization skill provides a framework for ensuring that the
+promise, tone, and visual cues of a traffic source (the "Ad") are immediately
+fulfilled on the destination page (the "Landing Page"). This maintains the
+**Scent of Information**—the trail of cues that users follow to reach their
+goal. Strong message match reduces cognitive friction and prevents "click
+shock," leading to significantly lower bounce rates and higher conversion
+efficiency.
 
 ## Use Cases
 
-- Optimizing Paid Search (PPC) campaigns where "Quality Score" is low.
-- Improving the conversion rate of email marketing campaigns.
-- Synchronizing social media promotions with dedicated landing pages.
-- Troubleshooting high bounce rates on high-traffic landing pages.
+- Paid search campaigns (Google Ads) with high bounce rates.
+- Social media ads (Meta, LinkedIn) where the "vibe" of the ad doesn't match the
+  page.
+- Email marketing campaigns where the CTA promise isn't the first thing seen on
+  the page.
+- Affiliate traffic or co-marketing landing pages.
 
 ## When NOT to Use
 
-- **Organic Homepages:** Where the traffic sources are too varied to match a
-  single message (though hero sections can still be optimized for general
-  clarity).
-- **In-App Navigation:** Where the user is already within a logged-in
-  environment and the "source" is a known internal state.
-- **Direct Traffic:** When there is no specific external "source" message to
-  match against.
+- **Direct Navigation/Organic Homepage Traffic:** Where the user's intent is
+  broad and not tied to a specific external promise.
+- **Internal Product Navigation:** Where the user is already within an app and
+  knows the context.
+- **SEO/Long-tail Content:** Where the goal is general education rather than
+  converting a specific ad-driven offer.
 
 ## Inputs
 
-1. **Traffic Source Assets:** Screenshots or copy of the ad, email, or social
-   post that the user clicks on.
-2. **Landing Page URL/Screenshot:** The destination page the user sees
-   immediately after clicking.
-3. **Primary Keyword/Hook:** The specific phrase or promise that drove the
+1. **The Source Material:** A screenshot or copy of the ad, email, or social
+   post driving the traffic.
+2. **The Destination URL:** The landing page where the traffic arrives.
+3. **Primary CTA/Offer:** What exactly was promised in the source? (e.g., "Free
+   Trial," "20% Discount," "Download Whitepaper").
+4. **Target Keywords/Hooks:** The specific words or pain points used to get the
    click.
-4. **Target Audience Intent:** Why did the user click? (e.g., "Looking for a
-   discount," "Seeking a specific feature").
-5. **Analytics Data:** Bounce rate and conversion rate specifically for the
-   traffic source being audited.
 
 ## Outputs
 
-1. **Message Match Audit:** A comparison of Source vs. Destination across key
-   dimensions (Headline, Visuals, CTA, Tone).
-2. **Optimized Landing Page Copy:** Revised H1 and subheadlines that
-   specifically echo the source's promise.
-3. **Visual Alignment Guidance:** Recommendations for imagery or design elements
-   that bridge the gap between source and destination.
-4. **Offer Synchronization:** ensuring the price, discount, or value proposition
-   in the source is identical to the one on the page.
+1. **Message Match Audit:** A comparison between the source and destination
+   across Copy, Visuals, and Offer.
+2. **Optimized Destination Copy:** Revisions to the H1 and subheadlines to match
+   the ad's hook.
+3. **Visual Alignment Guidance:** Recommendations for image or color adjustments
+   to ensure continuity.
+4. **Offer Sync Plan:** Ensuring the "Ask" on the landing page is identical to
+   the "Offer" in the ad.
 
 ## Workflow
 
-### 1. Source Analysis (Audit the Click)
+### 1. The "Scent of Information" Audit
 
-Identify the "Hook" of the traffic source:
+Analyze the source and destination side-by-side. Score the match on a scale of
+1-5 for:
 
-- What is the exact H1/Headline of the ad?
-- What visual elements are used (colors, people, icons)?
-- What is the specific call to action?
-- What is the core promise or discount mentioned?
+- **Headline Match:** Does the landing page H1 use the same primary keywords as
+  the ad?
+- **Visual Match:** Are the colors, fonts, and imagery consistent with the ad?
+- **Offer Match:** Is the specific deal or "carrot" exactly the same?
 
-### 2. Destination Audit (Audit the Landing)
+### 2. Identify "Click Shock" Points
 
-Perform the "Mirror Test":
+Look for elements that might cause a user to feel they are in the wrong place:
 
-- Does the Landing Page H1 contain the same keywords as the Ad Headline?
-- Does the hero image feel like a continuation of the ad's visual style?
-- Is the promised offer (e.g., "20% Off") immediately visible and identical?
+- **Missing Keywords:** If the ad is about "Affordable CRM," but the page says
+  "Enterprise Sales Platform," the scent is broken.
+- **Visual Jarring:** An ad with a bright, playful design leading to a dark,
+  serious corporate page.
+- **The Hidden Offer:** If the ad promised "Free Shipping" but it's not
+  mentioned until the footer or checkout.
 
-### 3. Gap Identification
+### 3. Re-Align the Narrative
 
-Flag "Cognitive Breaks":
+- **Echo the Headline:** The landing page H1 should be a direct evolution of the
+  ad's headline.
+- **Repeat the Hook:** If the ad focused on a specific pain point (e.g., "Stop
+  losing leads"), that pain point must be the first thing addressed on the page.
+- **Maintain Visual Thread:** Use the same hero image or a very similar style to
+  the ad's creative.
 
-- **Headline Gap:** Ad says "Affordable CRM," Landing Page says "Welcome to our
-  Platform."
-- **Visual Gap:** Ad uses a specific blue theme; Landing Page is bright orange.
-- **Offer Gap:** Ad promises a "Free Trial"; Landing Page asks for a "Demo
-  Booking."
+### 4. Apply the 3-Second Rule
 
-### 4. Implementation (Bridge the Gap)
+The user must realize they are in the "right place" within 3 seconds.
 
-- **Headline Matching:** Ensure the landing page H1 uses the same primary
-  keywords as the source.
-- **Visual Continuity:** If the ad used a specific product screenshot, use a
-  larger version of that same screenshot in the hero.
-- **The "Dynamic" Approach:** If multiple ads point to one page, recommend
-  Dynamic Text Replacement (DTR) to match headlines to ad groups.
+- Ensure the primary hook is "above the fold."
+- Ensure the CTA button is visible and uses similar language to the ad's CTA.
 
-### 5. Validation
+### 5. Review Against Decision Rules
 
-Review the "Path to Conversion":
-
-- Does the user feel a "sense of relief" upon landing?
-- Is the "Scent of Information" preserved from click to conversion?
+Verify the alignment against the growth heuristics below.
 
 ## Decision Rules
 
-- **The H1 Rule:** The landing page H1 must reflect the ad headline within 3
-  seconds of page load.
-- **The Visual Anchor:** Use at least one common visual element (color, image,
-  or icon) between the source and the destination.
-- **Offer Parity:** Never change the offer between the ad and the page. If the
-  ad says "Free," the page cannot say "Starting at $10."
-- **Language/Tone Consistency:** If the ad is playful and informal, the landing
-  page should not immediately shift to dense, corporate jargon.
+- **The Rule of Keywords:** At least 50% of the primary keywords in the ad must
+  be present in the landing page H1 or subheadline.
+- **Continuity of Offer:** The offer on the landing page must be at least as
+  good as the ad. Never "downgrade" the offer (e.g., ad says "50% off," page
+  says "Up to 50% off").
+- **Visual Anchor:** If the ad uses a specific human face or product shot, that
+  same anchor should ideally be visible on the landing page.
+- **Tone Consistency:** If the ad is "edgy" and "informal," the landing page
+  cannot be "stiff" and "academic."
 
 ## Common Failure Patterns
 
-- **Generic Destinations:** Sending specific ad traffic to the homepage.
-- **The Bait-and-Switch:** Promising one thing in an email but requiring
-  multiple steps or a different action on the page.
-- **Message Drift:** Over time, ads are updated while landing pages remain
-  static, causing the match to degrade.
-- **Headline Disconnect:** Using the company name as the H1 instead of the
-  benefit promised in the ad.
+- **The "Bait and Switch":** An ad for a specific product leading to a general
+  category page or homepage.
+- **The "Generic Hero":** Using a high-performing ad hook but sending it to a
+  landing page with a vague, "corporate-speak" headline.
+- **The "Disconnected CTA":** Ad says "Get a Demo," Landing page button says
+  "Contact Sales."
+- **Visual Disconnect:** Using a stock photo in the ad and a completely
+  different (or no) photo on the page.
 
 ## Validation Methods
 
-- **Bounce Rate by Source:** Compare the bounce rate of the optimized page vs.
-  the previous version for specific ad groups.
-- **Expectation Survey:** Use a 1-question on-site poll: "Did this page provide
-  what you expected based on the link you clicked?"
-- **Conversion Rate Lift:** Measure the increase in CVR for the specific traffic
-  segment.
-- **Quality Score Improvement:** (Google Ads) Monitor the "Landing Page
-  Experience" component of the Quality Score.
+- **The 3-Second Clarity Test:** Show the source, then show the destination for
+  3 seconds. Ask: "Is this what you expected to see?"
+- **Bounce Rate by Source:** Compare the bounce rate of the ad traffic vs.
+  organic traffic. A high gap indicates a message match failure.
+- **Click-Through Rate (CTR) to Next Step:** Measure how many users proceed from
+  the landing page to the next step of the funnel.
+- **Heatmap Consistency:** Check if users are looking at the headline first
+  (scent follow) or immediately scrolling/looking for an exit.

@@ -1,54 +1,63 @@
 # Message Match Audit Checklist
 
-Use this checklist to evaluate the consistency between a traffic source and its
-destination landing page.
+Use this checklist to evaluate the alignment between a traffic source (Ad,
+Email, Social) and its landing page.
 
-## 1. Headline & Copy Match
+## 1. The "Ad-to-Page" Copy Audit
 
-- [ ] **The H1 Mirror:** Does the Landing Page H1 contain the primary keywords
-      from the Ad Headline/Email Subject line?
-- [ ] **Expectation Confirmation:** If the user read the ad, do they know within
-      3 seconds of landing that they are in the right place?
-- [ ] **Subheadline Support:** Does the subheadline expand on the promise made
-      in the traffic source?
-- [ ] **Keyword Density:** Are the specific search terms used in the ad also
-      present in the upper half of the landing page?
+- [ ] **H1 Headline Match:** Does the landing page H1 contain at least one
+      primary keyword or phrase from the ad headline?
+- [ ] **Subheadline Continuity:** Does the subheadline expand on the _specific_
+      promise made in the ad?
+- [ ] **Tone Alignment:** If the ad was humorous, is the landing page humorous?
+      If the ad was data-driven, is the page data-driven?
+- [ ] **Problem/Solution Echo:** If the ad focused on a specific pain point, is
+      that pain point mentioned in the first 2 sections of the page?
 
-## 2. Visual & Design Match
+## 2. Visual Scent Audit
 
-- [ ] **Visual Continuity:** Does the landing page use the same or similar
-      imagery as the ad/email?
-- [ ] **Color Palette:** Does the landing page "feel" like the source? (e.g.,
-      matching brand colors or specific campaign styles).
-- [ ] **Brand Identity:** Is the logo and brand voice consistent between both
-      stages?
-- [ ] **UI/UX Transition:** If the ad showed a specific app feature, is that
-      feature the first thing shown on the page?
+- [ ] **Color Palette:** Does the landing page use the same primary brand colors
+      as the ad creative?
+- [ ] **Hero Asset Consistency:** If there was a person or product in the ad, is
+      that same asset (or a very similar one) visible above the fold on the
+      page?
+- [ ] **Typography:** Is the font style consistent (e.g., don't use a rugged
+      font in the ad and a delicate serif on the page)?
+- [ ] **Overall Aesthetic:** Does the "vibe" match (e.g., Minimalist ad →
+      Minimalist page)?
 
-## 3. Offer & Action Match
+## 3. Offer & CTA Sync
 
-- [ ] **The "Call to Action" Echo:** Is the CTA button text on the landing page
-      similar to the CTA used in the source (e.g., "Sign Up" -> "Sign Up Now")?
-- [ ] **Offer Parity:** Is the price/discount/offer exactly the same?
-- [ ] **Frictionless Transition:** If the ad promised a "Quick Setup," does the
-      landing page lead to a short form, or a long, complex onboarding?
-- [ ] **Landing Page Destination:** Does the link go to a specific, relevant
-      page instead of the general homepage?
+- [ ] **CTA Verbatim:** Does the landing page button use similar or identical
+      wording to the ad's CTA?
+- [ ] **The "Deal" Check:** Is the price, discount, or bonus mentioned in the ad
+      exactly the same on the page?
+- [ ] **Friction Check:** If the ad promised something "Easy" or "Fast," does
+      the landing page form look short and simple?
+- [ ] **Offer Prominence:** Is the ad's offer the most prominent thing on the
+      landing page?
 
-## 4. Tone & Intent Match
+## 4. The 3-Second Rule (Validation)
 
-- [ ] **Audience Segment:** Does the landing page copy speak to the same persona
-      as the traffic source (e.g., "For Developers" -> Developer-focused page)?
-- [ ] **Emotional Tone:** If the ad was urgent/high-energy, is the landing page
-      equally energetic?
-- [ ] **Language Consistency:** Does the page use the same terminology as the
-      traffic source (e.g., "Enterprise" vs "Corporate")?
+- [ ] **Immediate Recognition:** Can a user tell within 3 seconds that they are
+      on the "right" page based on what they clicked?
+- [ ] **Above the Fold:** Is all the "proof" of message match visible without
+      scrolling?
+- [ ] **Single Intent:** Does the landing page focus on the _one_ thing promised
+      in the ad, or is it distracting the user with other offers?
 
-## Scoring
+---
 
-- **0-4 Checks:** High Friction. Critical message match failure. Expect high
-  bounce rates.
-- **5-8 Checks:** Moderate Match. Some cognitive load; users may be confused.
-- **9-11 Checks:** High Match. Strong scent of information. Optimal for
-  conversion.
-- **12 Checks:** Perfect Match. Seamless transition.
+## Scoring System
+
+- **12-14 points:** Perfect Match (High Conversion Potential)
+- **8-11 points:** Minor Leaks (Some Friction)
+- **0-7 points:** Broken Scent (High Bounce Risk)
+
+## Recommendations for Improvement
+
+- **If Headline Match fails:** Rewrite the Landing Page H1 to include the Ad's
+  primary hook.
+- **If Visual Scent fails:** Update the hero image to match the ad creative.
+- **If Offer Sync fails:** Ensure the specific "carrot" from the ad is mentioned
+  in the subheadline or H2.
