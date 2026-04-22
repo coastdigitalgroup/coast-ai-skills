@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Responsive Navigation Example</title>
+    <style>
+      /* CSS Variables for easy maintenance */
+      :root {
+        --nav-bg: #ffffff;
+        --nav-text: #333333;
+        --accent: #0066cc;
+        --mobile-menu-width: 280px;
+        --header-height: 60px;
+      }
+
+      body {
+        margin: 0;
+        font-family:
+          system-ui,
+          -apple-system,
+          sans-serif;
+        line-height: 1.5;
+      }
+
+      /* 1. Skip Link - Accessibility First */
+      .skip-link {
+        position: absolute;
+        top: -100px;
+        left: 0;
+        background: var(--accent);
+        color: white;
+        padding: 1rem;
+        z-index: 1000;
+        text-decoration: none;
+      }
+
+      .skip-link:focus {
+        top: 0;
+      }
+
+      /* 2. Header & Nav Layout */
+      header {
+        background: var(--nav-bg);
+        border-bottom: 1px solid #eee;
+        height: var(--header-height);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 1.5rem;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+
+      .logo {
+        font-weight: bold;
+        font-size: 1.25rem;
+        text-decoration: none;
+        color: var(--nav-text);
+      }
+
+      /* 3. Mobile Navigation (Default) */
+      .nav-toggle {
+        display: flex;
+        align-items: center;
+        background: none;
+        border: 1px solid #ccc;
+        padding: 0.5rem;
+        cursor: pointer;
+        z-index: 200;
+        min-width: 44px;
+        min-height: 44px;
+      }
+
+      /* Hamburger Icon */
+      .hamburger-icon,
+      .hamburger-icon::before,
+      .hamburger-icon::after {
+        display: block;
+        width: 20px;
+        height: 2px;
+        background: #333;
+        transition: all 0.3s;
+      }
+      .hamburger-icon {
+        position: relative;
+      }
+      .hamburger-icon::before,
+      .hamburger-icon::after {
+        content: '';
+        position: absolute;
+        left: 0;
+      }
+      .hamburger-icon::before {
+        top: -6px;
+      }
+      .hamburger-icon::after {
+        bottom: -6px;
+      }
+
+      /* Animation when open */
+      .nav-toggle[aria-expanded='true'] .hamburger-icon {
+        background: transparent;
+      }
+      .nav-toggle[aria-expanded='true'] .hamburger-icon::before {
+        transform: rotate(45deg);
+        top: 0;
+      }
+      .nav-toggle[aria-expanded='true'] .hamburger-icon::after {
+        transform: rotate(-45deg);
+        bottom: 0;
+      }
+
+      .main-nav {
+        position: fixed;
+        top: 0;
+        right: calc(-1 * var(--mobile-menu-width));
+        width: var(--mobile-menu-width);
+        height: 100vh;
+        background: var(--nav-bg);
+        box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+        transition: right 0.3s ease-in-out;
+        padding: calc(var(--header-height) + 1rem) 1.5rem 1rem;
+        visibility: hidden; /* Prevent tabbing when hidden */
+      }
+
+      .main-nav.is-open {
+        right: 0;
+        visibility: visible;
+      }
+
+      .nav-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+      }
+
+      .nav-link {
+        text-decoration: none;
+        color: var(--nav-text);
+        font-weight: 500;
+        font-size: 1.1rem;
+      }
+
+      .nav-link:hover,
+      .nav-link:focus {
+        color: var(--accent);
+      }
+
+      .nav-link[aria-current='page'] {
+        color: var(--accent);
+        border-bottom: 2px solid var(--accent);
+      }
+
+      /* 4. Overlay */
+      .nav-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s;
+        z-index: 90;
+      }
+
+      .nav-overlay.is-active {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      /* 5. Desktop Layout Transition */
+      @media (min-width: 768px) {
+        .nav-toggle {
+          display: none; /* Hide hamburger */
+        }
+
+        .main-nav {
+          position: static;
+          width: auto;
+          height: auto;
+          background: none;
+          box-shadow: none;
+          padding: 0;
+          visibility: visible; /* Always visible on desktop */
+        }
+
+        .nav-list {
+          flex-direction: row;
+          gap: 2rem;
+        }
+
+        .nav-link {
+          font-size: 1rem;
+        }
+
+        .nav-overlay {
+          display: none;
+        }
+      }
+
+      /* Content spacing */
+      main {
+        padding: 2rem;
+        max-width: 800px;
+        margin: 0 auto;
+      }
+    </style>
+  </head>
+  <body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <header>
+      <a href="/" class="logo" aria-label="Company Home">DesignCo</a>
+
+      <button
+        class="nav-toggle"
+        aria-expanded="false"
+        aria-controls="primary-nav"
+        aria-label="Menu"
+      >
+        <span class="hamburger-icon" aria-hidden="true"></span>
+      </button>
+
+      <nav class="main-nav" id="primary-nav" aria-label="Main Navigation">
+        <ul class="nav-list">
+          <li><a href="/" class="nav-link" aria-current="page">Home</a></li>
+          <li><a href="/services" class="nav-link">Services</a></li>
+          <li><a href="/work" class="nav-link">Our Work</a></li>
+          <li><a href="/about" class="nav-link">About Us</a></li>
+          <li><a href="/contact" class="nav-link">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="nav-overlay" id="nav-overlay"></div>
+
+    <main id="main-content">
+      <h1>Responsive Navigation Implementation</h1>
+      <p>
+        This example demonstrates a mobile-first responsive navigation system
+        using vanilla HTML, CSS, and JavaScript. Key features include:
+      </p>
+      <ul>
+        <li>
+          <strong>Accessible Toggle:</strong> Uses
+          <code>aria-expanded</code> and <code>aria-controls</code>.
+        </li>
+        <li>
+          <strong>Focus Management:</strong> Prevents "focus leaks" when the
+          mobile menu is open and restores focus on close.
+        </li>
+        <li>
+          <strong>Keyboard Support:</strong> Closes on <code>Escape</code> and
+          handles the <code>Tab</code> sequence.
+        </li>
+        <li>
+          <strong>Semantic Structure:</strong> Uses <code>&lt;nav&gt;</code>,
+          <code>&lt;ul&gt;</code>, and <code>aria-current="page"</code>.
+        </li>
+        <li>
+          <strong>No Layout Shift:</strong> Desktop layout is handled purely
+          with CSS.
+        </li>
+      </ul>
+    </main>
+
+    <script>
+      const navToggle = document.querySelector('.nav-toggle')
+      const mainNav = document.querySelector('.main-nav')
+      const overlay = document.querySelector('#nav-overlay')
+      const navLinks = document.querySelectorAll('.nav-link')
+
+      function toggleMenu() {
+        const isExpanded = navToggle.getAttribute('aria-expanded') === 'true'
+
+        navToggle.setAttribute('aria-expanded', !isExpanded)
+        mainNav.classList.toggle('is-open')
+        overlay.classList.toggle('is-active')
+
+        if (!isExpanded) {
+          // Opening: Lock body scroll
+          document.body.style.overflow = 'hidden'
+          // Move focus to first link after a slight delay for animation
+          setTimeout(() => {
+            mainNav.querySelector('.nav-link').focus()
+          }, 100)
+        } else {
+          // Closing: Unlock body scroll
+          document.body.style.overflow = ''
+          // Restore focus to toggle
+          navToggle.focus()
+        }
+      }
+
+      navToggle.addEventListener('click', toggleMenu)
+      overlay.addEventListener('click', toggleMenu)
+
+      // Close on Escape key
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && mainNav.classList.contains('is-open')) {
+          toggleMenu()
+        }
+      })
+
+      // Simple Focus Trap
+      mainNav.addEventListener('keydown', (e) => {
+        if (e.key !== 'Tab') return
+
+        const focusableElements = mainNav.querySelectorAll('a, button')
+        const firstElement = focusableElements[0]
+        const lastElement = focusableElements[focusableElements.length - 1]
+
+        if (e.shiftKey) {
+          // Shift + Tab
+          if (document.activeElement === firstElement) {
+            lastElement.focus()
+            e.preventDefault()
+          }
+        } else {
+          // Tab
+          if (document.activeElement === lastElement) {
+            firstElement.focus()
+            e.preventDefault()
+          }
+        }
+      })
+
+      // Clean up on window resize (mobile to desktop transition)
+      window.addEventListener('resize', () => {
+        if (window.innerWidth >= 768 && mainNav.classList.contains('is-open')) {
+          navToggle.setAttribute('aria-expanded', 'false')
+          mainNav.classList.remove('is-open')
+          overlay.classList.remove('is-active')
+          document.body.style.overflow = ''
+        }
+      })
+    </script>
+  </body>
+</html>

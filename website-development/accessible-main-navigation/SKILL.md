@@ -1,148 +1,144 @@
 ---
 name: accessible-main-navigation
 description:
-  Implement and debug responsive, accessible website navigation that manages
-  focus, handles mobile states, and provides clear landmarks for assistive
-  technologies.
+  Implement and debug accessible, responsive main navigation systems, including
+  skip links, semantic landmarks, and keyboard-friendly mobile menus.
 ---
 
 # Accessible Main Navigation
 
 ## Purpose
 
-The Accessible Main Navigation skill provides a technical framework for building
-website headers and menus that are usable by all users. It ensures that
-navigation is semantically correct, keyboard-accessible, and provides a robust
-experience across various screen sizes (e.g., handling "hamburger" menus
-correctly).
+The Accessible Main Navigation skill provides a protocol for building and
+auditing primary site navigation that is usable by all users, including those
+using screen readers, keyboard-only navigation, and various screen sizes. It
+focuses on semantic structure, skip-link implementation, and accessible mobile
+menu interactions.
 
 ## Use Cases
 
-- Implementing a site-wide header with responsive behavior (mobile toggle).
-- Adding "Skip to Main Content" links to improve keyboard navigation.
-- Auditing existing navigation systems for accessibility failures (e.g., focus
-  traps or missing labels).
-- Implementing dropdown or mega-menus that require keyboard interaction logic.
+- Implementing a responsive header with a mobile "hamburger" menu.
+- Adding a "Skip to Main Content" link to improve keyboard navigation
+  efficiency.
+- Auditing existing navigation for WCAG compliance (e.g., focus management,
+  landmark usage).
+- Implementing dropdown menus that work for both mouse and keyboard users.
 
 ## When NOT to Use
 
-- **In-Page Pagination:** For simple "Next/Previous" buttons within an article,
-  use simpler patterns.
-- **Sidebars in Web Apps:** For complex, persistent application sidebars with
-  internal state (like a file explorer), use a specialized sidebar or tree-view
-  pattern.
-- **Single Page Navigation:** Simple anchor-link-only lists (like a table of
-  contents) may not require the full responsive toggle logic.
+- **In-Page Navigation:** Use localized anchor links for table of contents or
+  long-form page sections.
+- **App Sidebars:** For complex application shells (e.g., dashboards), different
+  focus management patterns for persistent sidebars may apply.
+- **Footer Links:** While similar, footers usually don't require the same level
+  of complex interaction (toggles, focus trapping) as main headers.
 
 ## Inputs
 
-1. **Information Architecture (IA):** The hierarchy of pages and links.
-2. **Responsive Breakpoints:** The screen widths where the navigation switches
-   from desktop to mobile view.
-3. **Branding Requirements:** Placement of logos and interactive elements
-   (search, account).
+1. **Information Architecture (IA):** The list of primary and secondary
+   navigation links.
+2. **Responsive Design Specs:** Breakpoints for switching from desktop to mobile
+   views.
+3. **Target Environment:** Framework-specific constraints or vanilla
+   HTML/CSS/JS.
 
 ## Outputs
 
-1. **Semantic HTML Structure:** Use of `<nav>`, `<ul>`, and `<header>`
-   landmarks.
-2. **ARIA-Enhanced States:** Proper use of `aria-expanded`, `aria-controls`, and
-   `aria-current`.
-3. **Mobile Toggle Logic:** Scripts that manage visibility and focus for the
-   mobile menu.
-4. **Skip Link:** A functional, visually-hidden-until-focused "Skip to Content"
-   link.
+1. **Semantic HTML:** Structure using `<header>`, `<nav>`, and `<ul>` elements.
+2. **Skip-Link:** A "Skip to Content" link that is visually hidden until
+   focused.
+3. **Mobile Toggle Logic:** Accessible script to manage the mobile menu state
+   (`aria-expanded`).
+4. **CSS Implementation:** Styles for layout, visibility, and focus indicators.
 
 ## Workflow
 
-### 1. Establish the Landmark Structure
+### 1. Implement Skip Link
 
-- Wrap the main navigation in a `<nav>` element.
-- Provide an `aria-label` to the `<nav>` if there are multiple navigation
-  landmarks on the page (e.g., `aria-label="Main Navigation"` vs
-  `aria-label="Footer Navigation"`).
-- Use a `<ul>` for the list of links to provide a count to screen reader users.
+- Place a link as the first focusable element in the `<body>`.
+- Target the main content container's ID (e.g., `#main-content`).
+- Style it to be off-screen or invisible until it receives focus.
 
-### 2. Implement the "Skip Link"
+### 2. Establish Semantic Landmarks
 
-- Place a link as the very first focusable element in the `<body>`.
-- Point the link to the `id` of the main content area (e.g.,
-  `<a href="#main">Skip to main content</a>`).
-- Style it to be visually hidden by default but visible when it receives focus.
+- Wrap the main navigation in a `<header>` element.
+- Use the `<nav>` element with an `aria-label="Main"` to distinguish it from
+  other navigation blocks.
+- List items within a `<ul>` for proper screen reader announcement of the item
+  count.
 
-### 3. Build the Responsive Toggle (Mobile Menu)
+### 3. Build the Mobile Toggle (for Responsive Nav)
 
-- **The Button:** Use a `<button>` element for the toggle, not a link or a
-  `div`.
-- **Linking:** Connect the button to the menu container using
-  `aria-controls="[menu-id]"`.
-- **State:** Use `aria-expanded="false/true"` on the button to communicate the
-  menu's state.
-- **Hiding:** When closed, ensure the mobile menu is hidden from both visual and
-  assistive technology (using `display: none` or `visibility: hidden`, or the
-  `hidden` attribute).
+- Use a `<button>` (not a link) for the mobile menu toggle.
+- Apply `aria-expanded="false"` by default and `aria-controls` pointing to the
+  menu's ID.
+- Toggle `aria-expanded` and the menu's visibility with JavaScript.
 
-### 4. Manage Focus and Interactivity
+### 4. Manage Focus for Mobile Menus
 
-- **Escape Key:** Ensure the mobile menu closes when the `Escape` key is
-  pressed.
-- **Focus Trapping:** For "overlay" mobile menus, trap focus within the menu
-  while it's open to prevent users from tabbing into the background content.
-- **Active State:** Use `aria-current="page"` on the link that matches the
-  current URL.
+- When the mobile menu is open, ensure the tab order is managed.
+- For "overlay" menus, consider trapping focus or ensuring the menu is
+  immediately after the toggle in the DOM.
+- Ensure the menu can be closed with the `Escape` key.
 
-### 5. Handle Dropdowns (if applicable)
+### 5. Ensure Desktop Interaction
 
-- Use buttons to toggle sub-menus.
-- Do not rely on "hover" alone for dropdowns; they must be triggerable via
-  click/tap and keyboard.
+- If using dropdowns, ensure they open on `Hover` (for mouse) AND `Focus` or
+  `Click` (for keyboard).
+- Use `aria-haspopup="true"` and `aria-expanded` for submenus.
+
+### 6. Visual Polish & Accessibility
+
+- Provide high-contrast focus indicators for all links and buttons.
+- Ensure color contrast for text and icons meets WCAG AA (4.5:1).
 
 ## Decision Rules
 
-- **Overlay vs. Slide-down:** Use an overlay (and focus trap) if the mobile menu
-  covers the entire screen. Use a simple slide-down if the user can still
-  interact with the page behind it.
-- **Icon-only Buttons:** If the toggle button only contains an icon, provide a
-  descriptive label via `aria-label="Toggle Menu"`.
-- **Screen Reader Only Text:** Use "SR-only" classes to provide context that is
-  visually hidden but necessary for screen readers.
+- **Button vs. Link:** Use a `<button>` if the action changes the state of the
+  page (like opening a menu). Use a link (`<a>`) if it navigates to a new URL.
+- **Skip Link Placement:** It must be the _absolute first_ focusable element. If
+  it's not, keyboard users have to tab through other elements to reach the
+  "skip" utility.
+- **Aria-Labeling:** If you have multiple `<nav>` elements (e.g., Header,
+  Sidebar, Footer), each should have a unique `aria-label`.
 
 ## Constraints
 
-- **No Keyboard Traps:** The user must always be able to navigate into and out
-  of the navigation.
-- **Visual Focus:** Every link and button must have a clear, high-contrast focus
-  indicator.
-- **Semantic Integrity:** Do not use `role="menu"` and `role="menuitem"` for
-  standard website navigation; these are for application-like menus. Standard
-  `<nav>`, `<ul>`, and `<a>` are preferred for SEO and standard web behavior.
+- **JavaScript Dependency:** While the menu should ideally work without JS (via
+  `checkbox` hack or CSS), accessible state management (`aria-expanded`)
+  requires JS.
+- **No Hover-Only menus:** Any menu item that appears on hover must also be
+  accessible via keyboard focus.
 
 ## Non-Goals
 
-- Design or aesthetic styling of the header.
-- Implementation of site-wide search functionality.
-- Handling of authentication state (login/logout) beyond the UI container.
+- Designing the site's Information Architecture (IA).
+- Implementing search functionality within the header (though search should also
+  be accessible).
+- Handling mega-menu content layouts (grid systems).
 
 ## Common Failure Patterns
 
-- **The "Invisible" Mobile Menu:** Forgetting to hide the mobile links from the
-  tab order when the menu is visually hidden.
-- **Missing Current State:** Failing to tell screen reader users which page they
-  are currently on.
-- **Broken Skip Links:** Pointing the skip link to an ID that doesn't exist or
-  is inside a container that isn't focusable.
-- **Link-based Toggles:** Using `<a href="#">` for the mobile toggle, which can
-  cause page jumps and incorrect semantic announcements.
+- **Missing Skip Link:** Forcing keyboard users to tab through 20+ navigation
+  links on every page load.
+- **Invisible Focus:** Using `outline: none` without providing a robust custom
+  focus style.
+- **Incorrect Toggle Semantics:** Using a `<div>` or `<a>` with `href="#"` as a
+  menu toggle instead of a `<button>`.
+- **Focus Leaks:** Allowing the user to tab into the background content while an
+  overlay mobile menu is open.
+- **Non-Standard Keyboard Support:** Forgetting to handle the `Escape` key for
+  closing submenus or mobile overlays.
 
 ## Validation Steps
 
-- [ ] **Tab Order Test:** Verify that tabbing through the header follows a
-      logical path.
-- [ ] **Mobile Menu Visibility Test:** Ensure that when the mobile menu is
-      closed, its links are not reachable via `Tab`.
-- [ ] **Skip Link Test:** Focus the page, press `Tab` once, and verify the "Skip
-      to Content" link appears and works.
-- [ ] **Aria-Expanded Test:** Verify that the `aria-expanded` attribute on the
-      toggle button changes when the menu opens/closes.
-- [ ] **Screen Reader Landmark Test:** Open a screen reader and ensure the
-      navigation landmark is correctly identified.
+- [ ] **Keyboard Navigation Test:** Can you reach all links using only the `Tab`
+      key?
+- [ ] **Skip Link Test:** Does the "Skip to Content" link appear on the first
+      `Tab` press and move focus to the main container?
+- [ ] **Screen Reader Test:** Does the mobile toggle announce "Expanded" and
+      "Collapsed" correctly?
+- [ ] **Mobile Resize Test:** Does the menu switch between desktop and mobile
+      views without losing the current interaction state?
+- [ ] **Escape Key Test:** Does pressing `Escape` close the mobile menu or
+      active dropdown?

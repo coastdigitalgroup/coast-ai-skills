@@ -1,84 +1,85 @@
-<!--
-  Accessible Navigation Boilerplate
-  A foundation for responsive, accessible website headers.
--->
+<!-- Accessible Navigation Boilerplate -->
 
-<header class="site-header">
-  <div class="container">
-    <div class="site-logo">
-      <a href="/">Company Name</a>
-    </div>
+<!-- 1. Skip Link (Must be first in body) -->
+<a href="#main-content" class="skip-link">Skip to main content</a>
 
-    <!--
-      Mobile Toggle Button
-      - aria-expanded: updated via JS
-      - aria-controls: matches the ID of the <nav>
-    -->
-    <button
-      type="button"
-      class="nav-toggle"
-      aria-controls="primary-navigation"
-      aria-expanded="false"
-      aria-label="Toggle Menu"
-    >
-      <span class="hamburger" aria-hidden="true"></span>
-    </button>
+<!-- 2. Header Landmark -->
+<header role="banner">
+  <!-- Brand/Logo -->
+  <a href="/" class="logo" aria-label="Go to homepage"> Company Name </a>
 
-    <!--
-      Primary Navigation
-      - aria-label: clarifies the landmark if others exist
-    -->
-    <nav
-      id="primary-navigation"
-      class="primary-nav"
-      aria-label="Main Navigation"
-    >
-      <ul class="nav-list">
-        <li>
-          <!-- aria-current="page" used for the active link -->
-          <a href="/" aria-current="page">Home</a>
-        </li>
-        <li>
-          <a href="/services">Services</a>
-        </li>
-        <li>
-          <a href="/about">About</a>
-        </li>
-        <li>
-          <a href="/contact">Contact</a>
-        </li>
-      </ul>
-    </nav>
-  </div>
+  <!-- 3. Mobile Menu Toggle -->
+  <!-- Ensure it is a <button> for screen readers -->
+  <button
+    class="nav-toggle"
+    aria-expanded="false"
+    aria-controls="primary-navigation"
+    aria-label="Toggle navigation menu"
+  >
+    <span class="hamburger-icon" aria-hidden="true"></span>
+  </button>
+
+  <!-- 4. Navigation Landmark -->
+  <nav id="primary-navigation" aria-label="Main">
+    <ul class="nav-list">
+      <li><a href="/">Home</a></li>
+      <li>
+        <!-- Dropdown Example -->
+        <button
+          aria-haspopup="true"
+          aria-expanded="false"
+          class="dropdown-trigger"
+        >
+          Services
+        </button>
+        <ul class="dropdown-menu">
+          <li><a href="/service-1">Service 1</a></li>
+          <li><a href="/service-2">Service 2</a></li>
+        </ul>
+      </li>
+      <li><a href="/about">About</a></li>
+      <li><a href="/contact">Contact</a></li>
+    </ul>
+  </nav>
 </header>
 
-<script>
-  /**
-   * Minimal script to handle the toggle state.
-   */
-  ;(function () {
-    const toggle = document.querySelector('.nav-toggle')
-    const nav = document.querySelector('#primary-navigation')
+<!-- 5. Main Content Target -->
+<main id="main-content" tabindex="-1">
+  <!-- Content goes here -->
+</main>
 
-    if (!toggle || !nav) return
+<style>
+  /* CSS Requirements for Accessibility */
 
-    toggle.addEventListener('click', () => {
-      const isExpanded = toggle.getAttribute('aria-expanded') === 'true'
-      toggle.setAttribute('aria-expanded', !isExpanded)
+  /* Visually hide skip link unless focused */
+  .skip-link {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
 
-      // Toggle a class on the nav or body for visual styling
-      // nav.classList.toggle('is-open');
-    })
+  .skip-link:focus {
+    position: static;
+    width: auto;
+    height: auto;
+    clip: auto;
+    /* Add focus styles here */
+  }
 
-    // Handle Escape key to close
-    window.addEventListener('keydown', (e) => {
-      if (
-        e.key === 'Escape' &&
-        toggle.getAttribute('aria-expanded') === 'true'
-      ) {
-        toggle.setAttribute('aria-expanded', 'false')
-        toggle.focus()
-      }
-    })
-  })()
-</script>
+  /* Ensure focus indicators are never removed */
+  *:focus-visible {
+    outline: 3px solid #005a9c;
+    outline-offset: 2px;
+  }
+
+  /* Tabindex -1 on main removes it from tab order but allows programmatic focus */
+  main:focus {
+    outline: none;
+  }
+</style>
