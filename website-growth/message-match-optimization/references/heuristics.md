@@ -1,58 +1,57 @@
 # Message Match Heuristics & Principles
 
-This document explains the core psychological and UX principles behind Message
-Match.
+The following principles provide the psychological foundation for Message Match
+Optimization.
 
 ## 1. The Scent of Information (Information Scent)
 
-Information Scent is a concept from Information Foraging Theory. It suggests
-that users follow "cues" (words, images, icons) that they perceive will lead
-them to their goal.
+Coined by researchers at Xerox PARC, this concept describes how users navigate
+the web by following "scents" toward their goal.
 
-- **Ad = The Trail:** The ad provides the initial scent.
-- **Landing Page = The Next Step:** If the landing page doesn't continue that
-  scent, the user feels "lost" and will abandon the trail (bounce).
-- **Goal:** Every click must reinforce the user's belief that they are getting
-  closer to the information or offer they want.
+- **Strong Scent:** When the content on the next page clearly matches the link
+  or ad that was clicked.
+- **Broken Scent:** When the landing page is irrelevant, confusing, or too
+  generic.
+- **Impact:** When the scent is broken, the user experiences cognitive friction
+  and is highly likely to bounce immediately.
 
-## 2. The 3-Second Rule
+## 2. The 3-Second Rule (The Blink Test)
 
-In the context of growth, the 3-Second Rule states that a visitor must orient
-themselves and confirm they are in the right place within 3 seconds of a page
-load.
+A user decides whether they are in the "right place" within approximately 3
+seconds of a page loading.
 
-- **0-1 Seconds:** Visual recognition (Does this _look_ like what I clicked?).
-- **1-2 Seconds:** Headline recognition (Does this _say_ what I clicked?).
-- **2-3 Seconds:** Intent confirmation (Can I _do_ what the ad promised?).
+- **The Question:** "Am I in the right place, and do they have what I'm looking
+  for?"
+- **The Answer:** Must be provided by the **H1**, the **Hero Image**, and the
+  **Primary CTA**.
 
-## 3. Cognitive Friction & Click Shock
+## 3. The Mirroring Technique
 
-Click Shock occurs when there is a massive discrepancy between an ad and a
-landing page. This causes immediate cognitive friction.
+Mirroring is the practice of repeating the exact language used by the user or
+the traffic source.
 
-- **Physical Friction:** A slow-loading page.
-- **Cognitive Friction:** A page that requires the user to "think" too hard to
-  connect the ad's promise to the page's content.
-- **Result:** Even a small amount of cognitive friction in the first few seconds
-  leads to a high exit rate.
+- **Psychological Effect:** It builds immediate trust and "fluency"—making the
+  information easier for the brain to process.
+- **Implementation:** If an ad says "Fastest Cloud Hosting," the landing page
+  should not say "Quickest Server Solutions." It should use the word "Fastest."
 
-## 4. Continuity of Narrative
+## 4. Expectation Management
 
-A successful growth funnel is a single, continuous story.
+Every click is an "agreement." The user agrees to give you their time in
+exchange for the promise made in the ad.
 
-- **Chapter 1:** The Ad (The Hook).
-- **Chapter 2:** The Landing Page (The Proof & The Plan).
-- **Chapter 3:** The Conversion/Form (The Commitment).
+- **The Breach:** If you promise a "Free PDF" and the landing page asks for a
+  "Demo Request" first, you have breached the agreement.
+- **The Reward:** Fulfilling the promise immediately (e.g., the PDF download
+  link is the first thing they see) builds the momentum needed for a second,
+  larger conversion later.
 
-If Chapter 2 starts talking about a different topic, the "story" is broken, and
-the user's emotional momentum stops.
+## 5. Visual Continuity
 
-## 5. The "Verbatim" Principle
+The brain processes images faster than text. Visual continuity acts as a
+"pre-attentive" cue that the user is in the right place.
 
-Whenever possible, use the **exact** same phrasing in the landing page H1 as was
-used in the high-performing ad.
-
-- _Ad:_ "Best CRM for Dentists"
-- _Landing Page H1:_ "The #1 Rated CRM for Dentists" (Correct)
-- _Landing Page H1:_ "Revolutionize Your Dental Practice Management"
-  (Incorrect - lacks keyword continuity).
+- **Colors:** Use the same accent colors from the ad creative.
+- **Models/Products:** If a specific person or product is in the ad, it should
+  be the hero of the landing page.
+- **Layout:** If the ad is minimalist, the landing page should feel minimalist.
