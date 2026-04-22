@@ -1,150 +1,142 @@
 ---
 name: site-navigation-system
 description:
-  Design and implement responsive information architecture, header/footer
-  hierarchies, and accessible wayfinding patterns. Trigger this skill when asked
-  to structure a site's menu, organize page relationships, or improve user
-  orientation across a website.
+  Design and structure site-wide navigation that is intuitive, accessible, and
+  responsive across all devices. Trigger this skill when building site
+  architectures, headers, footers, or mobile-specific navigation patterns.
 ---
 
 # Site Navigation System
 
 ## Purpose
 
-The Site Navigation System skill provides a framework for designing and
-organizing how users move through a website. It ensures that the information
-architecture is logical, the navigation UI is consistent and responsive, and
-users always know where they are, where they can go, and how to get back.
+The Site Navigation System provides a framework for organizing and presenting
+the paths through a website. It ensures that users can find what they need,
+understand their current location within the site hierarchy, and move between
+sections with minimal friction, regardless of their device or assistive
+technology.
 
 ## Use Cases
 
-- Designing the primary header and footer for a new multi-page website.
-- Restructuring a site's menu to improve discoverability of key pages.
-- Implementing "wayfinding" elements like breadcrumbs, pagination, or related
-  links.
-- Optimizing navigation for mobile users (e.g., hamburger menus, tab bars).
+- Designing the information architecture for a multi-page website.
+- Defining responsive behaviors for complex headers (e.g., transitioning from
+  Desktop Mega-Menus to Mobile Drawers).
+- Organizing "Utility" actions (Login, Search, Cart) vs. "Primary" navigation.
+- Establishing footer structures that serve as a "safety net" for lost users.
 
 ## When NOT to Use
 
-- **Single-Page Applications (SPAs) with minimal state:** If there is only one
-  "view" and no deep linking required.
-- **Micro-sites or Landing Pages:** Where the goal is a single conversion path
-  with no external links (though a "back to top" or "skip" link might still be
-  needed).
-- **Immersive Experiences:** Where traditional navigation is intentionally
-  subverted for storytelling or art (e.g., parallax horizontal scrolling sites).
+- **Single-Page Apps/Landers:** Where navigation only involves scrolling to
+  sections on a single page (though a simplified version still applies).
+- **Immersive/Experimental Art:** Where the goal is discovery through non-linear
+  or hidden paths rather than efficiency.
+- **Kiosk/Single-Function Interfaces:** Where only one path or action is
+  available to the user.
 
 ## Inputs
 
-To design a site navigation system, you need:
+To design a navigation system, you need:
 
-1.  **Sitemap / Content Inventory:** A list of all pages and their hierarchical
-    relationships (Parent > Child).
-2.  **User Personas & Goals:** What are the most common tasks users need to
-    perform?
-3.  **Technical Constraints:** Does the CMS support mega-menus? Is there a
-    requirement for multi-level nesting?
-4.  **Priority Categories:** Which pages belong in the Primary Nav vs. Utility
-    Nav vs. Footer?
+1.  **Sitemap/Content Inventory:** A list of all pages and their hierarchical
+    relationships.
+2.  **User Goals:** What are the top 3-5 things a user comes to this site to do?
+3.  **Device Constraints:** Target breakpoints and touch vs. pointer
+    considerations.
+4.  **Brand Guidelines:** Typography and color requirements for active, hover,
+    and focus states.
 
 ## Outputs
 
-1.  **Navigation Blueprint:** A structural map of the Header, Footer, and any
-    contextual navigation.
-2.  **Responsive Behavior Spec:** Documentation of how navigation changes from
-    Desktop (e.g., horizontal list) to Mobile (e.g., slide-out drawer).
-3.  **Accessibility Map:** ARIA roles, landmarks, and focus management rules for
-    the navigation components.
+1.  **Navigation Hierarchy:** A defined structure for Global (Primary), Local
+    (Secondary), Utility, and Footer navigation.
+2.  **Responsive Strategy:** Logic for how navigation adapts from Desktop to
+    Mobile (e.g., Hamburger, Tab Bar, or Priority+).
+3.  **State Definition:** Visual rules for how links behave when hovered,
+    focused, or representing the "Current Page."
 
 ## Workflow
 
-### 1. Group and Prioritize Content
+### 1. Categorize Navigation Tiers
 
-Categorize pages into logical groups. Use "Card Sorting" techniques if the site
-structure is complex.
+Organize your content into functional groups:
 
-- **Primary:** Top-level links for the majority of users (Products, Services,
-  About).
-- **Utility:** Functional links (Search, Account, Cart, Language).
-- **Secondary/Contextual:** Links relevant to a specific section
-  (Sub-navigation).
-- **Footer:** Legal links, site map, social media, and "safety net" navigation.
+- **Global Navigation:** The most important pages (Hiring, Services, About).
+- **Utility Navigation:** Task-oriented links (Login, Search, Cart, Language).
+- **Local Navigation:** Contextual links for the current section (e.g., a
+  sidebar for documentation).
+- **Footer Navigation:** Comprehensive site map, legal links, and social icons.
 
-### 2. Define the Header Hierarchy
+### 2. Select a Responsive Pattern
 
-Determine the placement of elements based on visual weight:
+Choose how the navigation behaves as the viewport shrinks:
 
-- Place the **Logo** in a standard location (Top Left or Center) for
-  orientation.
-- Keep **Primary Nav** links prominent and limited (usually 5-7 items max).
-- Group **Utility Nav** items (Search, Cart) together, typically in the Top
-  Right.
+- **The Hamburger (Drawer):** Good for sites with many links (5+).
+- **The Tab Bar:** Best for mobile-first apps with 3-5 high-frequency actions.
+- **Priority+:** Shows the most important links and hides the rest under a
+  "More" menu.
 
 ### 3. Design for Wayfinding
 
-Ensure users never feel "lost" by providing orientation cues:
+Ensure users never feel lost:
 
-- **Active States:** Clearly highlight the current page in the menu.
-- **Breadcrumbs:** Provide a trail for deep hierarchies (e.g., Home > Products >
-  Electronics > Laptops).
-- **Page Headers:** The `<h1>` should match the navigation label used to reach
-  the page.
+- **Active States:** Visually distinguish the link for the current page.
+- **Breadcrumbs:** Provide a secondary path for deep hierarchies (3+ levels).
+- **Clear Labels:** Use descriptive, short text (e.g., "Pricing" instead of "See
+  what it costs").
 
-### 4. Establish Responsive Patterns
+### 4. Apply Interaction Rules
 
-Define how the navigation adapts to screen sizes:
+Define how navigation elements react:
 
-- **Desktop:** Horizontal list or Mega-menu.
-- **Mobile:** Hamburger menu, Bottom Tab Bar, or Progressive Disclosure (Show 3
-  links + "More").
-- **Focus Management:** Ensure the mobile menu toggle handles keyboard focus
-  correctly when opened/closed.
+- **Hover/Focus:** High-contrast changes for pointer and keyboard users.
+- **Dropdowns:** Decide between "Click to Open" (more accessible/predictable)
+  vs. "Hover to Open" (faster but prone to errors).
 
 ### 5. Structure the Footer
 
-Use the footer as a secondary wayfinding tool:
+Treat the footer as a "safety net":
 
-- Group links into columns with clear headings.
-- Include a "Back to Top" link for long-scrolling pages.
-- Place low-priority but necessary links (Privacy Policy, Terms) here.
+- Group links logically under headers.
+- Include a "Back to Top" link for long-scroll pages.
+- Place mandatory legal/copyright info at the very bottom.
 
 ## Decision Rules
 
-- **The 7-Item Rule:** Keep primary navigation categories to 7 or fewer to avoid
-  cognitive overload.
-- **Predictability over Novelty:** Use standard icons (hamburger for menu,
-  magnifying glass for search) and locations.
-- **Depth vs. Breadth:** Favor a "shallow and broad" hierarchy over "deep and
-  narrow" to reduce the number of clicks needed.
-- **Accessibility Landmarks:** Always wrap the main menu in a `<nav>` element
-  with an appropriate `aria-label` (e.g., `aria-label="Main Navigation"`).
+- **The 7-Item Limit:** Try to keep primary navigation to 7 items or fewer to
+  prevent cognitive overload.
+- **Primary vs. Utility:** If a link is an "Action" (Login, Buy), give it a
+  distinct visual weight (e.g., a button) compared to "Info" links.
+- **Touch Target Size:** Ensure all navigation links on mobile are at least
+  44x44px.
+- **Sticky vs. Static:** Use sticky headers if the page is long and users need
+  constant access to navigation; otherwise, keep it static to save screen real
+  estate.
 
 ## Constraints
 
-- **Accessibility:** Must include a "Skip to Main Content" link as the first
-  focusable element. Navigation must be fully keyboard accessible (Tab, Enter,
-  Space, Esc).
-- **Responsiveness:** Navigation must be usable on the smallest supported
-  viewport (320px) without content overlap.
-- **Performance:** Avoid excessively large mega-menus that load hundreds of
-  links at once; consider lazy-loading or architectural simplification.
+- **Accessibility (WCAG):** Use semantic `<nav>` elements, `aria-label` for
+  context, and ensure `aria-expanded` states are updated for menus.
+- **Responsive Width:** Navigation must not "break" or wrap awkwardly at
+  "in-between" tablet widths (768px - 1024px).
+- **Z-Index:** Navigation menus must always appear above all other content,
+  including modals or sticky banners.
 
 ## Common Failure Patterns
 
-- **The "Mystery Meat" Navigation:** Using icons without labels that users don't
+- **Mystery Meat Navigation:** Using icons without labels that users don't
   understand.
-- **Mobile-Only Thinking:** Hiding important utility links (like "Contact")
-  inside a hamburger menu on Desktop.
-- **Broken Wayfinding:** User clicks "Services" but the page heading says "Our
-  Work," creating confusion.
-- **Lack of Focus Styles:** Keyboard users cannot see which menu item they have
-  selected.
+- **Hidden Current State:** Forgetting to show the user which page they are
+  actually on.
+- **The "Hover Trap":** Using hover-based menus that are impossible to navigate
+  via keyboard or difficult to use on touch screens.
+- **Vertical Overload:** Mobile menus that are so long they require scrolling
+  _within_ the menu, making it hard to find the "Close" button.
 
 ## Validation Criteria
 
-- [ ] Every page on the site is reachable within 3 clicks from the homepage.
-- [ ] The "Active" state is visually distinct and programmatically declared
-      (`aria-current="page"`).
-- [ ] Navigation is fully operable using only a keyboard.
-- [ ] A "Skip to Main Content" link is present and functional.
-- [ ] The navigation structure remains logical and legible on mobile devices.
+- [ ] Users can reach any page in the primary sitemap in 3 clicks or fewer.
+- [ ] The "Current Page" is visually distinct in the navigation.
+- [ ] Keyboard users can `Tab` through all links in a logical order.
+- [ ] Mobile navigation is usable with one hand (thumb-friendly).
+- [ ] The header does not obscure important content on scroll (if sticky).
+- [ ] Semantic HTML (`<nav>`, `<ul>`, `<li>`) is used for structure.

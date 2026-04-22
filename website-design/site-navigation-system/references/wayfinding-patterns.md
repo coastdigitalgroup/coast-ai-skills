@@ -1,83 +1,97 @@
-# Wayfinding Patterns & Navigation Structure
+# Wayfinding & Navigation Patterns
 
-Wayfinding is the process of using spatial and environmental cues to navigate a
-physical or digital space. In website design, effective wayfinding ensures users
-can answer three questions: "Where am I?", "Where can I go?", and "How do I get
-back?".
+This reference documents common navigation patterns, semantic requirements, and
+user orientation strategies.
 
-## 1. Common Navigation Patterns
+## Common Navigation Patterns
 
-### Global Navigation (Primary)
+### 1. The Mega-Menu
 
-The main menu that appears on every page of the site.
+- **Best For:** Large content sets (Retail, Enterprise SaaS).
+- **Structure:** Multi-column layout appearing on hover/click.
+- **Benefit:** Shows many options at once, reducing clicks.
+- **Constraint:** Can be overwhelming; requires careful grouping and hierarchy.
 
-- **Top Bar:** Best for sites with 5-7 main categories.
-- **Mega-menu:** Best for large e-commerce or content sites with many
-  sub-categories.
-- **Sidebar:** Often used for dashboards or documentation where vertical space
-  is less critical than horizontal density.
+### 2. Priority+ (The "More" Menu)
 
-### Local Navigation (Secondary)
+- **Best For:** Sites with many top-level links that can't fit on one line.
+- **Behavior:** Displays as many links as space allows, then groups the rest
+  under a "More" dropdown.
+- **Benefit:** Maximizes use of screen real estate.
 
-Navigation within a specific section of the site.
+### 3. Vertical/Sidebar Navigation
 
-- **Tab Bar:** Useful for switching between related views.
-- **Sub-menu:** A secondary list of links often appearing below the primary
-  header or in a sidebar.
+- **Best For:** Documentation, Dashboard Apps, Settings.
+- **Behavior:** A persistent column on the left (or right).
+- **Benefit:** Scalable for long lists of items. Good for deep hierarchies.
 
-### Contextual Navigation
+### 4. Breadcrumbs
 
-Links that appear within the body of a page.
-
-- **"Related Posts":** Found at the end of articles.
-- **"See Also":** In documentation or product pages.
-- **In-text links:** Hyperlinks within paragraphs.
-
-### Utility Navigation
-
-Functional links that aren't part of the core content hierarchy.
-
-- **Login/Account**
-- **Cart/Checkout**
-- **Search Bar**
-- **Language Switcher**
+- **Best For:** E-commerce, Deep content hierarchies (3+ levels).
+- **Behavior:** `Home > Category > Sub-category`.
+- **Benefit:** Provides a "way back" and improves SEO by defining the page
+  structure.
 
 ---
 
-## 2. Accessibility Requirements
+## Technical & Accessibility Requirements
 
-### ARIA Landmarks
+### Semantic Structure
 
-Use semantic HTML and ARIA roles to help screen readers identify navigation
-blocks.
+Always use standard HTML elements to ensure screen readers can identify the
+navigation.
 
-- Wrap navigation in `<nav aria-label="Main">`.
-- Use `aria-current="page"` for the link corresponding to the current page.
-- Use `aria-expanded="true/false"` for dropdowns or mobile menus.
+```html
+<nav aria-label="Main Navigation">
+  <ul>
+    <li><a href="/" aria-current="page">Home</a></li>
+    <li>
+      <button aria-expanded="false" aria-haspopup="true">Products</button>
+      <ul class="dropdown">
+        <li><a href="/p1">Product 1</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+```
 
-### Keyboard Interaction
+### Keyboard Interactions
 
-- **Tab Order:** Navigation must follow the visual order of elements.
-- **Visible Focus:** Never remove the outline from focused links unless you
-  provide a clear alternative style.
-- **Escape Key:** Pressing `Esc` should close open menus or dropdowns.
+| Key             | Action                                                   |
+| :-------------- | :------------------------------------------------------- |
+| **Tab**         | Move to the next focusable item.                         |
+| **Shift + Tab** | Move to the previous focusable item.                     |
+| **Space/Enter** | Activate a link or toggle a dropdown.                    |
+| **Escape**      | Close an open dropdown or mobile menu.                   |
+| **Arrow Keys**  | (Optional) Navigate between items in a menu-bar pattern. |
 
-### Skip Links
+### ARIA Attributes
 
-Every site should have a "Skip to Main Content" link that is:
-
-1. The first focusable element in the DOM.
-2. Hidden visually until it receives focus.
-3. Linked to an ID on the main content area (e.g., `<a href="#main-content">`).
+- `aria-label`: Used on `<nav>` to distinguish multiple navigation areas (e.g.,
+  "Primary", "Footer").
+- `aria-current="page"`: Placed on the link that matches the current URL.
+- `aria-expanded`: Set to `true`/`false` on buttons that toggle dropdowns or
+  mobile menus.
+- `aria-hidden`: Used to hide decorative icons or closed mobile menus from
+  screen readers.
 
 ---
 
-## 3. Structural Best Practices
+## Orientation Strategies
 
-| Pattern                    | Description                                           | Best For...                                                |
-| :------------------------- | :---------------------------------------------------- | :--------------------------------------------------------- |
-| **Breadcrumbs**            | Horizontal trail of links showing hierarchy.          | Deeply nested sites (e.g., E-commerce).                    |
-| **Fat Footer**             | Extensive footer containing a full site map.          | Users who scroll to the bottom looking for a "safety net." |
-| **Pagination**             | Numbered links for browsing large sets of data.       | Blog archives, search results.                             |
-| **Infinite Scroll**        | Content loads as the user scrolls.                    | Social media feeds (use with caution for accessibility).   |
-| **Progressive Disclosure** | Showing only high-priority items and hiding the rest. | Mobile menus or complex dashboards.                        |
+### The "You Are Here" Principle
+
+Never leave a user guessing where they are.
+
+1. **Highlighting:** The current link must be visually distinct (different
+   color, underline, or background).
+2. **Page Titles:** The `<h1>` of the page should match the navigation label
+   exactly.
+3. **Breadcrumbs:** Use breadcrumbs for any page that is not a top-level primary
+   page.
+
+### The "3-Click Rule" (Guideline)
+
+While not a hard rule, aim to make any piece of content reachable within 3
+clicks from the home page. This forces a flatter, more efficient information
+architecture.
