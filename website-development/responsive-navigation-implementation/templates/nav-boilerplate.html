@@ -1,0 +1,100 @@
+<!--
+    Responsive Navigation Boilerplate
+    This template provides the semantic structure and ARIA attributes needed
+    for an accessible, responsive navigation system.
+-->
+
+<header class="site-header">
+  <a href="#main" class="skip-link">Skip to content</a>
+
+  <div class="header-container">
+    <!-- Logo -->
+    <a href="/" class="brand" aria-label="Home"> [LOGO] </a>
+
+    <!-- Mobile Toggle -->
+    <button
+      type="button"
+      class="nav-toggle"
+      aria-expanded="false"
+      aria-controls="primary-nav"
+      aria-label="Toggle navigation menu"
+    >
+      <span class="icon-bar" aria-hidden="true"></span>
+    </button>
+
+    <!-- Navigation Menu -->
+    <nav id="primary-nav" class="nav-menu" aria-label="Primary Navigation">
+      <ul class="nav-list">
+        <li class="nav-item">
+          <a href="/" class="nav-link" aria-current="page">Home</a>
+        </li>
+        <li class="nav-item">
+          <a href="/about" class="nav-link">About</a>
+        </li>
+        <!-- Add more items here -->
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<style>
+  /* Minimally opinionated styling for the boilerplate */
+  .skip-link {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+  }
+  .skip-link:focus {
+    position: static;
+    width: auto;
+    height: auto;
+    clip: auto;
+  }
+
+  .nav-menu {
+    /* Mobile styles by default */
+    display: none; /* Hide when not active in mobile */
+  }
+
+  .nav-menu[aria-hidden='false'],
+  .nav-menu.is-active {
+    display: block;
+  }
+
+  @media (min-width: 768px) {
+    .nav-toggle {
+      display: none;
+    }
+    .nav-menu {
+      display: block !important; /* Always show on desktop */
+    }
+    .nav-list {
+      display: flex;
+    }
+  }
+</style>
+
+<script>
+  /**
+   * Minimal Navigation Logic
+   * Handles toggle state and basic accessibility.
+   */
+  const toggle = document.querySelector('.nav-toggle')
+  const menu = document.querySelector('#primary-nav')
+
+  if (toggle && menu) {
+    toggle.addEventListener('click', () => {
+      const isExpanded = toggle.getAttribute('aria-expanded') === 'true'
+      toggle.setAttribute('aria-expanded', !isExpanded)
+      menu.classList.toggle('is-active')
+
+      // Optional: Toggle aria-hidden on menu if not using display: none
+      // menu.setAttribute('aria-hidden', isExpanded);
+    })
+  }
+</script>
