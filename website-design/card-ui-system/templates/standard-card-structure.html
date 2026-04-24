@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      :root {
+        --card-bg: #ffffff;
+        --card-border: #e2e8f0;
+        --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        --primary-color: #3182ce;
+        --text-main: #2d3748;
+        --text-muted: #718096;
+        --radius: 8px;
+        --spacing: 16px;
+      }
+
+      .card-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 24px;
+        padding: 24px;
+      }
+
+      .card {
+        display: flex;
+        flex-direction: column;
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius);
+        overflow: hidden;
+        transition:
+          transform 0.2s ease,
+          box-shadow 0.2s ease;
+      }
+
+      .card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--card-shadow);
+      }
+
+      .card-image-wrap {
+        position: relative;
+        width: 100%;
+        padding-top: 100%; /* 1:1 Aspect Ratio */
+        background: #f7fafc;
+      }
+
+      .card-image-wrap img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .card-content {
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+        padding: var(--spacing);
+      }
+
+      .card-category {
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        margin-bottom: 4px;
+      }
+
+      .card-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin: 0 0 8px 0;
+        color: var(--text-main);
+      }
+
+      .card-description {
+        font-size: 0.875rem;
+        color: var(--text-muted);
+        margin-bottom: 16px;
+      }
+
+      .card-footer {
+        margin-top: auto; /* Pushes footer to bottom */
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .btn-primary {
+        display: block;
+        width: 100%;
+        padding: 10px;
+        background: var(--primary-color);
+        color: white;
+        text-align: center;
+        text-decoration: none;
+        border-radius: 4px;
+        font-weight: 600;
+      }
+
+      .btn-secondary {
+        font-size: 0.875rem;
+        color: var(--primary-color);
+        text-align: center;
+        text-decoration: none;
+      }
+
+      .btn-secondary:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card-grid">
+      <!-- Standard Card -->
+      <article class="card">
+        <div class="card-image-wrap">
+          <img src="https://via.placeholder.com/400" alt="Product Image" />
+        </div>
+        <div class="card-content">
+          <span class="card-category">Category</span>
+          <h3 class="card-title">Card with Short Title</h3>
+          <p class="card-description">
+            A brief description of the product or article.
+          </p>
+          <div class="card-footer">
+            <a href="#" class="btn-primary">Main Action</a>
+            <a href="#" class="btn-secondary">Secondary Link</a>
+          </div>
+        </div>
+      </article>
+
+      <!-- Card with Longer Content to demonstrate alignment -->
+      <article class="card">
+        <div class="card-image-wrap">
+          <img src="https://via.placeholder.com/400" alt="Product Image" />
+        </div>
+        <div class="card-content">
+          <span class="card-category">Category</span>
+          <h3 class="card-title">
+            Card with a Much Longer Title That Might Wrap Multiple Lines
+          </h3>
+          <p class="card-description">
+            This card has more description text to test how the footer stays
+            aligned at the bottom of the card container regardless of content
+            height.
+          </p>
+          <div class="card-footer">
+            <a href="#" class="btn-primary">Main Action</a>
+            <a href="#" class="btn-secondary">Secondary Link</a>
+          </div>
+        </div>
+      </article>
+    </div>
+  </body>
+</html>
