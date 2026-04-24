@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Skeleton Screen Implementation Example</title>
+    <style>
+      :root {
+        --skeleton-base: #e0e0e0;
+        --skeleton-shimmer: linear-gradient(
+          90deg,
+          rgba(255, 255, 255, 0) 0%,
+          rgba(255, 255, 255, 0.5) 50%,
+          rgba(255, 255, 255, 0) 100%
+        );
+        --card-padding: 1rem;
+        --card-radius: 8px;
+      }
+
+      body {
+        font-family:
+          system-ui,
+          -apple-system,
+          sans-serif;
+        padding: 2rem;
+        background-color: #f5f5f5;
+        color: #333;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 2rem;
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      /* --- Component Styles --- */
+      .product-card {
+        background: white;
+        border-radius: var(--card-radius);
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
+      }
+
+      .product-image {
+        width: 100%;
+        aspect-ratio: 4 / 3;
+        object-fit: cover;
+        background-color: var(--skeleton-base);
+      }
+
+      .product-info {
+        padding: var(--card-padding);
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .product-title {
+        margin: 0;
+        font-size: 1.25rem;
+        line-height: 1.2;
+      }
+
+      .product-price {
+        font-weight: bold;
+        color: #d32f2f;
+      }
+
+      /* --- Skeleton State --- */
+      .skeleton {
+        pointer-events: none;
+        user-select: none;
+      }
+
+      .skeleton-bone {
+        background-color: var(--skeleton-base);
+        position: relative;
+        overflow: hidden;
+        border-radius: 4px;
+      }
+
+      /* Shimmer Effect */
+      .skeleton-bone::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: var(--skeleton-shimmer);
+        animation: shimmer 2s infinite;
+        transform: translateX(-100%);
+      }
+
+      @keyframes shimmer {
+        100% {
+          transform: translateX(100%);
+        }
+      }
+
+      /* Reduced Motion Support */
+      @media (prefers-reduced-motion: reduce) {
+        .skeleton-bone::after {
+          animation: none;
+          display: none;
+        }
+      }
+
+      /* Matching Footprints */
+      .skeleton .product-image {
+        /* aspect-ratio already handled by .product-image class */
+      }
+
+      .skeleton .product-title {
+        height: 1.25rem;
+        width: 80%;
+      }
+
+      .skeleton .product-text-line {
+        height: 0.875rem;
+        width: 100%;
+      }
+
+      .skeleton .product-price {
+        height: 1rem;
+        width: 30%;
+        margin-top: auto;
+      }
+
+      /* Utility classes for layout */
+      .hidden {
+        display: none !important;
+      }
+
+      .fade-in {
+        animation: fadeIn 0.3s ease-in;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header style="margin-bottom: 2rem; text-align: center">
+      <h1>Product Discovery</h1>
+      <button id="toggle-loading" style="padding: 0.5rem 1rem; cursor: pointer">
+        Simulate Reload
+      </button>
+    </header>
+
+    <main
+      id="content-container"
+      class="grid"
+      aria-live="polite"
+      aria-busy="true"
+    >
+      <!-- Skeleton Card (Visible by default) -->
+      <div class="product-card skeleton" aria-hidden="true">
+        <div class="product-image skeleton-bone"></div>
+        <div class="product-info">
+          <div class="product-title skeleton-bone"></div>
+          <div class="product-text-line skeleton-bone"></div>
+          <div class="product-text-line skeleton-bone" style="width: 60%"></div>
+          <div class="product-price skeleton-bone"></div>
+        </div>
+      </div>
+
+      <div class="product-card skeleton" aria-hidden="true">
+        <div class="product-image skeleton-bone"></div>
+        <div class="product-info">
+          <div class="product-title skeleton-bone"></div>
+          <div class="product-text-line skeleton-bone"></div>
+          <div class="product-text-line skeleton-bone" style="width: 40%"></div>
+          <div class="product-price skeleton-bone"></div>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      const container = document.getElementById('content-container')
+      const btn = document.getElementById('toggle-loading')
+
+      const mockData = [
+        {
+          title: 'Premium Wireless Headphones',
+          price: '$199.99',
+          img: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=400&q=80'
+        },
+        {
+          title: 'Smart Ergonomic Watch',
+          price: '$249.00',
+          img: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=400&q=80'
+        }
+      ]
+
+      function loadContent() {
+        // Reset to loading state
+        container.setAttribute('aria-busy', 'true')
+        btn.disabled = true
+
+        // Simulate API Delay
+        setTimeout(() => {
+          container.innerHTML = mockData
+            .map(
+              (item) => `
+                    <div class="product-card fade-in">
+                        <img src="${item.img}" alt="${item.title}" class="product-image">
+                        <div class="product-info">
+                            <h2 class="product-title">${item.title}</h2>
+                            <p class="product-text">Experience high-quality sound and comfort with our latest model.</p>
+                            <span class="product-price">${item.price}</span>
+                        </div>
+                    </div>
+                `
+            )
+            .join('')
+
+          container.setAttribute('aria-busy', 'false')
+          btn.disabled = false
+        }, 2000)
+      }
+
+      btn.addEventListener('click', () => {
+        location.reload() // Simple reload for the example
+      })
+
+      // Initial load
+      window.addEventListener('DOMContentLoaded', loadContent)
+    </script>
+  </body>
+</html>
