@@ -1,151 +1,212 @@
 ---
 name: card-ui-system
 description:
-  Design and implement modular content containers (cards) that balance visual
-  hierarchy, information density, and accessibility. Trigger this skill when
-  organizing repetitive content types like products, blog posts, or feature
-  highlights.
+  Design and implement a systematic framework for modular content containers
+  that maintain hierarchy, structural integrity, and action alignment across
+  variable content and responsive viewports.
 ---
 
 # Card UI System
 
 ## Purpose
 
-The Card UI System provides a structured framework for creating modular content
-containers. Cards serve as entry points to more detailed information, balancing
-brief snippets of content with clear calls to action. This system ensures that
-cards remain legible, accessible, and visually consistent across varying
-viewport sizes and content lengths.
+The Card UI System provides a methodology for designing and structuring
+cards—the modular building blocks used to group related information and actions.
+Cards are the fundamental building blocks of discovery-heavy interfaces, allowing
+users to scan and compare multiple distinct items (products, articles, profiles)
+within a unified grid or list. A systematic approach to cards ensures that
+content is scannable, visually cohesive, and adapts gracefully across different
+layout contexts (grids, carousels, stacks) while maintaining accessibility and
+clear intent.
 
 ## Use Cases
 
-- Creating product grids for e-commerce listings.
-- Designing blog post or news article previews.
-- Highlighting service features or "USPs" (Unique Selling Points).
-- Building dashboard widgets for data visualization summaries.
-- Organizing user profiles or directory listings.
+- Designing product grids for e-commerce listing pages (PLPs).
+- Creating article or blog post previews for content hubs.
+- Creating "Features" or "Services" sections on a landing page.
+- Organizing dashboard widgets, feature highlights, or data summaries.
+- Implementing "Related Content" sections at the bottom of pages.
+- Defining a "Result" component for search or filter views.
 
 ## When NOT to Use
 
-- **Tabular Data:** Use a
-  [Responsive Data Table](../../website-development/responsive-data-tables/SKILL.md)
-  when users need to compare specific attributes across many rows.
-- **Pure Text Content:** Use standard typographic hierarchy for long-form
-  articles without modular grouping.
-- **Complex Interactions:** Avoid overcomplicating cards with too many nested
-  actions (e.g., editing, deleting, and moving all inside one card).
+- **Dense Data Tables:** When users need to compare specific attributes across
+  many rows of granular data simultaneously; use `responsive-data-tables`
+  instead (though cards can be a responsive fallback).
+- **Single Narrative Content / Simple Text Flows:** When the content follows a
+  strict linear story or standard paragraphs where a card wrapper would add
+  unnecessary visual noise or interfere with reading rhythm.
+- **Minimalist Action-Only UI:** Like a single-field search bar or a simple
+  login form where a card wrapper would add unnecessary visual noise.
 
 ## Inputs
 
-1.  **Content Elements:** A list of items to be included (e.g., Image, Title,
-    Category, Price, Rating, Description, CTA).
-2.  **Context of Use:** Where will the cards live? (Grid, Carousel, Sidebar).
-3.  **Priority of Information:** Which element is the "Anchor," the "Context,"
-    and the "Target"?
-4.  **Action Type:** Is the whole card clickable, or are there specific targets?
+1.  **Content Anatomy:** A list of required elements (e.g., Image, Title,
+    Category, Price, Description, CTA).
+2.  **Interaction Intent:** Is the entire card clickable, or are there specific
+    action targets?
+3.  **Parent Context:** Where will the card live? (e.g., 3-column grid,
+    sidebar, horizontal scroller?)
+4.  **Content Variance:** What is the minimum and maximum amount of text
+    expected for titles and descriptions?
+5.  **Existing Systems:** Fluid spacing, typography scales, and color palettes
+    from the parent design system.
 
 ## Outputs
 
-1.  **Card Component Specification:** Defined hierarchy and spacing for internal
-    elements.
-2.  **Responsive Behavior Rules:** How the card adapts from a vertical stack
-    (mobile) to a horizontal or grid layout (desktop).
-3.  **Accessibility Protocol:** Guidance on focus states, heading levels, and
-    ARIA attributes for card-specific patterns.
+1.  **Card Anatomy Spec:** Defined regions (Header, Media, Body, Footer) and
+    their internal spacing.
+2.  **Card Blueprint:** A structural definition of the card's internal layout
+    and layers.
+3.  **Responsive Variants:** Rules for how the card adapts (e.g., switching from
+    vertical to horizontal on mobile).
+4.  **Interaction Spec:** Defined states (Hover, Focus, Active) and clickable
+    area definitions.
+5.  **Accessibility Map:** Guidance on heading hierarchy and keyboard interaction
+    patterns.
 
 ## Workflow
 
-### 1. Apply the "Three-Point Rule"
+### 1. Apply the "Three-Point Rule" and Define Anatomy
 
-Identify the three critical entry points for every card:
+Every card should have three clear points of hierarchy to ensure scan-ability:
 
-- **Point 1: The Anchor (Visual):** Usually an image or icon that provides
-  immediate recognition.
-- **Point 2: The Context (Primary Content):** The title and essential metadata
-  (e.g., Price or Date).
-- **Point 3: The Target (Primary Action):** The button or link that leads the
-  user to the next step.
+1.  **The Anchor (Visual):** A high-quality image or icon that provides
+    immediate recognition. Define the aspect ratio for images (e.g., 16:9, 1:1).
+2.  **The Context (Content):** The title and core metadata (e.g., Price, Date,
+    Category).
+3.  **The Target (Action):** A clear primary action (e.g., "Add to Cart",
+    "Read More").
 
-### 2. Establish Internal Hierarchy
+Map out the full internal hierarchy: **Header** (meta-info like tags/dates),
+**Media Area**, **Content/Body** (title + description), and **Footer/Actions**
+(CTAs, price, social proof).
 
-Use [Visual Hierarchy System](../visual-hierarchy-system/SKILL.md) principles to
-rank elements:
+### 2. Establish Internal Spacing and the Internal Grid
 
-- **Size & Weight:** The Title should be the most prominent text element.
-- **Proximity:** Group related metadata (e.g., Author and Date) closer together
-  than the Title and the CTA.
-- **Consistency:** Use a fixed aspect ratio for images to prevent "jagged" grids
-  where cards have different heights.
+Apply the `fluid-spacing-system` to the card's interior:
 
-### 3. Define the Clickable Area Pattern
+- **Padding:** The space between the card edge and its content (usually
+  `--space-m`).
+- **Stacking Gaps:** The vertical space between internal elements (usually
+  `--space-xs` or `--space-s`).
 
-Choose one of three standard patterns:
+Determine how content is distributed within the card:
 
-- **Specific Action Targets:** Only the Button or Link is clickable. Best for
-  cards with multiple distinct actions.
-- **Stretched Link:** The primary link's clickable area is expanded to cover the
-  entire card using CSS. Best for discovery-focused cards.
-- **Full-Card Link:** The entire card is wrapped in an `<a>` tag. **Warning:**
-  Only use for very simple cards without other interactive elements.
+- **Top-Down (Standard):** Image at the top, content in the middle, action at
+  the bottom.
+- **Side-by-Side (Horizontal):** Image on the left, content and action on the
+  right (best for mobile lists or sidebars).
+- **Overlay:** Content sits on top of the image (requires high-contrast
+  treatments for legibility).
 
-### 4. Handle Variable Content
+### 3. Design Visual Hierarchy and Handle Content Variance
 
-Design for "the real world" where content lengths vary:
+Apply `visual-hierarchy-system` levers to distinguish content:
 
-- **Line Clamping:** Truncate long descriptions to a fixed number of lines
-  (e.g., 3 lines) to maintain grid alignment.
-- **Alignment:** Use Flexbox (`margin-top: auto`) on the CTA to ensure buttons
-  align at the bottom of cards in a row, regardless of text length.
+- **Weight:** Make the Title bold and larger than the description.
+- **Contrast:** Use a muted color for meta-text (e.g., "Published on Oct 24").
+- **Elevation:** Use borders or subtle box-shadows to separate the card from the
+  background.
 
-### 5. Add Interactive States
+Design for the "worst-case" content scenario:
 
-Define how the card responds to user input using the
-[Interactive State System](../interactive-state-system/SKILL.md):
+- **Truncation vs. Wrapping:** Decide if long titles should truncate with
+  ellipses or wrap to multiple lines.
+- **Alignment:** Use Flexbox `margin-top: auto` on the action container to
+  ensure buttons align perfectly across cards of different heights in a grid.
 
-- **Hover:** Subtle elevation (shadow) or scale changes.
-- **Focus:** Clear, high-contrast borders around the clickable target.
-- **Active:** A slight "press" effect or color shift.
+### 4. Establish Interaction Patterns
+
+Choose a functional pattern for interaction:
+
+- **The Big Box:** The entire card is a link (requires careful accessibility
+  handling for screen readers).
+- **The Nested Action:** Only specific buttons or the title are clickable.
+- **The Hybrid:** The card surface has a hover effect, but specific actions
+  perform different tasks (e.g., "Add to Cart" vs. "View Details").
+
+Use subtle transformations on hover (e.g., slight lift, border color change) to
+indicate interactivity.
+
+### 5. Define Responsive Adaptations and Verify Accessibility
+
+Plan how the card survives different viewports:
+
+- **Vertical to Horizontal:** For mobile, a card might switch from an
+  image-on-top layout to an image-on-the-left layout to save vertical space.
+- **Truncation:** Decide if long titles or descriptions should be truncated with
+  ellipses after N lines.
+
+Verify accessibility before sign-off:
+
+- **Heading Levels:** Ensure card titles use appropriate heading levels (usually
+  H3 or H4) to maintain the page's document outline.
+- **Touch Targets:** Any interactive element within the card must be at least
+  44x44px.
+- **Alt Text:** Every anchor image must have descriptive alt text or be marked
+  as decorative.
+- **Keyboard Navigation:** Every interactive element inside a card must be
+  reachable via `Tab` and have a clear focus indicator.
 
 ## Decision Rules
 
-- **Aspect Ratio over Original Size:** Always enforce a consistent aspect ratio
-  for card imagery (e.g., 16:9 or 1:1) to maintain layout stability.
-- **The "One Heading" Rule:** Each card should contain exactly one heading
-  (usually H3 or H4) that accurately describes the card's destination.
-- **Avoid "Read More":** Use descriptive link text (e.g., "View Product
-  Details") instead of generic "Read More" for better accessibility and SEO.
-- **Alignment Consistency:** If one card in a row has a button, all cards in
-  that row should have a button in the same position.
+- **The "Three-Point" Rule:** A card should rarely have more than 3 distinct
+  priorities (e.g., 1. Image, 2. Title, 3. Price). Too much detail makes it a
+  "mini-page," not a card.
+- **The Aspect Ratio Rule:** Use consistent aspect ratios for images (e.g., 4:3,
+  16:9, or 1:1) to prevent "jumping" layouts in a grid.
+- **Proximity Score:** The gap between the Title and Description should be
+  smaller than the gap between the Description and the CTA.
+- **The "No Orphan" Rule:** If a card is part of a grid, the grid must handle
+  remaining space gracefully (e.g.,
+  `grid-template-columns: repeat(auto-fill, minmax(280px, 1fr))`).
+- **Equal Heights:** In a grid, cards in the same row should ideally be the same
+  height (using Flexbox `align-items: stretch`).
+- **Primary vs. Secondary Actions:** Only one action should be visually dominant
+  (Primary CTA). Other actions (e.g., "Save to Wishlist") should be icons or
+  low-contrast links.
+- **Interactive Affordance:** If a card is clickable, it must have a visible
+  hover state.
 
 ## Constraints
 
-- **Accessibility:**
-  - Cards must follow a logical focus order (Image -> Title -> Metadata -> CTA).
-  - Images must have descriptive `alt` text unless purely decorative.
-  - Interactive elements inside a card must be large enough for touch (44x44px).
-- **Responsiveness:**
-  - Cards should never have a fixed width; use `min-width` or percentage-based
-  - widths within a grid.
-- **Hierarchy:** The card's title must be more visually prominent than its
-  supporting metadata.
+- **Responsiveness:** Cards must never exceed the viewport width or have a fixed
+  width; they should span columns in a `responsive-grid-system` and stack
+  vertically or switch to a horizontal layout on small screens.
+- **Accessibility:** Must support keyboard navigation (Tab through interactive
+  elements) and maintain a minimum contrast ratio of 4.5:1 for text. If the
+  whole card is clickable, use the "stretched link" pattern to avoid redundant
+  links for screen readers.
+- **Performance:** Avoid excessively large images; use `srcset` to serve
+  appropriately sized assets for the card container.
 
 ## Common Failure Patterns
 
-- **The "Wall of Text":** Including too much body copy, making cards hard to
-  scan.
-- **Jagged Grids:** Cards having different heights because images weren't
-  standardized or buttons weren't bottom-aligned.
-- **Nested Interactivity:** Putting links inside a card that is already a link,
-  which breaks screen reader behavior.
-- **Lack of Focus Indication:** Forgetting to style the focus state for keyboard
-  users.
+- **The "Staircase / Staggered Button" Effect:** Buttons sitting at different
+  heights because of varying title lengths, making the grid look messy.
+- **Over-Decoration:** Using too many borders, shadows, and gradients, making
+  the content hard to read.
+- **Low Information Density:** Making cards too large with too little content,
+  forcing unnecessary scrolling.
+- **Information Overload:** Trying to fit too many details into a single card,
+  breaking the Three-Point Rule and confusing the user.
+- **Inaccessible / Invisible Click-Targets:** Small buttons or links that are
+  difficult to tap on mobile devices, or making a card look clickable with only
+  a tiny icon as the actual trigger.
+- **Lack of Padding:** Cramming text right against the card's edge or image.
 
 ## Validation Criteria
 
-- [ ] Every card follows the Three-Point Rule (Anchor, Context, Target).
-- [ ] Images use a consistent aspect ratio across the set.
-- [ ] CTAs are aligned consistently (e.g., all bottom-aligned).
-- [ ] Text is truncated or clamped to prevent excessive card height.
-- [ ] Interactive states (hover/focus) are clearly defined.
-- [ ] Heading levels are semantically correct and consistent.
-- [ ] The card remains functional and readable on mobile viewports.
+- [ ] The "Three-Point Rule" is clearly visible (Anchor, Context, Target).
+- [ ] Internal spacing (padding/gaps) uses tokens from the fluid spacing system.
+- [ ] Typography follows the site's established scale and hierarchy.
+- [ ] Primary actions (buttons) are aligned across the bottom of the grid row.
+- [ ] Image aspect ratios are consistent across all cards in the system.
+- [ ] Interactive states (Hover/Focus) are defined and accessible.
+- [ ] Cards in a grid align correctly and handle varying content lengths
+      gracefully.
+- [ ] Heading levels follow a logical hierarchy within the page.
+- [ ] Touch targets meet the 44x44px minimum.
+- [ ] Accessibility: The card's heading level follows the page's logical
+      structure.
