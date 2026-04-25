@@ -1,0 +1,82 @@
+<div class="tabs">
+  <div role="tablist" aria-label="[Label describing the tab set]">
+    <button
+      role="tab"
+      aria-selected="true"
+      aria-controls="panel-1"
+      id="tab-1"
+      tabindex="0"
+    >
+      [Tab 1 Label]
+    </button>
+    <button
+      role="tab"
+      aria-selected="false"
+      aria-controls="panel-2"
+      id="tab-2"
+      tabindex="-1"
+    >
+      [Tab 2 Label]
+    </button>
+  </div>
+
+  <div role="tabpanel" id="panel-1" aria-labelledby="tab-1" tabindex="0">
+    <!-- Tab 1 Content -->
+  </div>
+
+  <div role="tabpanel" id="panel-2" aria-labelledby="tab-2" tabindex="0" hidden>
+    <!-- Tab 2 Content -->
+  </div>
+</div>
+
+<script>
+  /**
+   * Basic Tab Logic
+   * Note: This script provides minimum functional requirements.
+   * For production, encapsulate in a class or component.
+   */
+  ;(function () {
+    const tablist = document.querySelector('[role="tablist"]')
+    const tabs = tablist.querySelectorAll('[role="tab"]')
+    const panels = document.querySelectorAll('[role="tabpanel"]')
+
+    function switchTab(newTab) {
+      const oldTab = tablist.querySelector('[aria-selected="true"]')
+      const newPanel = document.getElementById(
+        newTab.getAttribute('aria-controls')
+      )
+      const oldPanel = document.getElementById(
+        oldTab.getAttribute('aria-controls')
+      )
+
+      oldTab.setAttribute('aria-selected', 'false')
+      oldTab.setAttribute('tabindex', '-1')
+      newTab.setAttribute('aria-selected', 'true')
+      newTab.setAttribute('tabindex', '0')
+
+      oldPanel.hidden = true
+      newPanel.hidden = false
+    }
+
+    tablist.addEventListener('keydown', (e) => {
+      const index = Array.from(tabs).indexOf(e.target)
+
+      let nextIndex
+      if (e.key === 'ArrowRight') nextIndex = (index + 1) % tabs.length
+      else if (e.key === 'ArrowLeft')
+        nextIndex = (index - 1 + tabs.length) % tabs.length
+      else if (e.key === 'Home') nextIndex = 0
+      else if (e.key === 'End') nextIndex = tabs.length - 1
+      else return
+
+      e.preventDefault()
+      switchTab(tabs[nextIndex])
+      tabs[nextIndex].focus()
+    })
+
+    tablist.addEventListener('click', (e) => {
+      const tab = e.target.closest('[role="tab"]')
+      if (tab) switchTab(tab)
+    })
+  })()
+</script>

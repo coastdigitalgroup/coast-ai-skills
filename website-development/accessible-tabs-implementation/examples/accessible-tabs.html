@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Accessible Tabs Example</title>
+    <style>
+      .tabs-container {
+        max-width: 600px;
+        margin: 2rem auto;
+        font-family:
+          system-ui,
+          -apple-system,
+          sans-serif;
+      }
+
+      [role='tablist'] {
+        display: flex;
+        border-bottom: 2px solid #ddd;
+        gap: 0.5rem;
+      }
+
+      [role='tab'] {
+        padding: 0.75rem 1.25rem;
+        border: none;
+        background: none;
+        font-size: 1rem;
+        cursor: pointer;
+        position: relative;
+        color: #555;
+        border-radius: 4px 4px 0 0;
+      }
+
+      [role='tab']:hover {
+        background-color: #f0f0f0;
+      }
+
+      [role='tab']:focus {
+        outline: 2px solid #0056b3;
+        outline-offset: 2px;
+      }
+
+      [role='tab'][aria-selected='true'] {
+        color: #0056b3;
+        font-weight: 600;
+      }
+
+      [role='tab'][aria-selected='true']::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background-color: #0056b3;
+      }
+
+      [role='tabpanel'] {
+        padding: 1.5rem;
+        border: 1px solid #ddd;
+        border-top: none;
+        background: #fff;
+      }
+
+      [role='tabpanel'][hidden] {
+        display: none;
+      }
+
+      h2 {
+        margin-top: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="tabs-container">
+      <div role="tablist" aria-label="Product Information">
+        <button
+          role="tab"
+          aria-selected="true"
+          aria-controls="panel-1"
+          id="tab-1"
+          tabindex="0"
+        >
+          Description
+        </button>
+        <button
+          role="tab"
+          aria-selected="false"
+          aria-controls="panel-2"
+          id="tab-2"
+          tabindex="-1"
+        >
+          Specifications
+        </button>
+        <button
+          role="tab"
+          aria-selected="false"
+          aria-controls="panel-3"
+          id="tab-3"
+          tabindex="-1"
+        >
+          Reviews
+        </button>
+      </div>
+
+      <div role="tabpanel" id="panel-1" aria-labelledby="tab-1" tabindex="0">
+        <h2>Description</h2>
+        <p>
+          This is a high-quality product designed for maximum efficiency and
+          durability. It features a sleek design and intuitive controls.
+        </p>
+      </div>
+
+      <div
+        role="tabpanel"
+        id="panel-2"
+        aria-labelledby="tab-2"
+        tabindex="0"
+        hidden
+      >
+        <h2>Specifications</h2>
+        <ul>
+          <li>Weight: 1.2kg</li>
+          <li>Dimensions: 20cm x 15cm x 5cm</li>
+          <li>Material: Recycled Aluminum</li>
+          <li>Battery Life: 12 hours</li>
+        </ul>
+      </div>
+
+      <div
+        role="tabpanel"
+        id="panel-3"
+        aria-labelledby="tab-3"
+        tabindex="0"
+        hidden
+      >
+        <h2>Customer Reviews</h2>
+        <p>⭐⭐⭐⭐⭐ - "Absolutely love it! Best purchase this year."</p>
+        <p>⭐⭐⭐⭐ - "Great quality, but the shipping took a bit longer."</p>
+      </div>
+    </div>
+
+    <script>
+      const tabList = document.querySelector('[role="tablist"]')
+      const tabs = tabList.querySelectorAll('[role="tab"]')
+      const panels = document.querySelectorAll('[role="tabpanel"]')
+
+      tabList.addEventListener('keydown', (e) => {
+        const target = e.target
+        if (target.getAttribute('role') !== 'tab') return
+
+        let index = Array.from(tabs).indexOf(target)
+        let newIndex = index
+
+        switch (e.key) {
+          case 'ArrowRight':
+            newIndex = (index + 1) % tabs.length
+            break
+          case 'ArrowLeft':
+            newIndex = (index - 1 + tabs.length) % tabs.length
+            break
+          case 'Home':
+            newIndex = 0
+            break
+          case 'End':
+            newIndex = tabs.length - 1
+            break
+          default:
+            return
+        }
+
+        e.preventDefault()
+        activateTab(tabs[newIndex])
+        tabs[newIndex].focus()
+      })
+
+      tabs.forEach((tab) => {
+        tab.addEventListener('click', (e) => {
+          activateTab(e.currentTarget)
+        })
+      })
+
+      function activateTab(targetTab) {
+        // Deactivate all tabs
+        tabs.forEach((tab) => {
+          tab.setAttribute('aria-selected', 'false')
+          tab.setAttribute('tabindex', '-1')
+        })
+
+        // Activate target tab
+        targetTab.setAttribute('aria-selected', 'true')
+        targetTab.setAttribute('tabindex', '0')
+
+        // Hide all panels
+        panels.forEach((panel) => {
+          panel.hidden = true
+        })
+
+        // Show target panel
+        const panelId = targetTab.getAttribute('aria-controls')
+        document.getElementById(panelId).hidden = false
+      }
+    </script>
+  </body>
+</html>
