@@ -7,7 +7,7 @@ description:
   strong messaging.
 ---
 
-# Social Proof & Trust Signal Optimization
+# Social Proof Optimization
 
 ## Purpose
 

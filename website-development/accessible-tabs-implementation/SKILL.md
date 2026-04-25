@@ -36,20 +36,20 @@ interaction patterns (arrow key navigation).
 
 ## Inputs
 
-1.  **Content Structure:** A list of labels and their corresponding content
-    blocks.
-2.  **Activation Strategy:** Decision on whether tabs should activate
-    automatically on focus or manually on click/keypress.
-3.  **Orientation:** Horizontal (default) or Vertical layout.
+1. **Content Structure:** A list of labels and their corresponding content
+   blocks.
+2. **Activation Strategy:** Decision on whether tabs should activate
+   automatically on focus or manually on click/keypress.
+3. **Orientation:** Horizontal (default) or Vertical layout.
 
 ## Outputs
 
-1.  **Semantic HTML:** A structure using appropriate ARIA roles and linking
-    attributes (`aria-controls`, `aria-labelledby`).
-2.  **Keyboard Logic:** JavaScript handlers for `ArrowRight`, `ArrowLeft`,
-    `Home`, `End`, and `Enter`/`Space`.
-3.  **Visual States:** CSS for `[aria-selected="true"]`, focus indicators, and
-    panel visibility.
+1. **Semantic HTML:** A structure using appropriate ARIA roles and linking
+   attributes (`aria-controls`, `aria-labelledby`).
+2. **Keyboard Logic:** JavaScript handlers for `ArrowRight`, `ArrowLeft`,
+   `Home`, `End`, and `Enter`/`Space`.
+3. **Visual States:** CSS for `[aria-selected="true"]`, focus indicators, and
+   panel visibility.
 
 ## Workflow
 

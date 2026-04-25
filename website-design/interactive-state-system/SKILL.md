@@ -36,20 +36,20 @@ for the end user.
 
 ## Inputs
 
-1.  **Component Inventory:** A list of all interactive elements in the design.
-2.  **Brand Color System:** Existing primary, secondary, and semantic color
-    scales.
-3.  **Accessibility Target:** (e.g., WCAG Level AA) which dictates contrast
-    ratios for states.
+1. **Component Inventory:** A list of all interactive elements in the design.
+2. **Brand Color System:** Existing primary, secondary, and semantic color
+   scales.
+3. **Accessibility Target:** (e.g., WCAG Level AA) which dictates contrast
+   ratios for states.
 
 ## Outputs
 
-1.  **State Matrix:** A comprehensive map showing Default, Hover, Focus, Active,
-    and Disabled states for every component.
-2.  **Interaction Guidelines:** Rules for transitions, timing (ms), and easing
-    functions.
-3.  **Accessibility Specification:** Explicit definitions for focus rings and
-    keyboard-only visual cues.
+1. **State Matrix:** A comprehensive map showing Default, Hover, Focus, Active,
+   and Disabled states for every component.
+2. **Interaction Guidelines:** Rules for transitions, timing (ms), and easing
+   functions.
+3. **Accessibility Specification:** Explicit definitions for focus rings and
+   keyboard-only visual cues.
 
 ## Workflow
 

@@ -37,22 +37,22 @@ that guide the eye through a page in a predictable, high-conversion sequence.
 
 To establish a visual hierarchy, you need:
 
-1.  **Content Inventory:** A list of all elements that must appear on the
-    page/screen.
-2.  **Priority Scoring:** A rank of each element's importance (e.g., Priority 1:
-    Buy Button, Priority 2: Price, Priority 3: Product Description).
-3.  **User Intent/Scan Pattern:** Is the user searching for something specific
-    (F-pattern) or being guided through a story (Z-pattern)?
-4.  **Brand Guardrails:** Existing typography scales and color palettes.
+1. **Content Inventory:** A list of all elements that must appear on the
+   page/screen.
+2. **Priority Scoring:** A rank of each element's importance (e.g., Priority 1:
+   Buy Button, Priority 2: Price, Priority 3: Product Description).
+3. **User Intent/Scan Pattern:** Is the user searching for something specific
+   (F-pattern) or being guided through a story (Z-pattern)?
+4. **Brand Guardrails:** Existing typography scales and color palettes.
 
 ## Outputs
 
-1.  **Priority Map:** A document or wireframe highlighting the levels of
-    hierarchy (Level 1, Level 2, Level 3).
-2.  **Visual Weight Specifications:** Rules for how each level is treated (e.g.,
-    "Level 1 uses H1 + Primary Color + 48px margin").
-3.  **Implementation Rules:** CSS-specific guidance on font weights, layering
-    (z-index), and spacing.
+1. **Priority Map:** A document or wireframe highlighting the levels of
+   hierarchy (Level 1, Level 2, Level 3).
+2. **Visual Weight Specifications:** Rules for how each level is treated (e.g.,
+   "Level 1 uses H1 + Primary Color + 48px margin").
+3. **Implementation Rules:** CSS-specific guidance on font weights, layering
+   (z-index), and spacing.
 
 ## Workflow
 

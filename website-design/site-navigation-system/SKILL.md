@@ -36,25 +36,25 @@ with clarity, maintaining accessibility and visual hierarchy.
 
 ## Inputs
 
-1.  **Information Architecture (IA):** A sitemap or list of pages categorized by
-    hierarchy.
-2.  **User Personas & Goals:** What are the most frequent tasks users need to
-    perform?
-3.  **Content Priority:** Which links are "Primary" (Global), "Secondary"
-    (Contextual), or "Utility" (Tools/Account)?
-4.  **Device Constraints:** Target breakpoints and touch vs. mouse interaction
-    requirements.
+1. **Information Architecture (IA):** A sitemap or list of pages categorized by
+   hierarchy.
+2. **User Personas & Goals:** What are the most frequent tasks users need to
+   perform?
+3. **Content Priority:** Which links are "Primary" (Global), "Secondary"
+   (Contextual), or "Utility" (Tools/Account)?
+4. **Device Constraints:** Target breakpoints and touch vs. mouse interaction
+   requirements.
 
 ## Outputs
 
-1.  **Navigation Map:** A structural guide for Header, Footer, and Sub-nav
-    elements.
-2.  **Responsive Strategy:** Definitions for how navigation adapts from Desktop
-    to Mobile.
-3.  **Interaction Spec:** Behavior for dropdowns, active states, and focus
-    management.
-4.  **Accessibility Landmarks:** Defined roles and labels for screen reader
-    navigation.
+1. **Navigation Map:** A structural guide for Header, Footer, and Sub-nav
+   elements.
+2. **Responsive Strategy:** Definitions for how navigation adapts from Desktop
+   to Mobile.
+3. **Interaction Spec:** Behavior for dropdowns, active states, and focus
+   management.
+4. **Accessibility Landmarks:** Defined roles and labels for screen reader
+   navigation.
 
 ## Workflow
 

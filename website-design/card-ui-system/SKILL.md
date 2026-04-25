@@ -41,29 +41,29 @@ clear intent.
 
 ## Inputs
 
-1.  **Content Anatomy:** A list of required elements (e.g., Image, Title,
-    Category, Price, Description, CTA).
-2.  **Interaction Intent:** Is the entire card clickable, or are there specific
-    action targets?
-3.  **Parent Context:** Where will the card live? (e.g., 3-column grid,
-    sidebar, horizontal scroller?)
-4.  **Content Variance:** What is the minimum and maximum amount of text
-    expected for titles and descriptions?
-5.  **Existing Systems:** Fluid spacing, typography scales, and color palettes
-    from the parent design system.
+1. **Content Anatomy:** A list of required elements (e.g., Image, Title,
+   Category, Price, Description, CTA).
+2. **Interaction Intent:** Is the entire card clickable, or are there specific
+   action targets?
+3. **Parent Context:** Where will the card live? (e.g., 3-column grid,
+   sidebar, horizontal scroller?)
+4. **Content Variance:** What is the minimum and maximum amount of text
+   expected for titles and descriptions?
+5. **Existing Systems:** Fluid spacing, typography scales, and color palettes
+   from the parent design system.
 
 ## Outputs
 
-1.  **Card Anatomy Spec:** Defined regions (Header, Media, Body, Footer) and
-    their internal spacing.
-2.  **Card Blueprint:** A structural definition of the card's internal layout
-    and layers.
-3.  **Responsive Variants:** Rules for how the card adapts (e.g., switching from
-    vertical to horizontal on mobile).
-4.  **Interaction Spec:** Defined states (Hover, Focus, Active) and clickable
-    area definitions.
-5.  **Accessibility Map:** Guidance on heading hierarchy and keyboard interaction
-    patterns.
+1. **Card Anatomy Spec:** Defined regions (Header, Media, Body, Footer) and
+   their internal spacing.
+2. **Card Blueprint:** A structural definition of the card's internal layout
+   and layers.
+3. **Responsive Variants:** Rules for how the card adapts (e.g., switching from
+   vertical to horizontal on mobile).
+4. **Interaction Spec:** Defined states (Hover, Focus, Active) and clickable
+   area definitions.
+5. **Accessibility Map:** Guidance on heading hierarchy and keyboard interaction
+   patterns.
 
 ## Workflow
 
@@ -71,12 +71,12 @@ clear intent.
 
 Every card should have three clear points of hierarchy to ensure scan-ability:
 
-1.  **The Anchor (Visual):** A high-quality image or icon that provides
-    immediate recognition. Define the aspect ratio for images (e.g., 16:9, 1:1).
-2.  **The Context (Content):** The title and core metadata (e.g., Price, Date,
-    Category).
-3.  **The Target (Action):** A clear primary action (e.g., "Add to Cart",
-    "Read More").
+1. **The Anchor (Visual):** A high-quality image or icon that provides
+   immediate recognition. Define the aspect ratio for images (e.g., 16:9, 1:1).
+2. **The Context (Content):** The title and core metadata (e.g., Price, Date,
+   Category).
+3. **The Target (Action):** A clear primary action (e.g., "Add to Cart",
+   "Read More").
 
 Map out the full internal hierarchy: **Header** (meta-info like tags/dates),
 **Media Area**, **Content/Body** (title + description), and **Footer/Actions**
