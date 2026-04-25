@@ -1,0 +1,92 @@
+/*
+  Skeleton Screen Base Utility Styles
+  Use these variables and classes to build consistent placeholder components.
+*/
+
+:root {
+  --sk-base: #eeeeee;
+  --sk-highlight: rgba(255, 255, 255, 0.6);
+  --sk-speed: 1.8s;
+}
+
+/* 1. Base Bone Style */
+.sk-bone {
+  background-color: var(--sk-base);
+  position: relative;
+  overflow: hidden;
+  display: block;
+  border-radius: 4px;
+}
+
+/* 2. Shimmer Animation */
+.sk-bone::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    var(--sk-highlight) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  animation: sk-shimmer var(--sk-speed) infinite linear;
+  transform: translateX(-100%);
+}
+
+@keyframes sk-shimmer {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+/* 3. Common Shape Variants */
+.sk-circle {
+  border-radius: 50%;
+}
+
+.sk-text {
+  height: 0.8em;
+  margin-bottom: 0.5em;
+  width: 100%;
+}
+
+.sk-text-short {
+  width: 40%;
+}
+
+.sk-title {
+  height: 1.2em;
+  margin-bottom: 0.8em;
+  width: 70%;
+}
+
+/* 4. Layout Constraints (CLS Prevention) */
+.sk-rect {
+  width: 100%;
+}
+
+/* Use aspect-ratio to match final image/video containers */
+.sk-aspect-video {
+  aspect-ratio: 16 / 9;
+}
+.sk-aspect-square {
+  aspect-ratio: 1 / 1;
+}
+.sk-aspect-photo {
+  aspect-ratio: 4 / 3;
+}
+
+/* 5. Accessibility & Interaction */
+[aria-busy='true'] .sk-bone {
+  cursor: wait;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sk-bone::after {
+    animation: none;
+    display: none;
+  }
+}
