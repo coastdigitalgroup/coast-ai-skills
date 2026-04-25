@@ -1,140 +1,139 @@
 ---
 name: product-listing-page-optimization
 description:
-  Audit and optimize Product Listing Pages (PLPs) and category pages to improve
-  product discovery and click-through rates (CTR) to product pages. Trigger this
-  skill when users are "pogo-sticking" or when filter engagement is low.
+  Audit and optimize e-commerce Product Listing Pages (PLPs) and category pages
+  to reduce discovery friction, improve product-to-PDP click-through rates, and
+  maximize Add-to-Cart (ATC) from the listing. Trigger this skill when category
+  pages have high bounce rates or when users struggle to find specific products
+  within a large catalog.
 ---
 
-# Product Listing Page Optimization
+# Product Listing Page (PLP) Optimization
 
 ## Purpose
 
 The Product Listing Page (PLP) Optimization skill provides a systematic
-framework for improving the "Discovery Hub" of an e-commerce site. It focuses on
-reducing the interaction cost of finding the right product through optimized
-faceted search, effective information density on product cards, and smart
-sorting strategies. By helping users find what they want faster, this skill
-increases CTR to Product Detail Pages (PDPs) and reduces bounce rates.
+framework for refining the middle of the e-commerce funnel. While the homepage
+sets the brand and the Product Detail Page (PDP) closes the sale, the PLP is the
+"discovery hub." It focuses on reducing "Interaction Cost" by making filtering,
+sorting, and product comparison effortless. By optimizing information density
+and navigation, this skill directly improves product findability and overall
+conversion rates.
 
 ## Use Cases
 
-- E-commerce sites with large catalogs where users struggle to navigate results.
-- Category pages with high bounce rates or low engagement with filters.
-- Improving mobile discovery where screen real estate is limited.
-- Reducing "Pogo-sticking" (users clicking a product then immediately returning
-  to the list).
+- Category pages with high bounce rates or low average time-on-page.
+- Large catalogs where users are overwhelmed by choice (Choice Paralysis).
+- Search results pages with low click-through rates (CTR) to products.
+- Mobile commerce experiences where vertical scrolling is the primary discovery
+  method.
 
 ## When NOT to Use
 
-- **Single-Product Sites:** If there is only one primary product, focus on
-  `product-page-optimization`.
-- **Checkout Flows:** Once the user has selected a product, use
+- **Product Detail Pages (PDPs):** These focus on individual product conversion.
+  Use `product-page-optimization`.
+- **Checkout Flows:** Once the intent to buy is established, use
   `checkout-flow-optimization`.
-- **Pure Lead Gen:** For sites without a product catalog, use
-  `landing-page-content-hierarchy`.
+- **Single-Product Sites:** If you only sell one thing, you don't need a PLP.
+- **Brand Story Pages:** Pages focused on "About Us" or "Our Mission" where
+  product discovery is not the primary goal.
 
 ## Inputs
 
-1. **Catalog Data:** Number of products per category and available attributes
-   (facets).
-2. **Analytics:** PLP-to-PDP Click-Through Rate (CTR), filter usage rates, and
-   pogo-sticking metrics.
-3. **User Behavior:** Heatmaps showing interaction with filters vs. product
-   cards.
-4. **Current Sorting Logic:** Default sort orders and how they are determined.
+1. **Category Analytics:** Bounce rate, PDP click-through rate (CTR), and filter
+   usage data.
+2. **Catalog Metadata:** Available attributes for filtering (size, color, price,
+   specs).
+3. **User Intent Data:** Top search terms and common "wayfinding" questions from
+   support.
+4. **Current Mobile vs. Desktop Split:** How many users are browsing on small
+   screens?
 
 ## Outputs
 
-1. **PLP Friction Audit:** Identification of discovery barriers, such as
-   overwhelming filters or "information-thin" cards.
-2. **Faceted Search Specification:** Optimized filter hierarchy and interaction
-   design (e.g., the "3-Filter Rule").
-3. **Product Card Hierarchy:** Defined data points for cards to reduce the need
-   for "pogo-sticking."
-4. **Mobile Discovery Plan:** Tailored layout and filter patterns for small
-   screens.
+1. **PLP Friction Audit:** Identification of technical and cognitive barriers to
+   finding products.
+2. **Optimized Filter & Sort Strategy:** A logical hierarchy of facets and
+   sorting options.
+3. **Product Card Design Guidance:** Revised information architecture for the
+   individual grid items.
+4. **Navigation & Pagination Strategy:** Recommendations for "Load More,"
+   Infinite Scroll, or Pagination.
 
 ## Workflow
 
-### 1. The Pogo-Sticking Audit
+### 1. Audit the "Discovery Path"
 
-Analyze the "bounce back" behavior from PDPs.
+Measure how many actions a user must take to find a specific product.
 
-- **Heuristic:** If users return to the PLP within 5 seconds of clicking a
-  product, the product card likely lacks critical information (e.g., price,
-  available sizes, or a clear usage context).
-- **Action:** Identify the "missing link" and move that data point from the PDP
-  up to the PLP product card.
+- **The 3-Click Rule:** Can a user find a relevant product within 3 clicks from
+  the entry point?
+- **Filter Visibility:** Are filters hidden behind a "Filter" button, or are the
+  most important ones (Price, Size, Rating) visible immediately?
+- **Zero Results Path:** What happens when a user filters too deeply? Is there a
+  "Clear All" or "You might also like" fallback?
 
-### 2. Faceted Search Optimization
+### 2. Optimize Choice Architecture (Filtering & Sorting)
 
-Reduce choice paralysis by organizing filters effectively.
+- **The "High-Intent" Facets:** Place the filters that matter most (e.g., "Size"
+  for apparel, "Compatibility" for tech) at the very top.
+- **Faceted Search:** Ensure filters update the results in real-time (AJAX)
+  without a full page reload.
+- **Smart Sorting:** Default to "Best Sellers" or "Top Rated" rather than
+  alphabetical. Include a "New Arrivals" sort to reward repeat visitors.
 
-- **The 3-Filter Rule:** On desktop, expand only the top 3 most used/important
-  filter categories by default. Collapse the rest to keep the UI clean.
-- **Dynamic Facets:** Show the number of results for each filter option (e.g.,
-  "Blue (12)"). Hide or gray out options with zero results.
-- **Visual Filters:** Use color swatches or icons for visual attributes (like
-  color or shape) instead of plain text.
+### 3. Refine Product Card Information Density
 
-### 3. Information Density & Visual Scent
+Balance visual appeal with the data needed to make a "click" decision.
 
-Optimize the product card to facilitate a "buying decision" from the list.
+- **Essential Data:** Title, Price, Star Rating, and "Hero" Image.
+- **Decision Triggers:** Show "Low Stock" badges, "Sustainable" labels, or
+  variant swatches (color/size) directly on the card.
+- **Secondary Actions:** Include a "Quick Add" or "Quick View" button for
+  standardized products to reduce the path to conversion.
 
-- **Information Balance:** Ensure cards include: High-quality image, Brand/Name,
-  Price, Star Rating, and "Visual Scent" (e.g., "Available in 4 colors").
-- **Secondary Actions:** Consider "Quick Add" or "Quick View" for low-complexity
-  items to speed up the funnel.
-- **Grid Ratio:** Balance image size with text. If images are the primary driver
-  (fashion), use larger images; if specs matter (tools), prioritize text.
+### 4. Optimize for Mobile Discovery
 
-### 4. Mobile Discovery Patterns
+- **Sticky Filters:** Ensure the "Filter & Sort" bar remains accessible as the
+  user scrolls.
+- **Image Aspect Ratios:** Use consistent aspect ratios (e.g., 4:5 or 1:1) to
+  prevent "jumpy" layouts.
+- **Tap Targets:** Ensure variant swatches and "Add to Cart" buttons are at
+  least 44x44px.
 
-Adapt for the "Thumb-Driven" experience.
+### 5. Review Against Decision Rules
 
-- **Filter Drawer:** Use a persistent "Filter & Sort" button that opens a
-  full-screen drawer. Accordion-style filters at the top of the list push
-  content too far down.
-- **Two-Column Grid:** For most retail, a two-column grid provides the best
-  balance between image clarity and scannability.
-- **Sticky Actions:** Keep the "Sort/Filter" trigger accessible during scroll.
-
-### 5. Sorting & Social Proof
-
-- **Default Sorting:** Avoid "Alphabetical" or "Newest" as defaults. Use "Best
-  Selling" or "Highly Rated" to lead with social proof.
-- **Smart Labels:** Use "Best Seller," "Sale," or "New" badges on cards to
-  provide additional discovery cues.
+Verify the proposed changes against the PLP growth heuristics.
 
 ## Decision Rules
 
-- **The 3-Filter Rule:** Never auto-expand more than 3 filter categories on
-  initial page load.
-- **Pogo-Sticking Threshold:** If pogo-sticking (return < 5s) is > 20%, the
-  product cards are "under-informed."
-- **Mobile First Filters:** Mobile filters MUST be in a modal or drawer to
-  preserve vertical space for products.
-- **The Empty State Rule:** Never show a "No Results" page without providing
-  clear "Clear All Filters" buttons or "You might also like" recommendations.
+- **The 3-Filter Rule:** On desktop, at least the top 3 most-used filter
+  categories must be expanded by default.
+- **No Dead Ends:** Never allow a filter combination to show a blank page
+  without providing a clear way to reset or view related items.
+- **The "Scannability" Priority:** Use a grid layout (usually 2-col on mobile,
+  3-4 on desktop) that allows the eye to compare prices and ratings quickly.
+- **Price Transparency:** Always show the final price (and any discounts)
+  clearly on the PLP card. Never hide the price behind a click.
 
 ## Common Failure Patterns
 
-- **The Filter Graveyard:** Too many filters that require excessive scrolling to
-  find the products.
-- **Hidden Prices:** Forcing users to click to the PDP just to see the price.
-- **Lack of "Scent":** Not showing that other colors or sizes are available,
-  leading users to assume the item doesn't meet their needs.
-- **Mobile Single-Column:** Using a single-column layout for small items,
-  creating an "infinite scroll" of death.
+- **The Hidden Filter:** Putting all discovery tools behind a single "Filter"
+  button on desktop, increasing interaction cost.
+- **Unhelpful Sorting:** Defaulting to "Price: Low to High," which often shows
+  low-value accessories or out-of-stock items first.
+- **Information Overload:** Adding too many badges (New, Sale, Top Seller,
+  Eco-friendly) to a single product card, creating visual noise.
+- **Pagination Friction:** Using standard pagination (1, 2, 3...) for large
+  catalogs on mobile instead of a "Load More" button.
 
 ## Validation Methods
 
-- **PLP-to-PDP CTR:** Measure the increase in users moving from the list to a
-  specific product.
-- **Reduction in Pogo-Sticking:** Track if users stay longer on the PDP after
-  clicking from an optimized card.
-- **Filter Interaction Rate:** Percentage of users who use at least one filter
-  to narrow their search.
-- **Average Time to PDP:** A decrease in time indicates a more efficient
-  discovery process.
+- **PDP Click-Through Rate (CTR):** (Product Clicks / PLP Views) \* 100. Target:
+  10-15% lift.
+- **Add-to-Cart (ATC) from PLP:** If using "Quick Add," measure the increase in
+  direct-to-cart conversions.
+- **Filter Engagement Rate:** Percentage of users who interact with at least one
+  filter.
+- **Search-to-Product Transition:** Measure if users find products faster via
+  search-driven PLPs.

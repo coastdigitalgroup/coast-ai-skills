@@ -1,0 +1,74 @@
+<!--
+  Accessible Accordion Boilerplate
+  - Semantic Header + Button trigger
+  - Linked ARIA attributes
+  - Region role for content panels
+-->
+<div class="accordion-group">
+  <div class="accordion-item">
+    <h3 class="accordion-heading">
+      <button
+        type="button"
+        id="accordion-button-1"
+        aria-expanded="false"
+        aria-controls="accordion-panel-1"
+        class="accordion-trigger"
+      >
+        <!-- Title text -->
+        Accordion Item 1
+        <!-- Optional Icon -->
+        <span class="icon" aria-hidden="true"></span>
+      </button>
+    </h3>
+    <div
+      id="accordion-panel-1"
+      role="region"
+      aria-labelledby="accordion-button-1"
+      class="accordion-panel"
+      hidden
+    >
+      <div class="accordion-content">
+        <!-- Panel content goes here -->
+        <p>Panel content...</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  /**
+   * Minimal logic for toggling accordion state.
+   * Handles ARIA attributes and the 'hidden' attribute for accessibility.
+   */
+  document.querySelectorAll('.accordion-trigger').forEach((button) => {
+    button.addEventListener('click', () => {
+      const isExpanded = button.getAttribute('aria-expanded') === 'true'
+      const panel = document.getElementById(
+        button.getAttribute('aria-controls')
+      )
+
+      button.setAttribute('aria-expanded', !isExpanded)
+
+      if (isExpanded) {
+        panel.setAttribute('hidden', '')
+      } else {
+        panel.removeAttribute('hidden')
+      }
+    })
+  })
+</script>
+
+<style>
+  /* Base styles for functionality */
+  .accordion-panel[hidden] {
+    display: none;
+  }
+
+  .accordion-trigger {
+    /* Ensure the trigger is clearly focusable */
+    cursor: pointer;
+  }
+
+  /* Example animation hook (optional) */
+  /* If using animation, remove the 'hidden' attribute and use CSS classes instead */
+</style>

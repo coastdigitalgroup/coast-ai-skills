@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Accessible Tabs Example</title>
+    <style>
+      body {
+        font-family:
+          system-ui,
+          -apple-system,
+          sans-serif;
+        line-height: 1.5;
+        padding: 2rem;
+        max-width: 800px;
+        margin: 0 auto;
+      }
+
+      .tabs-container {
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        overflow: hidden;
+      }
+
+      [role='tablist'] {
+        display: flex;
+        background: #f4f4f4;
+        border-bottom: 1px solid #ccc;
+      }
+
+      [role='tab'] {
+        flex: 1;
+        padding: 1rem;
+        border: none;
+        background: transparent;
+        cursor: pointer;
+        font-size: 1rem;
+        font-weight: 600;
+        color: #555;
+        transition: all 0.2s ease;
+        border-bottom: 3px solid transparent;
+      }
+
+      [role='tab']:hover {
+        background: #e9e9e9;
+      }
+
+      [role='tab']:focus {
+        outline: 3px solid #005a9c;
+        outline-offset: -3px;
+      }
+
+      [role='tab'][aria-selected='true'] {
+        background: white;
+        color: #005a9c;
+        border-bottom-color: #005a9c;
+      }
+
+      [role='tabpanel'] {
+        padding: 2rem;
+        min-height: 200px;
+      }
+
+      [role='tabpanel'][hidden] {
+        display: none;
+      }
+
+      /* Responsive adjustments */
+      @media (max-width: 600px) {
+        [role='tablist'] {
+          flex-direction: column;
+        }
+        [role='tab'] {
+          text-align: left;
+          border-bottom: none;
+          border-left: 4px solid transparent;
+        }
+        [role='tab'][aria-selected='true'] {
+          border-left-color: #005a9c;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Product Information</h1>
+
+    <div class="tabs-container">
+      <!-- The tablist contains the tabs -->
+      <div
+        role="tablist"
+        aria-label="Product Details"
+        aria-orientation="horizontal"
+      >
+        <button
+          role="tab"
+          aria-selected="true"
+          aria-controls="panel-1"
+          id="tab-1"
+          tabindex="0"
+        >
+          Features
+        </button>
+        <button
+          role="tab"
+          aria-selected="false"
+          aria-controls="panel-2"
+          id="tab-2"
+          tabindex="-1"
+        >
+          Specifications
+        </button>
+        <button
+          role="tab"
+          aria-selected="false"
+          aria-controls="panel-3"
+          id="tab-3"
+          tabindex="-1"
+        >
+          Reviews
+        </button>
+      </div>
+
+      <!-- Each panel corresponds to a tab -->
+      <div role="tabpanel" id="panel-1" aria-labelledby="tab-1" tabindex="0">
+        <h2>Core Features</h2>
+        <ul>
+          <li>Lightweight and portable design.</li>
+          <li>Water-resistant up to 50 meters.</li>
+          <li>24-hour battery life on a single charge.</li>
+          <li>Seamless integration with all your devices.</li>
+        </ul>
+      </div>
+
+      <div
+        role="tabpanel"
+        id="panel-2"
+        aria-labelledby="tab-2"
+        tabindex="0"
+        hidden
+      >
+        <h2>Technical Specifications</h2>
+        <dl>
+          <dt>Weight</dt>
+          <dd>150g</dd>
+          <dt>Dimensions</dt>
+          <dd>10cm x 5cm x 2cm</dd>
+          <dt>Material</dt>
+          <dd>Recycled Aluminum</dd>
+        </dl>
+      </div>
+
+      <div
+        role="tabpanel"
+        id="panel-3"
+        aria-labelledby="tab-3"
+        tabindex="0"
+        hidden
+      >
+        <h2>User Reviews</h2>
+        <blockquote>
+          "The best purchase I've made this year. High quality and reliable."
+          <cite>— Jane Doe</cite>
+        </blockquote>
+        <blockquote>
+          "Excellent value for money. Highly recommended."
+          <cite>— John Smith</cite>
+        </blockquote>
+      </div>
+    </div>
+
+    <script>
+      window.addEventListener('DOMContentLoaded', () => {
+        const tabs = document.querySelectorAll('[role="tab"]')
+        const tabList = document.querySelector('[role="tablist"]')
+
+        // Add click event listener to each tab
+        tabs.forEach((tab) => {
+          tab.addEventListener('click', (e) => {
+            activateTab(e.target)
+          })
+        })
+
+        // Handle keyboard navigation
+        tabList.addEventListener('keydown', (e) => {
+          const target = e.target
+          const index = Array.from(tabs).indexOf(target)
+
+          let newIndex
+          switch (e.key) {
+            case 'ArrowRight':
+              e.preventDefault()
+              newIndex = (index + 1) % tabs.length
+              tabs[newIndex].focus()
+              // Automatic activation
+              activateTab(tabs[newIndex])
+              break
+            case 'ArrowLeft':
+              e.preventDefault()
+              newIndex = (index - 1 + tabs.length) % tabs.length
+              tabs[newIndex].focus()
+              // Automatic activation
+              activateTab(tabs[newIndex])
+              break
+            case 'Home':
+              e.preventDefault()
+              tabs[0].focus()
+              activateTab(tabs[0])
+              break
+            case 'End':
+              e.preventDefault()
+              tabs[tabs.length - 1].focus()
+              activateTab(tabs[tabs.length - 1])
+              break
+          }
+        })
+
+        function activateTab(tab) {
+          const targetPanelId = tab.getAttribute('aria-controls')
+
+          // Deactivate all tabs and panels
+          tabs.forEach((t) => {
+            t.setAttribute('aria-selected', 'false')
+            t.setAttribute('tabindex', '-1')
+          })
+
+          document.querySelectorAll('[role="tabpanel"]').forEach((p) => {
+            p.setAttribute('hidden', '')
+          })
+
+          // Activate selected tab and panel
+          tab.setAttribute('aria-selected', 'true')
+          tab.setAttribute('tabindex', '0')
+          document.getElementById(targetPanelId).removeAttribute('hidden')
+        }
+      })
+    </script>
+  </body>
+</html>

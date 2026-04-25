@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Accessible Animated Accordion Example</title>
+    <style>
+      body {
+        font-family: system-ui, -apple-system, sans-serif;
+        line-height: 1.5;
+        max-width: 600px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+        background-color: #f9f9f9;
+      }
+
+      .accordion {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        overflow: hidden;
+        background: white;
+      }
+
+      .accordion-item {
+        border-bottom: 1px solid #ddd;
+      }
+
+      .accordion-item:last-child {
+        border-bottom: none;
+      }
+
+      .accordion-header {
+        margin: 0;
+      }
+
+      .accordion-trigger {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        padding: 1rem;
+        border: none;
+        background: none;
+        font-size: 1.1rem;
+        font-weight: 600;
+        text-align: left;
+        cursor: pointer;
+        color: #333;
+        transition: background-color 0.2s;
+      }
+
+      .accordion-trigger:hover,
+      .accordion-trigger:focus {
+        background-color: #f0f7ff;
+        outline: none;
+      }
+
+      .accordion-trigger:focus-visible {
+        box-shadow: inset 0 0 0 2px #0056b3;
+      }
+
+      /* Chevron icon */
+      .accordion-icon {
+        width: 1.25rem;
+        height: 1.25rem;
+        transition: transform 0.3s ease;
+      }
+
+      .accordion-trigger[aria-expanded="true"] .accordion-icon {
+        transform: rotate(180deg);
+      }
+
+      /* Animation implementation using CSS Grid trick */
+      .accordion-panel {
+        display: grid;
+        grid-template-rows: 0fr;
+        transition: grid-template-rows 0.3s ease-out;
+        visibility: hidden;
+      }
+
+      /* Selector fix: panel is sibling of H2 which contains the trigger */
+      .accordion-header:has(.accordion-trigger[aria-expanded="true"])
+        + .accordion-panel {
+        grid-template-rows: 1fr;
+        visibility: visible;
+      }
+
+      .accordion-content {
+        overflow: hidden;
+        padding: 0 1rem;
+        color: #555;
+      }
+
+      /* Inner padding for the content when expanded */
+      .accordion-header:has(.accordion-trigger[aria-expanded="true"])
+        + .accordion-panel
+        .accordion-content {
+        padding-bottom: 1rem;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Frequently Asked Questions</h1>
+
+    <div class="accordion" id="faq-accordion">
+      <div class="accordion-item">
+        <h2 class="accordion-header">
+          <button
+            type="button"
+            class="accordion-trigger"
+            id="accordion-trigger-1"
+            aria-expanded="false"
+            aria-controls="accordion-panel-1"
+          >
+            <span>What is an accessible accordion?</span>
+            <svg
+              class="accordion-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              aria-hidden="true"
+            >
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
+        </h2>
+        <div
+          class="accordion-panel"
+          id="accordion-panel-1"
+          role="region"
+          aria-labelledby="accordion-trigger-1"
+        >
+          <div class="accordion-content">
+            <p>
+              An accessible accordion is a pattern that allows users to show or
+              hide content. It uses semantic HTML and ARIA attributes to ensure
+              that screen reader users and keyboard navigators can interact with
+              it effectively.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="accordion-item">
+        <h2 class="accordion-header">
+          <button
+            type="button"
+            class="accordion-trigger"
+            id="accordion-trigger-2"
+            aria-expanded="false"
+            aria-controls="accordion-panel-2"
+          >
+            <span>How does the animation work?</span>
+            <svg
+              class="accordion-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              aria-hidden="true"
+            >
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
+        </h2>
+        <div
+          class="accordion-panel"
+          id="accordion-panel-2"
+          role="region"
+          aria-labelledby="accordion-trigger-2"
+        >
+          <div class="accordion-content">
+            <p>
+              By using <code>grid-template-rows: 0fr;</code> transitioning to
+              <code>1fr;</code>, we can smoothly animate the height of a dynamic
+              container without hardcoding a pixel value. This is more flexible
+              than using <code>max-height</code>.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      document.querySelectorAll(".accordion-trigger").forEach((trigger) => {
+        trigger.addEventListener("click", () => {
+          const isExpanded = trigger.getAttribute("aria-expanded") === "true";
+          trigger.setAttribute("aria-expanded", !isExpanded);
+        });
+      });
+    </script>
+  </body>
+</html>

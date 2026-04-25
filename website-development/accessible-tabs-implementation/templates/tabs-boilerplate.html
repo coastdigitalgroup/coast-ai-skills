@@ -1,0 +1,59 @@
+<!--
+  Accessible Tabs Boilerplate
+  Usage: Replace IDs and content as needed.
+  Requires: Accompanying JS for state management and keyboard navigation.
+-->
+<div class="tabs">
+  <div role="tablist" aria-label="[Unique Label describing the tabs]">
+    <button
+      role="tab"
+      aria-selected="true"
+      aria-controls="panel-1"
+      id="tab-1"
+      tabindex="0"
+    >
+      [Tab Label 1]
+    </button>
+    <button
+      role="tab"
+      aria-selected="false"
+      aria-controls="panel-2"
+      id="tab-2"
+      tabindex="-1"
+    >
+      [Tab Label 2]
+    </button>
+  </div>
+
+  <div role="tabpanel" id="panel-1" aria-labelledby="tab-1" tabindex="0">
+    <!-- Panel 1 Content -->
+  </div>
+
+  <div role="tabpanel" id="panel-2" aria-labelledby="tab-2" tabindex="0" hidden>
+    <!-- Panel 2 Content -->
+  </div>
+</div>
+
+<script>
+  /**
+   * Basic Tab Logic Template
+   */
+  const handleTabClick = (e) => {
+    const tab = e.currentTarget
+    const tablist = tab.parentElement
+    const tabs = tablist.querySelectorAll('[role="tab"]')
+    const panels = tablist.parentElement.querySelectorAll('[role="tabpanel"]')
+
+    tabs.forEach((t) => {
+      t.setAttribute('aria-selected', 'false')
+      t.setAttribute('tabindex', '-1')
+    })
+    panels.forEach((p) => p.setAttribute('hidden', ''))
+
+    tab.setAttribute('aria-selected', 'true')
+    tab.setAttribute('tabindex', '0')
+    document
+      .getElementById(tab.getAttribute('aria-controls'))
+      .removeAttribute('hidden')
+  }
+</script>
