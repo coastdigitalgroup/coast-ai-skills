@@ -4,7 +4,7 @@
 [![GitHub issues](https://img.shields.io/github/issues/coastdigitalgroup/coast-ai-skills)](https://github.com/coastdigitalgroup/coast-ai-skills/issues)
 [![License](https://img.shields.io/github/license/coastdigitalgroup/coast-ai-skills)](LICENSE)
 
-A portable, agent-friendly skill library served as an MCP server. Drop it into any project and AI agents across Claude Code, Cursor, Windsurf, Zed, and Continue instantly have access to structured guidance for website design, development, and growth tasks — without copying a single file.
+A portable, agent-friendly skill library served as an MCP server. Drop it into any project and AI agents across Codex, Claude Code, Cursor, Windsurf, Zed, and Continue instantly have access to structured guidance for website design, development, and growth tasks — without copying a single file.
 
 [Contributing](CONTRIBUTING.md) | [Changelog](CHANGELOG.md) | [Security](SECURITY.md)
 
@@ -51,6 +51,7 @@ Skills are never injected into context upfront. The agent fetches exactly what i
 
 | Editor | Auto-configured |
 | ------ | --------------- |
+| Codex | ✓ |
 | Claude Code | ✓ |
 | Claude Desktop (macOS + Windows) | ✓ |
 | Cursor (project + global) | ✓ |

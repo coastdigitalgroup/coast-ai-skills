@@ -18,6 +18,11 @@ the goal. If a relevant skill exists, load it with \`get_skill()\` before
 proceeding. Call \`list_skills()\` to browse all available skills by category.
 `
 
+const CODEX_MCP_SECTION = `[mcp_servers.${SERVER_NAME}]
+command = "npx"
+args = ["-y", "${PACKAGE_NAME}"]
+`
+
 // Different tools use different config shapes.
 // 'object' → { "server-name": { command, args } }   (Claude, Cursor, Windsurf, Zed)
 // 'array'  → [{ name: "server-name", command, args }] (Continue)
@@ -137,6 +142,50 @@ async function writeJson(filePath: string, data: unknown): Promise<void> {
   await writeFile(filePath, JSON.stringify(data, null, 2) + '\n', 'utf-8')
 }
 
+function upsertTomlSection(content: string, section: string, replacement: string): string {
+  const lines = content.split(/\r?\n/)
+  const start = lines.findIndex((line) => line.trim() === section)
+
+  if (start === -1) {
+    const prefix = content.trimEnd()
+    return `${prefix}${prefix ? '\n\n' : ''}${replacement}`
+  }
+
+  let end = start + 1
+  while (end < lines.length && !lines[end].trimStart().startsWith('[')) {
+    end++
+  }
+
+  const nextContent = [
+    ...lines.slice(0, start),
+    ...replacement.trimEnd().split('\n'),
+    ...lines.slice(end)
+  ].join('\n')
+
+  return nextContent.endsWith('\n') ? nextContent : `${nextContent}\n`
+}
+
+async function writeCodexConfig(): Promise<boolean> {
+  const codexConfigPath = join(homedir(), '.codex', 'config.toml')
+  const codexHomeExists = await fileExists(dirname(codexConfigPath))
+  const codexConfigExists = await fileExists(codexConfigPath)
+
+  if (!codexHomeExists && !codexConfigExists) return false
+
+  const current = codexConfigExists ? await readFile(codexConfigPath, 'utf-8') : ''
+  const next = upsertTomlSection(
+    current,
+    `[mcp_servers.${SERVER_NAME}]`,
+    CODEX_MCP_SECTION
+  )
+
+  await mkdir(dirname(codexConfigPath), { recursive: true })
+  await writeFile(codexConfigPath, next, 'utf-8')
+  console.log('  ✓  Codex')
+  console.log(`     ${codexConfigPath}\n`)
+  return true
+}
+
 function applyEntry(config: Record<string, unknown>, target: ConfigTarget): void {
   if (target.entryFormat === 'object') {
     if (
@@ -187,6 +236,10 @@ export async function install(): Promise<void> {
   const cwd = process.cwd()
   const targets = getTargets()
   let installed = 0
+
+  if (await writeCodexConfig()) {
+    installed++
+  }
 
   for (const target of targets) {
     const exists = await fileExists(target.path)

@@ -267,8 +267,9 @@ root. Editing skill content never requires a rebuild. Only changes to
 TypeScript source in `src/` require `npm run build`.
 
 The installer (`--install` flag) auto-detects supported editors on the
-machine and writes the MCP config entry to each. It also writes a `CLAUDE.md`
-instruction so agents know to search for skills before acting.
+machine and writes the MCP config entry to each, including Codex when
+`~/.codex` exists. It also writes a `CLAUDE.md` instruction so Claude agents
+know to search for skills before acting.
 
 Keep the MCP server as a thin translation layer. All execution value lives in
 the skill files, not in the server code.
