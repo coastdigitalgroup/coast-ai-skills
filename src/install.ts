@@ -2,6 +2,14 @@ import { access, mkdir, readFile, writeFile } from 'fs/promises'
 import { homedir } from 'os'
 import { dirname, join } from 'path'
 
+const PACKAGE_NAME = '@coastdigitalgroup/coastai-skills'
+const SERVER_NAME = 'coast-ai-skills'
+
+const STANDARD_ENTRY = {
+  command: 'npx',
+  args: ['-y', PACKAGE_NAME]
+}
+
 const CLAUDE_MD_BLOCK = `
 ## Skills
 
@@ -10,16 +18,17 @@ the goal. If a relevant skill exists, load it with \`get_skill()\` before
 proceeding. Call \`list_skills()\` to browse all available skills by category.
 `
 
-const MCP_ENTRY = {
-  command: 'npx',
-  args: ['-y', '@coastdigitalgroup/coastai-skills']
-}
+// Different tools use different config shapes.
+// 'object' → { "server-name": { command, args } }   (Claude, Cursor, Windsurf, Zed)
+// 'array'  → [{ name: "server-name", command, args }] (Continue)
+type EntryFormat = 'object' | 'array'
 
 interface ConfigTarget {
   label: string
   path: string
-  // Whether to create the file if it doesn't exist yet
   createIfMissing: boolean
+  configKey: string
+  entryFormat: EntryFormat
 }
 
 function getTargets(): ConfigTarget[] {
@@ -28,31 +37,81 @@ function getTargets(): ConfigTarget[] {
   const appData = process.env['APPDATA'] ?? join(home, 'AppData', 'Roaming')
 
   return [
+    // ── Anthropic ──────────────────────────────────────────────────────────
     {
       label: 'Claude Code',
       path: join(cwd, '.mcp.json'),
+      configKey: 'mcpServers',
+      entryFormat: 'object',
       createIfMissing: true
     },
     {
       label: 'Claude Desktop (macOS)',
       path: join(home, 'Library', 'Application Support', 'Claude', 'claude_desktop_config.json'),
+      configKey: 'mcpServers',
+      entryFormat: 'object',
       createIfMissing: false
     },
     {
       label: 'Claude Desktop (Windows)',
       path: join(appData, 'Claude', 'claude_desktop_config.json'),
+      configKey: 'mcpServers',
+      entryFormat: 'object',
+      createIfMissing: false
+    },
+    // ── Cursor ─────────────────────────────────────────────────────────────
+    {
+      label: 'Cursor (project)',
+      path: join(cwd, '.cursor', 'mcp.json'),
+      configKey: 'mcpServers',
+      entryFormat: 'object',
       createIfMissing: false
     },
     {
-      label: 'Cursor',
-      path: join(cwd, '.cursor', 'mcp.json'),
+      label: 'Cursor (global)',
+      path: join(home, '.cursor', 'mcp.json'),
+      configKey: 'mcpServers',
+      entryFormat: 'object',
       createIfMissing: false
     },
+    // ── Windsurf (Codeium) ─────────────────────────────────────────────────
     {
       label: 'Windsurf',
       path: join(home, '.codeium', 'windsurf', 'mcp_config.json'),
+      configKey: 'mcpServers',
+      entryFormat: 'object',
+      createIfMissing: false
+    },
+    // ── Zed ────────────────────────────────────────────────────────────────
+    // Zed uses 'context_servers' instead of 'mcpServers'
+    {
+      label: 'Zed (macOS)',
+      path: join(home, 'Library', 'Application Support', 'Zed', 'settings.json'),
+      configKey: 'context_servers',
+      entryFormat: 'object',
+      createIfMissing: false
+    },
+    {
+      label: 'Zed (Linux)',
+      path: join(home, '.config', 'zed', 'settings.json'),
+      configKey: 'context_servers',
+      entryFormat: 'object',
+      createIfMissing: false
+    },
+    // ── Continue ───────────────────────────────────────────────────────────
+    // Continue uses an array under mcpServers, not an object
+    {
+      label: 'Continue',
+      path: join(home, '.continue', 'config.json'),
+      configKey: 'mcpServers',
+      entryFormat: 'array',
       createIfMissing: false
     }
+    // ── Not yet supported ──────────────────────────────────────────────────
+    // Goose (Block)     — uses YAML config, requires yaml parser
+    // Cline             — stored inside VS Code settings.json, complex to patch
+    // GitHub Copilot    — no MCP support yet
+    // OpenAI tools      — no MCP support yet
   ]
 }
 
@@ -78,6 +137,32 @@ async function writeJson(filePath: string, data: unknown): Promise<void> {
   await writeFile(filePath, JSON.stringify(data, null, 2) + '\n', 'utf-8')
 }
 
+function applyEntry(config: Record<string, unknown>, target: ConfigTarget): void {
+  if (target.entryFormat === 'object') {
+    if (
+      !config[target.configKey] ||
+      typeof config[target.configKey] !== 'object' ||
+      Array.isArray(config[target.configKey])
+    ) {
+      config[target.configKey] = {}
+    }
+    ;(config[target.configKey] as Record<string, unknown>)[SERVER_NAME] = STANDARD_ENTRY
+  } else {
+    // array format — e.g. Continue's mcpServers
+    if (!Array.isArray(config[target.configKey])) {
+      config[target.configKey] = []
+    }
+    const arr = config[target.configKey] as Array<Record<string, unknown>>
+    const idx = arr.findIndex((e) => e['name'] === SERVER_NAME)
+    const entry = { name: SERVER_NAME, ...STANDARD_ENTRY }
+    if (idx >= 0) {
+      arr[idx] = entry
+    } else {
+      arr.push(entry)
+    }
+  }
+}
+
 async function writeClaudeMd(cwd: string): Promise<void> {
   const claudeMdPath = join(cwd, 'CLAUDE.md')
   const exists = await fileExists(claudeMdPath)
@@ -93,7 +178,7 @@ async function writeClaudeMd(cwd: string): Promise<void> {
     await writeFile(claudeMdPath, CLAUDE_MD_BLOCK.trimStart(), 'utf-8')
   }
 
-  console.log(`  ✓  CLAUDE.md — skills instruction written\n`)
+  console.log('  ✓  CLAUDE.md — skills instruction written\n')
 }
 
 export async function install(): Promise<void> {
@@ -105,16 +190,10 @@ export async function install(): Promise<void> {
 
   for (const target of targets) {
     const exists = await fileExists(target.path)
-
     if (!exists && !target.createIfMissing) continue
 
     const config = await readJson(target.path)
-
-    if (!config['mcpServers'] || typeof config['mcpServers'] !== 'object') {
-      config['mcpServers'] = {}
-    }
-
-    ;(config['mcpServers'] as Record<string, unknown>)['coast-ai-skills'] = MCP_ENTRY
+    applyEntry(config, target)
 
     try {
       await writeJson(target.path, config)
@@ -133,12 +212,14 @@ export async function install(): Promise<void> {
     console.log('  Created .mcp.json for Claude Code in the current directory.\n')
     console.log('  To add to other editors manually, insert this into their MCP config:\n')
     console.log(
-      `  "coast-ai-skills": ${JSON.stringify(MCP_ENTRY, null, 4).replace(/\n/g, '\n  ')}\n`
+      `  "coast-ai-skills": ${JSON.stringify(STANDARD_ENTRY, null, 4).replace(/\n/g, '\n  ')}\n`
     )
   } else {
     const word = installed === 1 ? 'target' : 'targets'
     console.log(`Installed to ${installed} ${word}. Restart your editor to activate.\n`)
   }
 
-  console.log('Usage: agents can now call list_skills() and get_skill(name) via MCP.')
+  console.log(
+    'Agents can now call search_skills(), list_skills(), and get_skill() via MCP.'
+  )
 }
