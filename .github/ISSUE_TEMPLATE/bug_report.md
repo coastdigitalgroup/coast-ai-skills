@@ -1,22 +1,37 @@
 ---
 name: Bug report
-about: Create a report to help us improve
+about: Report a problem with the MCP server, installer, or a skill
 labels: bug
 ---
 
 ## Description
 
-## Steps to Reproduce
+<!-- What went wrong? Be specific. -->
 
-## Expected Behavior
+## Steps to reproduce
 
-## Actual Behavior
+1.
+2.
+3.
 
-## Screenshots or Logs
+## Expected behavior
+
+## Actual behavior
 
 ## Environment
 
-- Version:
+- Package version (`npm list @coastdigitalgroup/coastai-skills`):
+- Node version (`node --version`):
 - OS:
+- Editor / MCP client (Claude Code, Cursor, Windsurf, Zed, Continue):
 
-## Additional Context
+## Is this a skill content issue or a server/installer issue?
+
+- [ ] Skill content (wrong guidance, missing steps, incorrect output)
+- [ ] MCP server (tool not responding, wrong results from search/list/get)
+- [ ] Installer (`--install` failed or wrote incorrect config)
+- [ ] Other
+
+## Logs or screenshots
+
+## Additional context

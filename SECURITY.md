@@ -1,89 +1,67 @@
 # Security Policy
 
-## Supported Versions
+## Supported versions
 
-We aim to support the latest published version of CoastAi Skills. Security updates are applied to the current major version only.
+Security updates are applied to the current major version only.
 
-| Version | Supported          |
-| ------- | ------------------ |
-| 1.x.x   | :white_check_mark: |
-| < 1.0   | :x:                |
+| Version | Supported |
+| ------- | --------- |
+| 0.x.x (current) | ✓ |
 
-**Please ensure you are using the most recent version** of this repository.
+Always use the most recent published version of `@coastdigitalgroup/coastai-skills`.
 
-Older releases may not receive security fixes.
+## Reporting a vulnerability
 
-## Reporting a Vulnerability
+Do not open a public issue for security vulnerabilities.
 
-If you discover a security vulnerability, please **DO NOT** open a public issue. Security issues should be reported privately to protect users.
+**Preferred:** Use [GitHub Security Advisories](https://github.com/coastdigitalgroup/coast-ai-skills/security/advisories/new) to report privately.
 
-### How to Report
+**Alternative:** Email the maintainers or send a direct message through GitHub.
 
-**Preferred method**: Use [GitHub Security Advisories](https://github.com/coastdigitalgroup/coast-ai-skills/security/advisories/new) to privately report vulnerabilities
+Include as much detail as possible:
 
-**Alternative methods**:
+1. Description of the vulnerability and potential impact
+2. Steps to reproduce or proof of concept
+3. Affected versions (if known)
+4. Suggested mitigation (if you have one)
 
-- Email the maintainers at [security contact - see repository]
-- Direct message maintainers through GitHub
+### Response timeline
 
-### What to Include
+- **Acknowledgment:** within 48 hours
+- **Initial assessment:** within 5 business days
+- **Resolution:** coordinated with you before public disclosure
+- **Credit:** you will be credited in the advisory unless you prefer otherwise
 
-Please provide as much detail as possible to help us reproduce and assess impact:
+## Security best practices
 
-1. **Description of the vulnerability** and potential impact
-2. **Steps to reproduce** or proof-of-concept
-3. **Affected versions** (if known)
-4. **Potential attack scenarios**
-5. **Suggested mitigation** (if you have ideas)
+When using this package:
 
-### What to Expect
+- **Do not commit secrets** — no API keys, credentials, or tokens inside skill files
+- **Review skill content** before sharing outside the organization — skill files may contain internal process context
+- **Keep the package updated** — run `npm update @coastdigitalgroup/coastai-skills` periodically
 
-1. **Acknowledgment**: We will acknowledge receipt within **48 hours**
-2. **Assessment**: We will investigate and provide an initial assessment within **5 business days**
-3. **Updates**: We will keep you informed of the fix status throughout the process
-4. **Resolution**: We will work on a fix and coordinate disclosure timing with you
-5. **Credit**: We will credit you in the security advisory (unless you prefer to remain anonymous)
+### MCP server considerations
 
-## Responsible Disclosure
+The MCP server runs as a local process on the user's machine via stdio transport. It does not make network requests, does not store data, and does not expose any ports. Skills are read from the installed npm package at runtime.
 
-We appreciate responsible disclosure and will work with you to:
-
-- Understand the scope and severity of the issue
-- Develop and test a fix
-- Coordinate public disclosure timing
-- Credit your contribution (if desired)
-
-**Please allow us reasonable time to address the issue before public disclosure.**
-
-## Security Best Practices
-
-When using CoastAi Skills:
-
-1. **Keep the repository private** if it contains proprietary Skill instructions or sensitive system prompts
-2. **Review access permissions** regularly for collaborators
-3. **Avoid committing secrets** — no API keys, passwords, or credentials inside Skill files
-4. **Review Skill content** before sharing outside the organization — Skill files may contain internal persona and process context
+- The server has read access to the skill files bundled in the npm package
+- It does not read from the user's project files or filesystem beyond what is explicitly requested
+- No telemetry or analytics are collected
 
 ## Scope
 
-This security policy covers:
+This policy covers:
 
-- The Skills repository structure and Skill files
-- Repository access and permissions
-- Skill instruction content and embedded persona data
+- The npm package `@coastdigitalgroup/coastai-skills` and its MCP server
+- Skill file content and structure
+- The `--install` command and config file modifications
 
-This policy does **NOT** cover:
+This policy does not cover:
 
-- Vulnerabilities in Google Gemini or the Skills platform (report to Google)
-- Third-party tools or integrations consuming these Skill files
-- Underlying infrastructure outside this repository
+- Vulnerabilities in MCP client applications (Claude Code, Cursor, etc.)
+- Third-party editors or tools consuming the MCP server
+- Infrastructure outside this repository
 
 ## Contact
 
-For security-related questions that aren't vulnerabilities:
-
-- Open a [GitHub Discussion](https://github.com/coastdigitalgroup/coast-ai-skills/discussions)
-- Tag maintainers in relevant issues
-
-Thank you for helping keep this Skill library and our community safe!
-
+For non-vulnerability security questions, open a [GitHub Discussion](https://github.com/coastdigitalgroup/coast-ai-skills/discussions).

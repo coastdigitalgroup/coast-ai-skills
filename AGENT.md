@@ -119,7 +119,7 @@ names when a standard folder already fits.
 
 ## How to Decide Category vs Skill vs Support File
 
-### Make something a category when:
+### Make something a category when
 
 - it groups multiple related skills
 - it improves browsing and discovery
@@ -132,7 +132,7 @@ Examples:
 - `product`
 - `growth`
 
-### Make something a skill when:
+### Make something a skill when
 
 - it is a standalone reusable capability
 - it can be copied and used on its own
@@ -146,7 +146,7 @@ Examples:
 - `incident-handoff`
 - `spec-writing`
 
-### Keep something as support material inside a skill when:
+### Keep something as support material inside a skill when
 
 - it is just a checklist, example, reference, script, or template
 - it cannot stand well on its own
@@ -251,15 +251,40 @@ Avoid vague names like:
 
 ---
 
+## MCP Server
+
+This repository includes an MCP server in `src/` that serves skills to AI
+agents via the Model Context Protocol.
+
+The server exposes three tools:
+
+- `search_skills(query)` — keyword search across skill names and descriptions
+- `list_skills(category?)` — lists all skills with dynamic category discovery
+- `get_skill(name)` — returns full `SKILL.md` content by skill name
+
+The MCP server reads skills directly from the category folders at the repo
+root. Editing skill content never requires a rebuild. Only changes to
+TypeScript source in `src/` require `npm run build`.
+
+The installer (`--install` flag) auto-detects supported editors on the
+machine and writes the MCP config entry to each. It also writes a `CLAUDE.md`
+instruction so agents know to search for skills before acting.
+
+Keep the MCP server as a thin translation layer. All execution value lives in
+the skill files, not in the server code.
+
+---
+
 ## Platform Agnostic Guidance
 
 This repository is intentionally platform-agnostic.
 
-Some runtimes may expect skills in different install paths, but that is an
-integration concern, not a repository design concern. The unit of portability
-here is the skill folder.
+The MCP server is the integration layer for agent runtimes. The skill folders
+remain the portable unit — they can still be copied into any environment that
+does not use MCP.
 
-Design each skill so it can be copied into another system with minimal cleanup.
+Design each skill so it can be used both through the MCP server and as a
+standalone folder copied into another system.
 
 Do not assume:
 

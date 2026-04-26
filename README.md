@@ -1,205 +1,170 @@
-# coast-ai-skills
+# @coastdigitalgroup/coastai-skills
 
+[![npm](https://img.shields.io/npm/v/@coastdigitalgroup/coastai-skills)](https://www.npmjs.com/package/@coastdigitalgroup/coastai-skills)
 [![GitHub issues](https://img.shields.io/github/issues/coastdigitalgroup/coast-ai-skills)](https://github.com/coastdigitalgroup/coast-ai-skills/issues)
-[![GitHub pulls](https://img.shields.io/github/issues-pr/coastdigitalgroup/coast-ai-skills)](https://github.com/coastdigitalgroup/coast-ai-skills/pulls)
 [![License](https://img.shields.io/github/license/coastdigitalgroup/coast-ai-skills)](LICENSE)
 
-`coast-ai-skills` is a portable, agent-friendly skill library for reusable execution guidance.
-It is designed for skills that can be copied into other repositories, local skill directories, and different agent runtimes with minimal modification.
+A portable, agent-friendly skill library served as an MCP server. Drop it into any project and AI agents across Claude Code, Cursor, Windsurf, Zed, and Continue instantly have access to structured guidance for website design, development, and growth tasks — without copying a single file.
 
-This repository is maintained as a transferable skill library, not an app repo, a docs dump, or a collection of shallow prompts. The unit of portability here is the skill folder, and every contribution should improve the library as a reusable execution asset.
+[Contributing](CONTRIBUTING.md) | [Changelog](CHANGELOG.md) | [Security](SECURITY.md)
 
-[Contributing](CONTRIBUTING.md) | [Changelog](CHANGELOG.md) | [Security Policy](SECURITY.md)
+---
 
-## Key capabilities
+## Install
 
-- Stores complete, reusable skills that can move between agent systems with minimal cleanup
-- Uses a predictable category-first structure that stays easy to browse and copy
-- Standardizes support folders for examples, references, templates, assets, and scripts
-- Keeps the repository platform-agnostic instead of optimizing around one vendor or runtime
-- Sets a quality bar for skill completeness, scope, and execution usefulness
+Run once in any project directory:
 
-## Repository structure
+```bash
+npx @coastdigitalgroup/coastai-skills --install
+```
 
-The repository uses this layout:
+The installer auto-detects every supported editor on the machine, writes the MCP server entry into each config, and adds a `CLAUDE.md` instruction so agents know to use skills automatically. Restart your editor and it is live.
+
+---
+
+## How it works
+
+The MCP server exposes three tools agents call on demand:
+
+| Tool | What it does |
+| ---- | ------------ |
+| `search_skills(query)` | Finds relevant skills by keyword — use this first |
+| `list_skills(category?)` | Browses all skills, optionally filtered by category |
+| `get_skill(name)` | Loads the full skill content by exact name |
+
+Typical agent flow:
+
+```text
+User:  "Help me build an accessible modal dialog"
+Agent: search_skills("modal dialog accessible")
+       → accessible-modal-dialog (website-development)
+Agent: get_skill("accessible-modal-dialog")
+       → full workflow, decision rules, validation steps
+Agent: executes with skill guidance
+```
+
+Skills are never injected into context upfront. The agent fetches exactly what it needs, when it needs it.
+
+---
+
+## Supported editors
+
+| Editor | Auto-configured |
+| ------ | --------------- |
+| Claude Code | ✓ |
+| Claude Desktop (macOS + Windows) | ✓ |
+| Cursor (project + global) | ✓ |
+| Windsurf | ✓ |
+| Zed (macOS + Linux) | ✓ |
+| Continue | ✓ |
+
+---
+
+## Available skills
+
+### website-design
+
+| Skill | Description |
+| ----- | ----------- |
+| `accessible-color-system` | Design a systematic color palette that meets WCAG 2.1 contrast requirements |
+| `card-ui-system` | Design modular content cards with consistent hierarchy and responsive layouts |
+| `fluid-spacing-system` | Build a fluid spacing scale using CSS `clamp()` for consistent white space across viewports |
+| `fluid-typography-system` | Build a typographic scale that scales smoothly across viewports using CSS `clamp()` |
+| `interactive-state-system` | Define hover, focus, active, and disabled states for all interactive elements |
+| `responsive-grid-system` | Design a flexible column-based layout system that scales across devices |
+| `site-navigation-system` | Design a structured, accessible, and responsive navigation framework |
+| `visual-hierarchy-system` | Establish a clear order of importance using scale, color, contrast, and spacing |
+
+### website-development
+
+| Skill | Description |
+| ----- | ----------- |
+| `accessible-accordion-implementation` | Implement accessible, animatable accordion and disclosure components |
+| `accessible-main-navigation` | Build accessible, responsive main navigation with skip links and keyboard support |
+| `accessible-modal-dialog` | Implement accessible modal dialogs with focus trapping and keyboard interactions |
+| `accessible-responsive-navigation` | Build fully accessible responsive navigation systems |
+| `accessible-tabs-implementation` | Implement accessible tabbed interfaces using WAI-ARIA roles and keyboard patterns |
+| `css-stacking-contexts` | Debug and manage CSS layering with stacking contexts and z-index |
+| `dark-mode-implementation` | Implement a robust dark mode system that prevents flash and respects system preferences |
+| `responsive-data-tables` | Make data tables readable and accessible across all screen sizes |
+| `responsive-images` | Implement responsive images using `srcset`, `sizes`, and `<picture>` |
+| `responsive-navigation-implementation` | Build navigation that transitions between mobile and desktop layouts accessibly |
+| `robust-form-implementation` | Build accessible, resilient web forms using native APIs and ARIA best practices |
+| `skeleton-screen-implementation` | Implement accessible skeleton screens to improve perceived performance |
+| `web-font-optimization` | Optimize web font loading to prevent layout shifts and invisible text |
+
+### website-growth
+
+| Skill | Description |
+| ----- | ----------- |
+| `checkout-flow-optimization` | Audit and optimize the checkout process to reduce abandonment |
+| `hero-section-optimization` | Audit and optimize hero sections for clarity and conversion |
+| `landing-page-content-hierarchy` | Optimize the logical flow and information architecture of landing pages |
+| `lead-capture-form-optimization` | Reduce friction and increase conversion rates on lead generation forms |
+| `message-match-optimization` | Align traffic sources with destination landing pages to reduce bounce rates |
+| `pricing-page-optimization` | Optimize pricing pages to reduce choice paralysis and improve conversion |
+| `product-listing-page-optimization` | Reduce discovery friction on e-commerce category and listing pages |
+| `product-page-optimization` | Optimize product detail pages to improve add-to-cart rates |
+| `social-proof-optimization` | Audit and optimize trust signals to build credibility and reduce user anxiety |
+
+---
+
+## Adding skills
+
+The library is domain-agnostic. Add any topic by dropping a folder into a category directory:
 
 ```text
 /<category>/<skill-name>/SKILL.md
 ```
 
-Each skill folder is the portable unit. Keep the structure shallow, predictable, and easy to lift into another environment.
+Each `SKILL.md` requires a frontmatter block. The `description` is what agents use to decide if a skill is relevant:
 
-Example:
-
-```text
-/website-development/accessible-modal-dialog/SKILL.md
-/website-design/fluid-typography-system/SKILL.md
-/website-growth/hero-section-optimization/SKILL.md
+```markdown
+---
+name: your-skill-name
+description:
+  One or two sentences explaining what this skill does and when to trigger it.
+  Write it as if the agent is reading it to decide whether to load the skill.
+---
 ```
 
-Repository rules:
+The MCP server discovers new skills automatically — no code changes or rebuilds needed.
 
-- Level 1 is the major category
-- Level 2 is the portable skill unit
-- Each skill must contain a `SKILL.md`
-- Do not add an extra top-level `skills/` folder
-- Do not create unnecessary nested skill trees
+Optional support folders alongside `SKILL.md`:
 
-## Available skills
+- `examples/` — worked examples
+- `templates/` — reusable files
+- `references/` — detailed reference material
+- `assets/` — images or other static files
+- `scripts/` — deterministic helper scripts
 
-Current categories and skills in this repository:
-
-- `website-development/accessible-modal-dialog`
-  Implements and audits accessible modal dialogs with proper semantics, focus management, keyboard handling, and assistive technology support.
-- `website-design/fluid-typography-system`
-  Creates responsive typographic systems using CSS `clamp()` and a structured scale across viewport sizes.
-- `website-growth/hero-section-optimization`
-  Audits and improves hero sections for clarity, engagement, and conversion-focused outcomes.
-
-Each skill may include support material alongside `SKILL.md` when it improves execution quality:
-
-- `examples/`
-- `templates/`
-- `references/`
-- `assets/`
-- `scripts/`
-
-Only `SKILL.md` is required. Use the support folders only when they materially improve reuse, portability, or execution quality.
-
-## Quick start
-
-### Browse a skill
-
-Open a skill folder and start with its `SKILL.md`.
-
-```text
-<category>/<skill-name>/
-  SKILL.md
-  examples/
-  templates/
-  references/
-  assets/
-  scripts/
-```
-
-### Copy a skill into another environment
-
-The intended portable unit is the skill folder itself. In most cases, you should copy the entire skill directory so its support files stay attached to the operating guidance in `SKILL.md`.
-
-### Add a new skill
-
-When adding a skill:
-
-1. Choose a category that improves browsing and discovery.
-2. Create a standalone skill folder with a clear reusable capability.
-3. Write `SKILL.md` so another agent or operator can use it with minimal guesswork.
-4. Add support files only when they improve portability or execution quality.
-
-## What this repository owns
-
-- Portable, agent-friendly skill folders
-- Execution-oriented `SKILL.md` files with clear operating guidance
-- Standardized support material that helps another agent or operator use a skill
-- Repository-level structure and quality standards for a transferable public skill library
-
-This repository should stay portability-first.
-
-## What this repository does not own
-
-- Platform-specific packaging conventions as the default repository structure
-- Placeholder-heavy drafts, scratchpads, or shallow prompts presented as finished skills
-- Deep nested trees or repo-specific process that makes copying harder
-- Skills that depend on undocumented local assumptions to be usable
-
-If an integration needs platform-specific details, keep them isolated and clearly labeled instead of letting them shape the repository structure.
-
-## Skill quality bar
-
-A skill is a self-contained, reusable capability that an agent can apply repeatedly.
-
-A valid skill is:
-
-- portable
-- scoped
-- understandable by another agent or human operator
-- complete enough to be useful without missing critical pieces
-- organized for reuse
-
-A skill is not:
-
-- a vague idea
-- a one-off note
-- a placeholder
-- a scratchpad
-- a thin prompt with no operating guidance
-
-### Definition of done
-
-A skill is complete when it includes:
-
-1. A clear purpose
-2. Defined use cases or triggers
-3. Explicit inputs
-4. Expected outputs
-5. Workflow or execution steps
-6. Decision rules and constraints
-7. Boundaries and non-goals
-8. Error handling or escalation guidance when relevant
-9. Examples, templates, references, scripts, or assets when needed
-10. Enough depth that another agent can use it with minimal guesswork
-
-Prefer fewer complete skills over many shallow ones.
-
-### Writing standard
-
-Every `SKILL.md` should be practical and execution-oriented. Use plain language and write for agents and operators.
-
-A strong `SKILL.md` usually includes:
-
-- Title
-- Purpose
-- Use when
-- Do not use when
-- Inputs
-- Outputs
-- Constraints
-- Workflow
-- Decision rules
-- Escalation conditions
-- Quality bar
-- Related files in the skill folder
-
-## Categories and naming
-
-Create a category when it improves browsing and groups multiple related skills. Create a skill when it is a standalone reusable capability that still makes sense outside this repository.
-
-Naming rules:
-
-- Categories should be lowercase, concise, and broad but clear
-- Skill folders should be lowercase, hyphen-separated, and capability-oriented
-- Avoid vague names like `helper`, `misc`, `stuff`, or `general-tooling`
+---
 
 ## Development
 
-This repository is content-first. The main work is improving skill clarity, structure, and portability rather than building an application runtime.
+```bash
+git clone https://github.com/coastdigitalgroup/coast-ai-skills.git
+cd coast-ai-skills
+npm install
+npm run build
+```
 
-Key repository files:
+| Command | What it does |
+| ------- | ------------ |
+| `npm run build` | Compiles TypeScript to `dist/` |
+| `npm run dev` | Runs the MCP server directly via tsx |
 
-- `AGENT.md` for repository guidance and contribution intent
-- `CONTRIBUTING.md` for the contribution workflow
-- `CHANGELOG.md` for notable changes
+The MCP server source lives in `src/`. Skills live in the category folders at the repo root. They are independent — editing skills never requires a rebuild.
 
-Key skill areas:
-
-- `website-development/`
-- `website-design/`
-- `website-growth/`
+---
 
 ## Contributing
 
-Contributions should prioritize portability, reuse, and execution quality over volume. Strengthen an existing skill before creating a near-duplicate, and avoid placeholder-heavy drafts.
+Contributions should prioritize portability, reuse, and execution quality over volume. Strengthen an existing skill before creating a near-duplicate.
 
-Start with [CONTRIBUTING.md](CONTRIBUTING.md) and use [AGENT.md](AGENT.md) as the repository-level source of truth for structure, quality, and scope.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the full workflow and [AGENT.md](AGENT.md) for repository structure and quality standards.
+
+---
 
 ## License
 
