@@ -1,0 +1,167 @@
+/**
+ * Focus Specification Guide Template (CSS Variables & Utility Classes)
+ *
+ * This ready-to-drop-in CSS template establishes a consistent, high-contrast,
+ * and brandable focus indicator system across all standard and custom web components.
+ * It strictly adheres to WCAG 2.1/2.2 AAA recommendations, prevents outline cropping,
+ * manages mouse-vs-keyboard focus visibility, and includes Forced Colors fallback.
+ */
+
+/* ==========================================================================
+   1. GLOBAL DESIGN TOKENS
+   ========================================================================== */
+:root {
+  /* Default light theme tokens */
+  --focus-ring-color: #0d52ff;          /* Vivid brand blue */
+  --focus-ring-width: 2px;
+  --focus-ring-style: solid;
+  --focus-ring-offset: 2px;
+  --focus-ring-radius-adjustment: 2px;  /* Curvature alignment modifier */
+  --focus-transition-duration: 0.15s;
+  --focus-transition-timing: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Alternative contrast tokens */
+  --focus-ring-color-dark-bg: #90b4fc;  /* High-contrast sky blue on darks */
+  --focus-ring-color-brand-bg: #ffffff; /* Pure white on brand backgrounds */
+  --focus-ring-color-high-contrast: #12141c; /* Absolute dark for white buttons */
+}
+
+/* ==========================================================================
+   2. GLOBAL ACCESSIBILITY BASELINE (DEFAULT RESET)
+   ========================================================================== */
+
+/* Remove default browser focus outline only when a custom system is active */
+:focus {
+  outline: none;
+}
+
+/* Fallback for browsers that do not support :focus-visible */
+:focus-visible {
+  outline: none;
+}
+
+/* ==========================================================================
+   3. KEYBOARD-ONLY ACTIVE OUTLINES (:focus-visible)
+   ========================================================================== */
+
+/* standard text anchors and inline text links */
+a:focus-visible {
+  outline: var(--focus-ring-width) var(--focus-ring-style) var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+  border-radius: 2px; /* Small radius for precise textual bounding boxes */
+  transition: outline var(--focus-transition-duration) var(--focus-transition-timing);
+}
+
+/* Standard Buttons and elements styled as buttons */
+button:focus-visible,
+[role="button"]:focus-visible,
+[role="tab"]:focus-visible {
+  outline: var(--focus-ring-width) var(--focus-ring-style) var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+  /* Force focus ring to match elements rounded curvature */
+  border-radius: inherit;
+}
+
+/* Inputs, Textareas, and Select Fields (Inset focus indicators prevent layout overlapping) */
+input[type="text"]:focus-visible,
+input[type="email"]:focus-visible,
+input[type="password"]:focus-visible,
+input[type="search"]:focus-visible,
+input[type="tel"]:focus-visible,
+input[type="url"]:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: none;
+  border-color: var(--focus-ring-color) !important;
+  box-shadow: 0 0 0 var(--focus-ring-width) var(--focus-ring-color) !important;
+  transition: box-shadow var(--focus-transition-duration) var(--focus-transition-timing),
+              border-color var(--focus-transition-duration) var(--focus-transition-timing);
+}
+
+/* Standard Radio and Checkbox Controls (Ensures focus contours capsule/circular shapes) */
+input[type="radio"]:focus-visible {
+  outline: var(--focus-ring-width) var(--focus-ring-style) var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+  border-radius: 50%; /* Perfect circle matching radio buttons */
+}
+
+input[type="checkbox"]:focus-visible {
+  outline: var(--focus-ring-width) var(--focus-ring-style) var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+  border-radius: 4px; /* Soft rounding matching standard checkbox geometry */
+}
+
+/* ==========================================================================
+   4. CONTEXT-AWARE OVERRIDES & UTILITY CLASSES
+   ========================================================================== */
+
+/**
+ * Utility: On Dark Backgrounds
+ * Apply to containers with deep black, slate, or charcoal background values.
+ */
+.focus-on-dark *:focus-visible {
+  --focus-ring-color: var(--focus-ring-color-dark-bg);
+}
+.focus-on-dark input:focus-visible {
+  box-shadow: 0 0 0 var(--focus-ring-width) var(--focus-ring-color-dark-bg) !important;
+  border-color: var(--focus-ring-color-dark-bg) !important;
+}
+
+/**
+ * Utility: On Brand Saturated Backgrounds
+ * Apply to high-saturation elements (e.g. vivid brand colored CTA bands).
+ */
+.focus-on-brand *:focus-visible {
+  --focus-ring-color: var(--focus-ring-color-brand-bg);
+}
+.focus-on-brand input:focus-visible {
+  box-shadow: 0 0 0 var(--focus-ring-width) var(--focus-ring-color-brand-bg) !important;
+  border-color: var(--focus-ring-color-brand-bg) !important;
+}
+
+/**
+ * Utility: Inset Shadow Focus
+ * Use this on card components or widgets wrapped inside elements using `overflow: hidden`,
+ * as standard outer outlines are clipped and rendered invisible.
+ */
+.focus-inset:focus-visible {
+  outline: none !important;
+  box-shadow: inset 0 0 0 var(--focus-ring-width) var(--focus-ring-color) !important;
+  transition: box-shadow var(--focus-transition-duration) var(--focus-transition-timing);
+}
+
+/**
+ * Utility: Focus Not Obscured Baseline
+ * Automatically add top space offsets to standard interactive anchor target scrolls
+ * to prevent floating sticky headers from covering the active element.
+ */
+.anchor-scroll-target {
+  scroll-margin-top: 100px; /* Adjust to match the physical height of sticky navigation bars */
+}
+
+/* ==========================================================================
+   5. DUAL-RING CONTRAST HALO (EXPERT OUTLINE FOR GRADIENTS/IMAGES)
+   ========================================================================== */
+.focus-contrast-halo:focus-visible {
+  outline: var(--focus-ring-width) var(--focus-ring-style) #ffffff !important;
+  outline-offset: var(--focus-ring-offset);
+  box-shadow: 0 0 0 calc(var(--focus-ring-width) + var(--focus-ring-offset) + 1px) #12141c !important;
+}
+
+/* ==========================================================================
+   6. ASSISTIVE TECHNOLOGY - WINDOWS FORCED COLORS MODE FALLBACK
+   ========================================================================== */
+@media (forced-colors: active) {
+  /*
+   * Custom CSS box-shadows, backgrounds, and custom borders are discarded by
+   * Windows Forced Colors Mode. To ensure elements remain visible, we specify
+   * transparent native outlines which are safely color-mapped by OS preferences.
+   */
+  *:focus-visible,
+  input:focus-visible,
+  button:focus-visible,
+  a:focus-visible {
+    outline: 2px solid ButtonText !important;
+    outline-offset: 2px !important;
+  }
+}
