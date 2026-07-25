@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Accessible Idle Detection and Warning Demo</title>
+  <style>
+    :root {
+      --color-primary: #0284c7;
+      --color-primary-dark: #0369a1;
+      --color-bg: #f8fafc;
+      --color-card: #ffffff;
+      --color-text: #1e293b;
+      --color-text-light: #64748b;
+      --color-border: #e2e8f0;
+      --color-danger: #ef4444;
+      --color-success: #22c55e;
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      font-family: var(--font-family);
+      background-color: var(--color-bg);
+      color: var(--color-text);
+      margin: 0;
+      padding: 2rem 1rem;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    header {
+      margin-bottom: 2rem;
+      border-bottom: 2px solid var(--color-border);
+      padding-bottom: 1rem;
+    }
+
+    h1 {
+      color: var(--color-primary-dark);
+      margin: 0 0 0.5rem 0;
+      font-size: 2rem;
+    }
+
+    p.subtitle {
+      color: var(--color-text-light);
+      margin: 0;
+      font-size: 1.1rem;
+    }
+
+    .card {
+      background: var(--color-card);
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    .card h2 {
+      margin-top: 0;
+      font-size: 1.3rem;
+      border-bottom: 1px solid var(--color-border);
+      padding-bottom: 0.5rem;
+    }
+
+    /* Live Tracking Dashboard Styles */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .metric-box {
+      background: var(--color-bg);
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      padding: 1rem;
+      text-align: center;
+    }
+
+    .metric-label {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      color: var(--color-text-light);
+      letter-spacing: 0.05em;
+      margin-bottom: 0.25rem;
+    }
+
+    .metric-value {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: var(--color-text);
+    }
+
+    .metric-value.highlight {
+      color: var(--color-primary);
+    }
+
+    /* Interactive Simulation Controls */
+    .btn {
+      background-color: var(--color-primary);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.15s ease, outline 0.1s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn:hover {
+      background-color: var(--color-primary-dark);
+    }
+
+    .btn:focus-visible {
+      outline: 3px solid var(--color-primary-dark);
+      outline-offset: 2px;
+    }
+
+    .btn-danger {
+      background-color: var(--color-danger);
+    }
+
+    .btn-danger:hover {
+      background-color: #b91c1c;
+    }
+
+    .btn-secondary {
+      background-color: transparent;
+      color: var(--color-text);
+      border: 1px solid var(--color-border);
+    }
+
+    .btn-secondary:hover {
+      background-color: var(--color-bg);
+    }
+
+    .interaction-log {
+      font-family: monospace;
+      font-size: 0.85rem;
+      background-color: #0f172a;
+      color: #38bdf8;
+      padding: 1rem;
+      border-radius: 6px;
+      height: 150px;
+      overflow-y: auto;
+      margin-top: 1rem;
+    }
+
+    /* Modal Overlay Styles */
+    .modal-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(15, 23, 42, 0.75);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+
+    .modal-backdrop.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-dialog {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      width: 90%;
+      max-width: 500px;
+      padding: 2rem;
+      transform: scale(0.95);
+      transition: transform 0.25s ease;
+    }
+
+    .modal-backdrop.active .modal-dialog {
+      transform: scale(1);
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .modal-icon {
+      color: var(--color-danger);
+      font-size: 1.75rem;
+    }
+
+    .modal-title {
+      margin: 0;
+      font-size: 1.5rem;
+      color: #0f172a;
+    }
+
+    .modal-body {
+      color: var(--color-text-light);
+      margin-bottom: 1.5rem;
+    }
+
+    .modal-countdown {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: var(--color-danger);
+      text-align: center;
+      margin: 1.5rem 0;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 1rem;
+    }
+
+    /* Visually Hidden styles for WCAG screen reader alerts */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    /* Guidelines / Instructions styling */
+    ol.instructions-list {
+      padding-left: 1.25rem;
+      margin: 0;
+    }
+
+    ol.instructions-list li {
+      margin-bottom: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <h1>Session Idle Detection & Timeout Manager</h1>
+      <p class="subtitle">A secure, multi-tab synced, and highly accessible user inactivity system</p>
+    </header>
+
+    <main>
+      <!-- Simulation Controller Instructions -->
+      <section class="card" aria-labelledby="instr-heading">
+        <h2 id="instr-heading">Simulation Guide</h2>
+        <p>
+          For easy demonstration, the inactivity threshold in this sandbox has been reduced to
+          <strong>15 seconds</strong>, with a warning countdown appearing during the final <strong>10 seconds</strong>.
+        </p>
+        <ol class="instructions-list">
+          <li><strong>Sitting Idle:</strong> Stop clicking or moving. After 5 seconds, the accessible warning modal will automatically popup.</li>
+          <li><strong>Keyboard Focus Trap:</strong> Try pressing <kbd>Tab</kbd> inside the modal. You cannot escape focus to background content.</li>
+          <li><strong>Multi-Tab Syncing:</strong> Open this exact URL in another browser tab. Trigger an interaction in Tab A, and watch the idle counter instantly reset in Tab B!</li>
+          <li><strong>Page Visibility Resilience:</strong> Switch tabs for 15 seconds, then return. The utility will bypass the modal and instantly logout.</li>
+        </ol>
+      </section>
+
+      <!-- Dashboard Statistics -->
+      <section class="card" aria-labelledby="status-heading">
+        <h2 id="status-heading">Live System Dashboard</h2>
+
+        <div class="dashboard-grid">
+          <div class="metric-box">
+            <div class="metric-label">Status</div>
+            <div id="status-val" class="metric-value highlight">Active</div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-label">Seconds Active</div>
+            <div id="time-active-val" class="metric-value">0s</div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-label">Time to Warning</div>
+            <div id="time-to-warn-val" class="metric-value">5.0s</div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-label">Tab Connection</div>
+            <div id="channel-val" class="metric-value">Connected</div>
+          </div>
+        </div>
+
+        <div style="margin-top: 1.5rem; display: flex; gap: 1rem; align-items: center;">
+          <button id="btn-manual-reset" class="btn">
+            ⚡ Simulate Interaction (Reset)
+          </button>
+          <button id="btn-kill" class="btn btn-secondary">
+            Teardown Monitor
+          </button>
+        </div>
+      </section>
+
+      <!-- Logging console -->
+      <section class="card" aria-labelledby="log-heading">
+        <h2 id="log-heading">System Interactions Logs</h2>
+        <p class="subtitle" style="font-size: 0.9rem; margin-bottom: 0.5rem;">Throttled interactions & same-origin cross-tab synchronization events:</p>
+        <div id="interaction-log" class="interaction-log">
+          [System Initialization Successful] Waiting for user inputs...
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- WCAG Alert dialog structure -->
+  <div id="warning-backdrop" class="modal-backdrop" role="none">
+    <div
+      id="warning-modal"
+      class="modal-dialog"
+      role="alertdialog"
+      aria-modal="true"
+      aria-labelledby="modal-title"
+      aria-describedby="modal-desc"
+    >
+      <div class="modal-header">
+        <span class="modal-icon" aria-hidden="true">⚠️</span>
+        <h3 id="modal-title" class="modal-title">Session Expiring</h3>
+      </div>
+
+      <div class="modal-body">
+        <p id="modal-desc">
+          You have been inactive for a while. For your security, your session will automatically terminate soon.
+        </p>
+
+        <div id="countdown-display" class="modal-countdown" aria-hidden="true">
+          10s
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button id="btn-logout" class="btn btn-secondary btn-danger">Log Out Now</button>
+        <button id="btn-extend" class="btn">Keep Me Logged In</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- WCAG aria-live container for blind/visually impaired countdown notifications -->
+  <div id="sr-announcer" class="sr-only" aria-live="assertive"></div>
+
+  <!-- Include our modular template inline for the self-contained demo -->
+  <script>
+    // Copy of our templates/idle-monitor.js code
+    class IdleMonitor {
+      constructor(options = {}) {
+        this.idleThreshold = options.idleThreshold || 15 * 60 * 1000;
+        this.warningDuration = options.warningDuration || 60 * 1000;
+        this.activityEvents = options.activityEvents || [
+          'mousedown', 'pointerdown', 'keydown', 'scroll', 'touchstart', 'wheel'
+        ];
+        this.throttleDelay = options.throttleDelay || 1000;
+        this.syncChannelName = options.syncChannelName || 'idle_monitor_sync';
+
+        this.onWarning = options.onWarning || null;
+        this.onTimeout = options.onTimeout || null;
+        this.onActivity = options.onActivity || null;
+        this.onRemainingTimeUpdate = options.onRemainingTimeUpdate || null;
+
+        this.lastActivityTime = Date.now();
+        this.expirationTime = this.lastActivityTime + this.idleThreshold;
+        this.isWarningActive = false;
+        this.isDestroyed = false;
+        this.heartbeatIntervalId = null;
+        this.lastProcessedTime = 0;
+        this.syncChannel = null;
+
+        this.handleInteraction = this.handleInteraction.bind(this);
+        this.handleVisibilityChange = this.handleVisibilityChange.bind(this);
+        this.syncReceived = this.syncReceived.bind(this);
+        this.checkSessionState = this.checkSessionState.bind(this);
+      }
+
+      start() {
+        if (this.isDestroyed) return;
+        this.resetTimerLocally();
+        this.setupListeners();
+        this.setupSyncChannel();
+        this.heartbeatIntervalId = setInterval(this.checkSessionState, 100);
+        this.checkSessionState();
+      }
+
+      setupListeners() {
+        this.activityEvents.forEach(eventName => {
+          const isPassiveEvent = ['scroll', 'touchstart', 'wheel', 'touchmove', 'pointermove'].includes(eventName);
+          window.addEventListener(eventName, this.handleInteraction, isPassiveEvent ? { passive: true } : false);
+        });
+        document.addEventListener('visibilitychange', this.handleVisibilityChange);
+      }
+
+      destroy() {
+        this.isDestroyed = true;
+        if (this.heartbeatIntervalId) {
+          clearInterval(this.heartbeatIntervalId);
+          this.heartbeatIntervalId = null;
+        }
+        this.activityEvents.forEach(eventName => {
+          window.removeEventListener(eventName, this.handleInteraction);
+        });
+        document.removeEventListener('visibilitychange', this.handleVisibilityChange);
+        if (this.syncChannel) {
+          this.syncChannel.close();
+          this.syncChannel = null;
+        }
+      }
+
+      setupSyncChannel() {
+        if ('BroadcastChannel' in window) {
+          try {
+            this.syncChannel = new BroadcastChannel(this.syncChannelName);
+            this.syncChannel.onmessage = this.syncReceived;
+          } catch (err) {
+            console.warn('Failed to initialize BroadcastChannel:', err);
+            this.setupLocalStorageFallback();
+          }
+        } else {
+          this.setupLocalStorageFallback();
+        }
+      }
+
+      setupLocalStorageFallback() {
+        window.addEventListener('storage', (event) => {
+          if (event.key === `${this.syncChannelName}_activity`) {
+            const remoteTime = parseInt(event.newValue, 10);
+            if (!isNaN(remoteTime)) {
+              this.resetTimerLocally(remoteTime, false);
+            }
+          }
+        });
+      }
+
+      broadcastActivity(timestamp) {
+        if (this.syncChannel) {
+          this.syncChannel.postMessage({ type: 'activity_reset', timestamp });
+        } else {
+          localStorage.setItem(`${this.syncChannelName}_activity`, timestamp.toString());
+        }
+      }
+
+      syncReceived(event) {
+        if (event.data && event.data.type === 'activity_reset') {
+          this.resetTimerLocally(event.data.timestamp, false);
+        }
+      }
+
+      handleInteraction() {
+        const now = Date.now();
+        if (now - this.lastProcessedTime >= this.throttleDelay) {
+          this.lastProcessedTime = now;
+          this.resetTimerLocally(now, true);
+        }
+      }
+
+      resetTimerLocally(timestamp = Date.now(), shouldBroadcast = true) {
+        this.lastActivityTime = timestamp;
+        this.expirationTime = this.lastActivityTime + this.idleThreshold;
+
+        if (this.isWarningActive) {
+          this.isWarningActive = false;
+          if (this.onActivity) {
+            this.onActivity();
+          }
+        }
+
+        if (shouldBroadcast) {
+          this.broadcastActivity(this.lastActivityTime);
+        }
+      }
+
+      handleVisibilityChange() {
+        if (document.visibilityState === 'visible') {
+          this.checkSessionState();
+        }
+      }
+
+      checkSessionState() {
+        if (this.isDestroyed) return;
+        const now = Date.now();
+        const remainingTime = this.expirationTime - now;
+
+        if (remainingTime <= 0) {
+          this.destroy();
+          if (this.onTimeout) {
+            this.onTimeout();
+          }
+          return;
+        }
+
+        if (remainingTime <= this.warningDuration) {
+          if (!this.isWarningActive) {
+            this.isWarningActive = true;
+            if (this.onWarning) {
+              this.onWarning(remainingTime);
+            }
+          }
+          if (this.onRemainingTimeUpdate) {
+            this.onRemainingTimeUpdate(remainingTime);
+          }
+        } else {
+          if (this.isWarningActive) {
+            this.isWarningActive = false;
+            if (this.onActivity) {
+              this.onActivity();
+            }
+          }
+        }
+      }
+
+      extendSession() {
+        this.resetTimerLocally(Date.now(), true);
+      }
+    }
+  </script>
+
+  <!-- Live Interactivity Script -->
+  <script>
+    const statusVal = document.getElementById('status-val');
+    const timeActiveVal = document.getElementById('time-active-val');
+    const timeToWarnVal = document.getElementById('time-to-warn-val');
+    const logBox = document.getElementById('interaction-log');
+
+    // Modal controls
+    const warningBackdrop = document.getElementById('warning-backdrop');
+    const warningModal = document.getElementById('warning-modal');
+    const countdownDisplay = document.getElementById('countdown-display');
+    const btnExtend = document.getElementById('btn-extend');
+    const btnLogout = document.getElementById('btn-logout');
+    const btnManualReset = document.getElementById('btn-manual-reset');
+    const btnKill = document.getElementById('btn-kill');
+
+    // Accessibility Announcer
+    const srAnnouncer = document.getElementById('sr-announcer');
+
+    // Keep track of the active element before modal opens so we can restore it cleanly
+    let previouslyActiveElement = null;
+
+    // Log messages
+    function log(message) {
+      const time = new Date().toLocaleTimeString();
+      logBox.innerHTML = `[${time}] ${message}\n` + logBox.innerHTML;
+    }
+
+    // Initialize IdleMonitor (Reduced times for easy sandbox testing)
+    const monitor = new IdleMonitor({
+      idleThreshold: 15 * 1000,   // 15 seconds total idle threshold
+      warningDuration: 10 * 1000, // Show warning countdown at 10 seconds remaining
+      throttleDelay: 1000,        // Ignore user resets within 1 second
+
+      onWarning: function(remaining) {
+        log('⚠️ Entering Warning State! Remaining: ' + Math.ceil(remaining/1000) + 's');
+        openWarningModal();
+      },
+
+      onTimeout: function() {
+        log('🛑 Session Expired! Terminating session...');
+        closeWarningModal();
+        statusVal.textContent = 'Expired';
+        statusVal.style.color = 'var(--color-danger)';
+        alert('Your session has timed out due to inactivity.');
+      },
+
+      onActivity: function() {
+        log('✨ Local Activity reset recorded (Warning closed).');
+        closeWarningModal();
+        statusVal.textContent = 'Active';
+        statusVal.style.color = 'var(--color-success)';
+      },
+
+      onRemainingTimeUpdate: function(remaining) {
+        const secondsRemaining = Math.ceil(remaining / 1000);
+
+        // Update regular visual display
+        countdownDisplay.textContent = `${secondsRemaining}s`;
+        timeToWarnVal.textContent = '0.0s (Alerting)';
+
+        // Update Screen Reader live announcements selectively to prevent audio spam (WCAG 2.2.1)
+        if (secondsRemaining === 10 || secondsRemaining === 5 || secondsRemaining <= 3) {
+          srAnnouncer.textContent = `Warning: Your session will log out in ${secondsRemaining} seconds. Press Space to stay logged in.`;
+          log(`📢 Accessibility Announcer: "Session expiring in ${secondsRemaining} seconds"`);
+        }
+      }
+    });
+
+    // Start tracking
+    monitor.start();
+
+    // Secondary GUI clock
+    let startTime = Date.now();
+    setInterval(() => {
+      if (monitor.isDestroyed) return;
+
+      const elapsed = Math.floor((Date.now() - startTime) / 1000);
+      timeActiveVal.textContent = `${elapsed}s`;
+
+      const remaining = monitor.expirationTime - Date.now();
+      const timeToWarn = Math.max(0, (remaining - monitor.warningDuration) / 1000);
+
+      if (timeToWarn > 0) {
+        timeToWarnVal.textContent = `${timeToWarn.toFixed(1)}s`;
+      }
+    }, 100);
+
+    // Track original interactions to print in console
+    monitor.activityEvents.forEach(evt => {
+      window.addEventListener(evt, () => {
+        if (monitor.isWarningActive || monitor.isDestroyed) return;
+        const now = Date.now();
+        if (now - monitor.lastProcessedTime >= monitor.throttleDelay) {
+          log(`🖱️ Registered user activity trigger: "${evt}"`);
+        }
+      }, { passive: true });
+    });
+
+    // Handle cross-tab updates logging
+    if (monitor.syncChannel) {
+      const originalSync = monitor.syncReceived;
+      monitor.syncReceived = function(event) {
+        if (event.data && event.data.type === 'activity_reset') {
+          log(`🌐 Multi-Tab Sync: Reset received from another open tab!`);
+        }
+        originalSync(event);
+      };
+    }
+
+    // Modal Interaction Handlers
+    function openWarningModal() {
+      // 1. Store previous focus
+      previouslyActiveElement = document.activeElement;
+
+      // 2. Add class to slide/fade backdrop
+      warningBackdrop.classList.add('active');
+
+      // 3. Move focus inside the modal proactively (focus the extend button, avoiding destructive logout button first)
+      btnExtend.focus();
+
+      // 4. Trap keyboard focus
+      warningModal.addEventListener('keydown', trapFocus);
+    }
+
+    function closeWarningModal() {
+      warningBackdrop.classList.remove('active');
+      warningModal.removeEventListener('keydown', trapFocus);
+
+      // Restore previous focus cleanly
+      if (previouslyActiveElement && typeof previouslyActiveElement.focus === 'function') {
+        previouslyActiveElement.focus();
+      }
+    }
+
+    // WCAG Focus Trap Logic
+    function trapFocus(e) {
+      if (e.key !== 'Tab') return;
+
+      const focusableEls = [btnExtend, btnLogout];
+      const firstEl = focusableEls[0];
+      const lastEl = focusableEls[focusableEls.length - 1];
+
+      if (e.shiftKey) { // Shift + Tab
+        if (document.activeElement === firstEl) {
+          lastEl.focus();
+          e.preventDefault();
+        }
+      } else { // Tab
+        if (document.activeElement === lastEl) {
+          firstEl.focus();
+          e.preventDefault();
+        }
+      }
+    }
+
+    // Interactive button clicks
+    btnExtend.addEventListener('click', () => {
+      monitor.extendSession();
+    });
+
+    btnLogout.addEventListener('click', () => {
+      log('🚪 Manual logout triggered.');
+      monitor.destroy();
+      closeWarningModal();
+      statusVal.textContent = 'Logged Out';
+      statusVal.style.color = 'var(--color-danger)';
+    });
+
+    btnManualReset.addEventListener('click', () => {
+      log('⚡ Force simulation reset button clicked.');
+      monitor.extendSession();
+    });
+
+    btnKill.addEventListener('click', () => {
+      log('💣 Killing monitor process. All listeners removed.');
+      monitor.destroy();
+      closeWarningModal();
+      statusVal.textContent = 'Terminated';
+      statusVal.style.color = 'var(--color-text-light)';
+    });
+  </script>
+</body>
+</html>
