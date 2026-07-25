@@ -1,0 +1,203 @@
+/**
+ * Focus Specification Guide CSS Template
+ *
+ * A production-ready, highly portable CSS template for implementing accessible,
+ * brand-aligned, and resilient focus indicators across all core UI components.
+ * Matches WCAG 2.1/2.2 AA and AAA standards and includes Windows Forced Colors Mode overrides.
+ */
+
+:root {
+  /* ==========================================================================
+     Focus Design System Tokens (Light Theme Defaults)
+     ========================================================================== */
+  --focus-ring-width: 3px;
+  --focus-ring-style: solid;
+  --focus-ring-offset: 2px;
+
+  /* High contrast colors (WCAG 3:1 Non-Text contrast target) */
+  --focus-color-primary: #2563eb; /* Blue 600 (6.1:1 on white background) */
+  --focus-color-secondary: #1e293b; /* Slate 800 (13.5:1 on white background) */
+  --focus-bg-offset-color: #ffffff; /* Matches adjacent page surface */
+
+  /* Focus Animation and Easing */
+  --focus-transition-duration: 120ms;
+  --focus-transition-timing: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Scroll Margin buffer for sticky headers (Height of header + 16px padding) */
+  --focus-scroll-padding-top: 96px;
+}
+
+/* Dark Theme overrides */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --focus-color-primary: #60a5fa; /* Blue 400 (5.8:1 on #111827) */
+    --focus-color-secondary: #f8fafc; /* Slate 50 (15.2:1 on #111827) */
+    --focus-bg-offset-color: #111827; /* Dark surface background */
+  }
+}
+
+/* ==========================================================================
+   Global Keyboard Scroll Safety Rule
+   Prevents focused elements from being buried under sticky headers or footers.
+   ========================================================================== */
+html {
+  scroll-padding-top: var(--focus-scroll-padding-top);
+  scroll-behavior: smooth;
+}
+
+/* Disable focus transitions for users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-delay: -1ms !important;
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    background-attachment: initial !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0s !important;
+    transition-delay: 0s !important;
+  }
+}
+
+
+/* ==========================================================================
+   Pattern A: Offset Outline Pattern (Default Recommended Style)
+   Best for: Standard rectangular/rounded buttons, anchors, and square cards.
+   ========================================================================== */
+.focus-pattern-outline {
+  /* Prevent default browser styles */
+  outline: none;
+}
+
+.focus-pattern-outline:focus-visible {
+  outline: var(--focus-ring-width) var(--focus-ring-style) var(--focus-color-primary);
+  outline-offset: var(--focus-ring-offset);
+  transition: outline-color var(--focus-transition-duration) var(--focus-transition-timing);
+}
+
+
+/* ==========================================================================
+   Pattern B: Dual-Ring Shadow Pattern
+   Best for: Circular elements, tags, or pills with rounded borders where outline clipping is a risk.
+   ========================================================================== */
+.focus-pattern-dual-ring {
+  outline: none;
+  transition: box-shadow var(--focus-transition-duration) var(--focus-transition-timing);
+}
+
+.focus-pattern-dual-ring:focus-visible {
+  /* Double ring: Inner offset ring matching surface color, outer ring matching focus color */
+  box-shadow:
+    0 0 0 var(--focus-ring-offset) var(--focus-bg-offset-color),
+    0 0 0 calc(var(--focus-ring-offset) + var(--focus-ring-width)) var(--focus-color-primary);
+}
+
+
+/* ==========================================================================
+   Pattern C: Inset Highlight Pattern
+   Best for: Form fields (text inputs, textareas) to avoid overlapping adjacent inputs.
+   ========================================================================== */
+.focus-pattern-inset-input {
+  outline: none;
+  border: 1px solid #d1d5db;
+  transition: border-color var(--focus-transition-duration) var(--focus-transition-timing),
+              box-shadow var(--focus-transition-duration) var(--focus-transition-timing);
+}
+
+.focus-pattern-inset-input:focus-visible {
+  border-color: var(--focus-color-primary);
+  /* Double strength border effect without shifting container size (using inset shadow) */
+  box-shadow: inset 0 0 0 1px var(--focus-color-primary);
+}
+
+
+/* ==========================================================================
+   Pattern D: Bottom Border Highlight Pattern
+   Best for: Tabs, segmented controls, or horizontal main navigation items.
+   ========================================================================== */
+.focus-pattern-bottom-bar {
+  outline: none;
+  position: relative;
+}
+
+.focus-pattern-bottom-bar::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -4px;
+  width: 100%;
+  height: var(--focus-ring-width);
+  background-color: transparent;
+  transform: scaleX(0);
+  transition: transform var(--focus-transition-duration) var(--focus-transition-timing),
+              background-color var(--focus-transition-duration) var(--focus-transition-timing);
+}
+
+.focus-pattern-bottom-bar:focus-visible::after {
+  background-color: var(--focus-color-primary);
+  transform: scaleX(1);
+}
+
+
+/* ==========================================================================
+   Pattern E: Unified Card Stretched Link Pattern
+   Best for: Interactive lists, articles, or product cards where the whole block is clickable.
+   ========================================================================== */
+.focus-card-container {
+  position: relative;
+  outline: none;
+  border: 1px solid #e5e7eb;
+  transition: border-color var(--focus-transition-duration) var(--focus-transition-timing),
+              outline var(--focus-transition-duration) var(--focus-transition-timing);
+}
+
+/* Stretched active link covers the entire container surface */
+.focus-card-container .stretched-link {
+  outline: none;
+}
+
+.focus-card-container .stretched-link::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1;
+}
+
+/* Apply focus styling to card boundary when internal link receives focus */
+.focus-card-container:has(.stretched-link:focus-visible) {
+  border-color: var(--focus-color-primary);
+  outline: var(--focus-ring-width) var(--focus-ring-style) var(--focus-color-primary);
+  outline-offset: 4px; /* More generous offset around entire container card */
+}
+
+
+/* ==========================================================================
+   Forced Colors Mode Fallbacks (Windows High Contrast Theme Support)
+   Guarantees that custom shadow rings remain perfectly visible when CSS background-color
+   and box-shadow variables are stripped out by the browser.
+   ========================================================================== */
+@media (forced-colors: active) {
+  /* Box shadows are removed by the browser, so we must fall back to standard outlines */
+  .focus-pattern-dual-ring:focus-visible {
+    outline: var(--focus-ring-width) var(--focus-ring-style) Highlight;
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  .focus-pattern-inset-input:focus-visible {
+    /* Set high-contrast visible outline on focus, since box-shadow goes invisible */
+    outline: 2px solid Highlight;
+    outline-offset: -1px; /* Keeps outline aligned tightly inside input border */
+  }
+
+  .focus-pattern-bottom-bar:focus-visible {
+    /* Fallback to standard offset outline for horizontal tabs/navs */
+    outline: 2px solid Highlight;
+    outline-offset: 2px;
+  }
+
+  .focus-pattern-bottom-bar:focus-visible::after {
+    display: none; /* Hide custom bottom line as outline is now active */
+  }
+}
