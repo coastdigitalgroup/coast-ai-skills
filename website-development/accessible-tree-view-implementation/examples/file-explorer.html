@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Accessible File Explorer Tree View Example</title>
+  <style>
+    :root {
+      --primary-color: #2563eb;
+      --primary-light: #dbeafe;
+      --text-color: #1f2937;
+      --text-muted: #6b7280;
+      --border-color: #e5e7eb;
+      --focus-ring: #3b82f6;
+      --bg-hover: #f3f4f6;
+      --bg-selected: #eff6ff;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: var(--text-color);
+      line-height: 1.5;
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+      background-color: #fafafa;
+    }
+
+    h1 {
+      font-size: 1.875rem;
+      margin-bottom: 0.5rem;
+    }
+
+    p.intro {
+      color: var(--text-muted);
+      margin-bottom: 2rem;
+    }
+
+    .workspace-layout {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 1.5rem;
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      overflow: hidden;
+      min-height: 400px;
+    }
+
+    /* Tree View Sidebar */
+    .sidebar {
+      border-right: 1px solid var(--border-color);
+      background-color: #f9fafb;
+      padding: 1rem 0;
+      overflow-y: auto;
+    }
+
+    .sidebar-title {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      padding: 0 1.25rem 0.75rem;
+      margin: 0;
+      font-weight: 700;
+    }
+
+    /* Core Tree Styles */
+    ul[role="tree"] {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    ul[role="group"] {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    /* Tree Node */
+    li[role="treeitem"] {
+      outline: none;
+      cursor: pointer;
+    }
+
+    /* Node content wrapper to handle interactive states and indentation */
+    .node-content {
+      display: flex;
+      align-items: center;
+      padding: 0.375rem 1rem 0.375rem calc(1rem + (var(--tree-depth, 0) * 1.25rem));
+      font-size: 0.875rem;
+      color: var(--text-color);
+      border-left: 3px solid transparent;
+      user-select: none;
+      position: relative;
+    }
+
+    /* Hover State */
+    .node-content:hover {
+      background-color: var(--bg-hover);
+    }
+
+    /* Focus State (via roving tabindex on li) */
+    li[role="treeitem"]:focus-visible > .node-content {
+      outline: none;
+      background-color: var(--bg-hover);
+      box-shadow: inset 0 0 0 2px var(--focus-ring);
+    }
+
+    /* Selected State */
+    li[role="treeitem"][aria-selected="true"] > .node-content {
+      background-color: var(--bg-selected);
+      color: var(--primary-color);
+      border-left-color: var(--primary-color);
+      font-weight: 500;
+    }
+
+    /* Disclosure / Toggle Icon */
+    .tree-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 1.25rem;
+      height: 1.25rem;
+      margin-right: 0.375rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-radius: 4px;
+    }
+
+    .tree-toggle:hover {
+      background-color: rgba(0, 0, 0, 0.05);
+      color: var(--text-color);
+    }
+
+    /* Chevron Icon Rotation base on expansion */
+    .tree-toggle svg {
+      width: 1rem;
+      height: 1rem;
+      transition: transform 0.15s ease;
+    }
+
+    li[role="treeitem"][aria-expanded="false"] > .node-content .tree-toggle svg {
+      transform: rotate(-90deg);
+    }
+
+    li[role="treeitem"][aria-expanded="true"] > .node-content .tree-toggle svg {
+      transform: rotate(0deg);
+    }
+
+    /* Subtree visibility */
+    li[role="treeitem"][aria-expanded="false"] > ul[role="group"] {
+      display: none;
+    }
+
+    li[role="treeitem"][aria-expanded="true"] > ul[role="group"] {
+      display: block;
+    }
+
+    /* Leaf Node (no children) indicator spacer */
+    .node-spacer {
+      width: 1.25rem;
+      height: 1.25rem;
+      margin-right: 0.375rem;
+    }
+
+    /* Icon styles */
+    .node-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 0.5rem;
+      color: var(--text-muted);
+    }
+
+    li[role="treeitem"][aria-selected="true"] .node-icon {
+      color: var(--primary-color);
+    }
+
+    /* Content Area */
+    .content-viewer {
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .viewer-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex-grow: 1;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    .viewer-placeholder svg {
+      width: 3rem;
+      height: 3rem;
+      stroke-width: 1.5;
+      margin-bottom: 1rem;
+      color: #cbd5e1;
+    }
+
+    .file-details {
+      display: none;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .file-details.active {
+      display: flex;
+    }
+
+    .file-header {
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .file-title {
+      font-size: 1.25rem;
+      margin: 0 0 0.25rem 0;
+      font-weight: 600;
+    }
+
+    .file-meta {
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+    }
+
+    .file-body {
+      flex-grow: 1;
+      font-family: Consolas, Monaco, "Andale Mono", monospace;
+      background-color: #f8fafc;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 1rem;
+      white-space: pre-wrap;
+      font-size: 0.875rem;
+      overflow-y: auto;
+    }
+
+    /* Documentation Box */
+    .instructions {
+      margin-top: 2rem;
+      background-color: #f3f4f6;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 1.25rem;
+    }
+
+    .instructions h2 {
+      font-size: 1rem;
+      margin-top: 0;
+      margin-bottom: 0.5rem;
+    }
+
+    .instructions ul {
+      margin: 0;
+      padding-left: 1.25rem;
+      font-size: 0.875rem;
+      color: #374151;
+    }
+
+    .instructions li {
+      margin-bottom: 0.35rem;
+    }
+
+    code {
+      background-color: #e5e7eb;
+      padding: 0.125rem 0.25rem;
+      border-radius: 4px;
+      font-size: 0.8125rem;
+      font-family: monospace;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Accessible Workspace File Explorer</h1>
+  <p class="intro">
+    A robust, framework-free client-side File Explorer showcasing standard
+    <strong>WAI-ARIA 1.2 Tree View</strong> behaviors. It features nested directories,
+    depth-based indents, roving tabindex, and extensive keyboard interaction.
+  </p>
+
+  <div class="workspace-layout">
+    <!-- Sidebar with ARIA Tree -->
+    <aside class="sidebar">
+      <h2 class="sidebar-title" id="tree-label">Files</h2>
+
+      <ul role="tree" aria-labelledby="tree-label" id="workspace-tree">
+        <!-- Root Level Parent (Project) -->
+        <li role="treeitem" aria-expanded="true" aria-selected="false" id="node-root" tabindex="0">
+          <div class="node-content" style="--tree-depth: 0;">
+            <span class="tree-toggle" class="tree-toggle" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </span>
+            <span class="node-icon" aria-hidden="true">📁</span>
+            <span class="node-label">project-root</span>
+          </div>
+
+          <ul role="group">
+            <!-- Nested Folder: source -->
+            <li role="treeitem" aria-expanded="false" aria-selected="false" id="node-src" tabindex="-1">
+              <div class="node-content" style="--tree-depth: 1;">
+                <span class="tree-toggle" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </span>
+                <span class="node-icon" aria-hidden="true">📁</span>
+                <span class="node-label">src</span>
+              </div>
+
+              <ul role="group">
+                <!-- Leaf File: index.js -->
+                <li role="treeitem" aria-selected="false" class="leaf" id="node-indexjs" tabindex="-1" data-type="js" data-size="1.2 KB" data-date="2 hours ago">
+                  <div class="node-content" style="--tree-depth: 2;">
+                    <span class="node-spacer" aria-hidden="true"></span>
+                    <span class="node-icon" aria-hidden="true">📄</span>
+                    <span class="node-label">index.js</span>
+                  </div>
+                </li>
+                <!-- Leaf File: utils.js -->
+                <li role="treeitem" aria-selected="false" class="leaf" id="node-utilsjs" tabindex="-1" data-type="js" data-size="3.4 KB" data-date="1 day ago">
+                  <div class="node-content" style="--tree-depth: 2;">
+                    <span class="node-spacer" aria-hidden="true"></span>
+                    <span class="node-icon" aria-hidden="true">📄</span>
+                    <span class="node-label">utils.js</span>
+                  </div>
+                </li>
+              </ul>
+            </li>
+
+            <!-- Nested Folder: assets -->
+            <li role="treeitem" aria-expanded="false" aria-selected="false" id="node-assets" tabindex="-1">
+              <div class="node-content" style="--tree-depth: 1;">
+                <span class="tree-toggle" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </span>
+                <span class="node-icon" aria-hidden="true">📁</span>
+                <span class="node-label">assets</span>
+              </div>
+
+              <ul role="group">
+                <!-- Leaf File: logo.png -->
+                <li role="treeitem" aria-selected="false" class="leaf" id="node-logopng" tabindex="-1" data-type="image" data-size="45 KB" data-date="3 days ago">
+                  <div class="node-content" style="--tree-depth: 2;">
+                    <span class="node-spacer" aria-hidden="true"></span>
+                    <span class="node-icon" aria-hidden="true">🖼️</span>
+                    <span class="node-label">logo.png</span>
+                  </div>
+                </li>
+                <!-- Leaf File: styles.css -->
+                <li role="treeitem" aria-selected="false" class="leaf" id="node-stylescss" tabindex="-1" data-type="css" data-size="12 KB" data-date="Yesterday">
+                  <div class="node-content" style="--tree-depth: 2;">
+                    <span class="node-spacer" aria-hidden="true"></span>
+                    <span class="node-icon" aria-hidden="true">📄</span>
+                    <span class="node-label">styles.css</span>
+                  </div>
+                </li>
+              </ul>
+            </li>
+
+            <!-- Leaf File: package.json -->
+            <li role="treeitem" aria-selected="false" class="leaf" id="node-packagejson" tabindex="-1" data-type="json" data-size="840 Bytes" data-date="Just now">
+              <div class="node-content" style="--tree-depth: 1;">
+                <span class="node-spacer" aria-hidden="true"></span>
+                <span class="node-icon" aria-hidden="true">⚙️</span>
+                <span class="node-label">package.json</span>
+              </div>
+            </li>
+
+            <!-- Leaf File: README.md -->
+            <li role="treeitem" aria-selected="false" class="leaf" id="node-readmemd" tabindex="-1" data-type="markdown" data-size="4.5 KB" data-date="5 mins ago">
+              <div class="node-content" style="--tree-depth: 1;">
+                <span class="node-spacer" aria-hidden="true"></span>
+                <span class="node-icon" aria-hidden="true">📝</span>
+                <span class="node-label">README.md</span>
+              </div>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </aside>
+
+    <!-- File Viewer Panel -->
+    <main class="content-viewer">
+      <!-- Empty Placeholder -->
+      <div class="viewer-placeholder" id="viewer-placeholder">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 13l-3 3m0 0l-3-3m3 3V8m0 13a9 9 0 110-18 9 9 0 010 18z" />
+        </svg>
+        <p>Select a file in the workspace tree to view details and file contents.</p>
+      </div>
+
+      <!-- File details panel -->
+      <div class="file-details" id="file-details">
+        <div class="file-header">
+          <h2 class="file-title" id="display-title">file-name.js</h2>
+          <div class="file-meta">
+            Type: <span id="display-type">JavaScript</span> &bull;
+            Size: <span id="display-size">0 KB</span> &bull;
+            Modified: <span id="display-date">Never</span>
+          </div>
+        </div>
+        <div class="file-body" id="display-content">
+          // Content will load here
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <section class="instructions">
+    <h2>Accessibility Instructions & Keyboard Controls</h2>
+    <ul>
+      <li><strong>Tab:</strong> Focuses the workspace tree (navigates into the currently active item). Tabbing again moves focus out of the entire sidebar.</li>
+      <li><strong>Up / Down Arrows:</strong> Navigates through visible nodes vertically.</li>
+      <li><strong>Right Arrow:</strong> Opens folders when collapsed. When already open, jumps to the first nested item.</li>
+      <li><strong>Left Arrow:</strong> Closes folders when open. When already closed, moves focus up to the parent directory.</li>
+      <li><strong>Enter / Space:</strong> Selects the active node. If a folder is targeted, toggles its open/closed state.</li>
+      <li><strong>Home / End:</strong> Instantly focus the first item (root) or the last visible child node in the entire list.</li>
+      <li><strong>Asterisk (*):</strong> Expands the currently focused folder and all of its sibling folders at the exact same depth level.</li>
+    </ul>
+  </section>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const tree = document.getElementById('workspace-tree');
+
+      // Mock File Contents
+      const mockContents = {
+        'index.js': `// Entry point for workspace\nimport { greet } from './utils.js';\n\nconsole.log(greet('Developer'));`,
+        'utils.js': `// Shared utility helpers\nexport function greet(name) {\n  return \`Hello, \${name}! Let's build accessible websites.\`;\n}`,
+        'logo.png': `[Binary PNG Image Data]\nSize: 45 KB\nDimensions: 512 x 512 px\nFormat: RGBA Color Space`,
+        'styles.css': `/* Primary Application Stylesheet */\n:root {\n  --brand-color: #2563eb;\n}\n\nbody {\n  margin: 0;\n  padding: 0;\n}`,
+        'package.json': `{\n  "name": "accessible-workspace",\n  "version": "1.0.0",\n  "description": "Accessible tree view layout",\n  "main": "src/index.js",\n  "dependencies": {}\n}`,
+        'README.md': `# Accessible Tree View\n\nThis is a clean-room implementation of a nested workspace folder layout.\n\nAll focus boundaries are strictly constrained to WAI-ARIA standards.`
+      };
+
+      // Helper to check if a node is a parent folder
+      function isParentNode(item) {
+        return item.hasAttribute('aria-expanded');
+      }
+
+      // Helper to list all currently visible treeitems in sequential order
+      function getVisibleNodes() {
+        const allNodes = Array.from(tree.querySelectorAll('li[role="treeitem"]'));
+        return allNodes.filter(node => {
+          // A node is visible if none of its ancestor groups are closed
+          let parentGroup = node.closest('ul[role="group"]');
+          while (parentGroup) {
+            const parentItem = parentGroup.closest('li[role="treeitem"]');
+            if (parentItem && parentItem.getAttribute('aria-expanded') === 'false') {
+              return false;
+            }
+            parentGroup = parentItem ? parentItem.parentElement.closest('ul[role="group"]') : null;
+          }
+          return true;
+        });
+      }
+
+      // Sets programmatic focus on a node, updating roving tabindex
+      function setNodeFocus(item) {
+        if (!item) return;
+
+        // Reset tabindex of all nodes to -1
+        const allNodes = tree.querySelectorAll('li[role="treeitem"]');
+        allNodes.forEach(node => node.setAttribute('tabindex', '-1'));
+
+        // Highlight the new node and focus it
+        item.setAttribute('tabindex', '0');
+        item.focus();
+      }
+
+      // Selects/activates a node and loads its metadata/contents into viewer
+      function selectNode(item) {
+        if (!item) return;
+
+        // De-select all other nodes
+        const allNodes = tree.querySelectorAll('li[role="treeitem"]');
+        allNodes.forEach(node => node.setAttribute('aria-selected', 'false'));
+
+        // Set selected node attributes
+        item.setAttribute('aria-selected', 'true');
+
+        const label = item.querySelector('.node-label').textContent;
+        const placeholder = document.getElementById('viewer-placeholder');
+        const details = document.getElementById('file-details');
+
+        if (isParentNode(item)) {
+          // For folders, toggle expansion as primary action
+          toggleParentState(item);
+        } else {
+          // For files, load file details into workspace viewer
+          placeholder.style.display = 'none';
+          details.classList.add('active');
+
+          document.getElementById('display-title').textContent = label;
+          document.getElementById('display-type').textContent = item.dataset.type || 'Unknown';
+          document.getElementById('display-size').textContent = item.dataset.size || 'N/A';
+          document.getElementById('display-date').textContent = item.dataset.date || 'Unknown';
+
+          const textContent = mockContents[label] || `// No preview available for ${label}`;
+          document.getElementById('display-content').textContent = textContent;
+        }
+      }
+
+      // Toggle expansion state of parent folder
+      function toggleParentState(item) {
+        if (!isParentNode(item)) return;
+        const isExpanded = item.getAttribute('aria-expanded') === 'true';
+        item.setAttribute('aria-expanded', !isExpanded ? 'true' : 'false');
+      }
+
+      // Master Keyboard Event Handler on the tree root container
+      tree.addEventListener('keydown', (e) => {
+        const activeNode = document.activeElement;
+        if (!activeNode || activeNode.getAttribute('role') !== 'treeitem') return;
+
+        const visibleNodes = getVisibleNodes();
+        const currentIndex = visibleNodes.indexOf(activeNode);
+
+        let preventDefault = true;
+
+        switch (e.key) {
+          case 'ArrowDown':
+            // Focus next visible node
+            if (currentIndex < visibleNodes.length - 1) {
+              setNodeFocus(visibleNodes[currentIndex + 1]);
+            }
+            break;
+
+          case 'ArrowUp':
+            // Focus previous visible node
+            if (currentIndex > 0) {
+              setNodeFocus(visibleNodes[currentIndex - 1]);
+            }
+            break;
+
+          case 'ArrowRight':
+            if (isParentNode(activeNode)) {
+              if (activeNode.getAttribute('aria-expanded') === 'false') {
+                // If collapsed, expand it
+                toggleParentState(activeNode);
+              } else {
+                // If expanded, move focus to first nested child node
+                const childGroup = activeNode.querySelector('ul[role="group"]');
+                if (childGroup) {
+                  const firstChild = childGroup.querySelector('li[role="treeitem"]');
+                  if (firstChild) setNodeFocus(firstChild);
+                }
+              }
+            }
+            break;
+
+          case 'ArrowLeft':
+            if (isParentNode(activeNode) && activeNode.getAttribute('aria-expanded') === 'true') {
+              // If open, close it
+              toggleParentState(activeNode);
+            } else {
+              // Otherwise, move focus to its parent node
+              const parentGroup = activeNode.parentElement.closest('ul[role="group"]');
+              if (parentGroup) {
+                const parentItem = parentGroup.closest('li[role="treeitem"]');
+                if (parentItem) setNodeFocus(parentItem);
+              }
+            }
+            break;
+
+          case 'Enter':
+          case ' ':
+            // Select and activate item
+            selectNode(activeNode);
+            break;
+
+          case 'Home':
+            // Jump to absolute start
+            if (visibleNodes.length > 0) {
+              setNodeFocus(visibleNodes[0]);
+            }
+            break;
+
+          case 'End':
+            // Jump to absolute end
+            if (visibleNodes.length > 0) {
+              setNodeFocus(visibleNodes[visibleNodes.length - 1]);
+            }
+            break;
+
+          case '*':
+            // Expand focused node and all adjacent parent folders on the same level
+            if (isParentNode(activeNode)) {
+              const depth = activeNode.querySelector('.node-content').style.getPropertyValue('--tree-depth');
+              const siblingNodes = tree.querySelectorAll(`li[role="treeitem"] > .node-content[style*="--tree-depth: ${depth}"]`);
+              siblingNodes.forEach(contentEl => {
+                const itemNode = contentEl.closest('li[role="treeitem"]');
+                if (isParentNode(itemNode)) {
+                  itemNode.setAttribute('aria-expanded', 'true');
+                }
+              });
+            }
+            break;
+
+          default:
+            // Standard typeahead: focus next node starting with key letter
+            if (e.key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey) {
+              const char = e.key.toLowerCase();
+              let searchIndex = currentIndex + 1;
+              for (let i = 0; i < visibleNodes.length; i++) {
+                const checkedNode = visibleNodes[searchIndex % visibleNodes.length];
+                const labelText = checkedNode.querySelector('.node-label').textContent.trim().toLowerCase();
+                if (labelText.startsWith(char)) {
+                  setNodeFocus(checkedNode);
+                  break;
+                }
+                searchIndex++;
+              }
+            } else {
+              preventDefault = false;
+            }
+            break;
+        }
+
+        if (preventDefault) {
+          e.preventDefault();
+        }
+      });
+
+      // Mouse click activation mapping
+      tree.addEventListener('click', (e) => {
+        const toggleBtn = e.target.closest('.tree-toggle');
+        const nodeContent = e.target.closest('.node-content');
+
+        if (nodeContent) {
+          const itemNode = nodeContent.closest('li[role="treeitem"]');
+          if (itemNode) {
+            setNodeFocus(itemNode);
+
+            // If the user specifically clicked the chevron/disclosure toggle button
+            if (toggleBtn) {
+              e.stopPropagation();
+              toggleParentState(itemNode);
+            } else {
+              selectNode(itemNode);
+            }
+          }
+        }
+      });
+    });
+  </script>
+</body>
+</html>
