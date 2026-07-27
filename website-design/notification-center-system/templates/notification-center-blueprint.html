@@ -1,0 +1,223 @@
+<!--
+  NOTIFICATION CENTER BLUEPRINT
+
+  This template provides a robust, semantic, and highly accessible HTML/CSS structure
+  for a popover-based Notification Center. It includes complete ARIA landmarks,
+  roles, states, and action patterns to ensure compliance with WCAG 2.2 AA.
+-->
+
+<!-- 1. Header Trigger & Bell Button -->
+<div class="notification-trigger-wrapper">
+  <button
+    type="button"
+    id="notification-trigger"
+    class="notification-bell-btn"
+    aria-haspopup="true"
+    aria-expanded="false"
+    aria-controls="notification-panel"
+    aria-label="Notifications, 4 unread items"
+  >
+    <!-- Bell Icon SVG -->
+    <svg class="icon-bell" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path>
+      <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path>
+    </svg>
+
+    <!-- Numeric Notification Badge (Hidden when count is 0) -->
+    <span class="notification-badge" id="notification-badge-count">4</span>
+  </button>
+</div>
+
+<!-- 2. Notification Panel Container (Popover style, positioned absolute relative to trigger) -->
+<section
+  id="notification-panel"
+  class="notification-panel-container"
+  aria-labelledby="notification-panel-title"
+  hidden
+>
+  <!-- Panel Header -->
+  <header class="notification-panel-header">
+    <div class="header-main-row">
+      <h2 id="notification-panel-title" class="panel-heading">Notifications</h2>
+
+      <!-- Mark all as read button -->
+      <button
+        type="button"
+        class="btn-text-action"
+        aria-label="Mark all notifications as read"
+      >
+        Mark all read
+      </button>
+    </div>
+
+    <!-- Notification Categories / Tablist (Optional for denser applications) -->
+    <div class="notification-tabs-nav" role="tablist" aria-label="Filter notifications">
+      <button
+        type="button"
+        role="tab"
+        aria-selected="true"
+        aria-controls="panel-all-notifications"
+        id="tab-all"
+        tabindex="0"
+      >
+        All <span class="tab-badge">4</span>
+      </button>
+      <button
+        type="button"
+        role="tab"
+        aria-selected="false"
+        aria-controls="panel-mentions-notifications"
+        id="tab-mentions"
+        tabindex="-1"
+      >
+        Mentions <span class="tab-badge">2</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Panel Body (Scrollable Feed) -->
+  <!-- Tabpanel: All Notifications -->
+  <div
+    id="panel-all-notifications"
+    role="tabpanel"
+    aria-labelledby="tab-all"
+    class="notification-scroll-area"
+  >
+    <!-- Use structured, semantic list of items -->
+    <ol class="notification-list" role="list">
+
+      <!-- Item 1: Unread Social Mention (High priority, user-generated) -->
+      <li class="notification-card state-unread" tabindex="0" aria-labelledby="notif-1-title notif-1-meta">
+        <!-- Unread Indicator Dot -->
+        <div class="unread-status-dot" aria-hidden="true"></div>
+
+        <!-- User Avatar -->
+        <div class="avatar-container">
+          <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=80&h=80" alt="Jane Cooper" class="avatar-img" />
+        </div>
+
+        <!-- Content Block -->
+        <div class="card-content-block">
+          <p class="notification-text" id="notif-1-title">
+            <strong class="user-name">Jane Cooper</strong> replied to your comment in <span class="workspace-context">Design Tokens Spec</span>
+          </p>
+          <blockquote class="text-excerpt">
+            "We should unify our hex color definitions under semantic tokens."
+          </blockquote>
+          <span class="time-stamp" id="notif-1-meta">5 mins ago</span>
+
+          <!-- Contextual Action Buttons -->
+          <div class="card-actions-row">
+            <a href="/project/tokens?comment=103" class="btn-card-primary">View comment</a>
+            <button type="button" class="btn-card-secondary">Reply inline</button>
+          </div>
+        </div>
+
+        <!-- Hover / Contextual Quick Operations -->
+        <div class="card-quick-ops">
+          <button type="button" class="btn-op-icon" aria-label="Mark notification as read">
+            <!-- Checkmark SVG -->
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </button>
+          <button type="button" class="btn-op-icon" aria-label="Archive notification">
+            <!-- Trash/Archive SVG -->
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+          </button>
+        </div>
+      </li>
+
+      <!-- Item 2: Unread System Event (System-generated, status indicator) -->
+      <li class="notification-card state-unread" tabindex="-1" aria-labelledby="notif-2-title notif-2-meta">
+        <div class="unread-status-dot" aria-hidden="true"></div>
+
+        <!-- System Status Icon instead of Avatar -->
+        <div class="status-icon-container bg-success-light text-success">
+          <!-- Check circle icon -->
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+          </svg>
+        </div>
+
+        <div class="card-content-block">
+          <p class="notification-text" id="notif-2-title">
+            <strong class="system-status">Data export complete</strong>. Your file is ready for download.
+          </p>
+          <p class="text-excerpt">"Users-Export-Q3-Final.csv (14.2 MB)"</p>
+          <span class="time-stamp" id="notif-2-meta">2 hours ago</span>
+
+          <div class="card-actions-row">
+            <a href="/downloads/users" class="btn-card-primary" download>Download CSV</a>
+          </div>
+        </div>
+
+        <div class="card-quick-ops">
+          <button type="button" class="btn-op-icon" aria-label="Mark notification as read">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          </button>
+          <button type="button" class="btn-op-icon" aria-label="Archive notification">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+          </button>
+        </div>
+      </li>
+
+      <!-- Item 3: Read Notification -->
+      <li class="notification-card state-read" tabindex="-1" aria-labelledby="notif-3-title notif-3-meta">
+        <!-- Status dot is hidden or transparent for read items -->
+        <div class="unread-status-dot hidden" aria-hidden="true"></div>
+
+        <div class="avatar-container">
+          <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=80&h=80" alt="Arron Flynn" class="avatar-img" />
+        </div>
+
+        <div class="card-content-block">
+          <p class="notification-text" id="notif-3-title">
+            <strong class="user-name">Arron Flynn</strong> invited you to edit <span class="workspace-context">CoastAi-Skills-Repo</span>
+          </p>
+          <span class="time-stamp" id="notif-3-meta">Yesterday at 4:12 PM</span>
+        </div>
+
+        <div class="card-quick-ops">
+          <button type="button" class="btn-op-icon" aria-label="Archive notification">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+          </button>
+        </div>
+      </li>
+    </ol>
+  </div>
+
+  <!-- Panel Footer -->
+  <footer class="notification-panel-footer">
+    <a href="/notifications" class="btn-panel-link-full">View all notifications</a>
+    <a href="/settings/notifications" class="btn-panel-link-icon" aria-label="Notification Preferences">
+      <!-- Cog/Settings Icon SVG -->
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <circle cx="12" cy="12" r="3"></circle>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+      </svg>
+    </a>
+  </footer>
+</section>
+
+<!--
+  CSS DESIGN TOKENS (CSS Variables Hooks)
+  Add these to your stylesheet to control the notification center layout and presentation:
+
+  :root {
+    --notif-panel-width: 380px;
+    --notif-panel-bg: #ffffff;
+    --notif-panel-border: #e4e4e7;
+    --notif-card-unread-bg: #f4f8ff;
+    --notif-card-read-bg: #ffffff;
+    --notif-card-hover-bg: #f9fafb;
+    --notif-accent-color: #2563eb;
+    --notif-text-primary: #18181b;
+    --notif-text-muted: #71717a;
+    --notif-border-radius: 8px;
+  }
+-->
