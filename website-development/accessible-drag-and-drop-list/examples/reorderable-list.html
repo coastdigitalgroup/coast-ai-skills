@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Accessible Drag-and-Drop List Reordering</title>
+  <style>
+    :root {
+      --primary-color: #2563eb;
+      --primary-dark: #1d4ed8;
+      --text-color: #1f2937;
+      --border-color: #e5e7eb;
+      --bg-color: #f9fafb;
+      --focus-ring: 0 0 0 3px rgba(37, 99, 235, 0.4);
+      --item-bg: #ffffff;
+      --grabbed-bg: #eff6ff;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: var(--text-color);
+      background-color: var(--bg-color);
+      line-height: 1.5;
+      padding: 2rem 1rem;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      font-size: 1.75rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .instructions {
+      font-size: 0.875rem;
+      color: #4b5563;
+      margin-bottom: 1.5rem;
+      padding: 0.75rem;
+      background-color: #f3f4f6;
+      border-left: 4px solid var(--primary-color);
+      border-radius: 0 4px 4px 0;
+    }
+
+    /* Screen Reader Only Utility */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    /* List Container Styles */
+    .dnd-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    /* List Item Styles */
+    .dnd-item {
+      display: flex;
+      align-items: center;
+      padding: 0.75rem 1rem;
+      background-color: var(--item-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+      position: relative;
+      user-select: none;
+    }
+
+    /* Draggable Handle Styles */
+    .dnd-handle {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      margin-right: 0.75rem;
+      padding: 0;
+      background-color: transparent;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      cursor: grab;
+      color: #9ca3af;
+      touch-action: none; /* Prevents default panning/zooming during pointer drag */
+    }
+
+    .dnd-handle:focus-visible {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: var(--focus-ring);
+      color: var(--primary-color);
+    }
+
+    .dnd-handle svg {
+      width: 20px;
+      height: 20px;
+      fill: currentColor;
+    }
+
+    /* State Styles */
+    .dnd-item.is-grabbed {
+      background-color: var(--grabbed-bg);
+      border-color: var(--primary-color);
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+      z-index: 10;
+    }
+
+    .dnd-item.is-grabbed .dnd-handle {
+      cursor: grabbing;
+      color: var(--primary-color);
+    }
+
+    /* Dragover Drop Indicator class (Native DnD path) */
+    .dnd-item.drag-over {
+      border-top: 3px solid var(--primary-color);
+      padding-top: calc(0.75rem - 2px);
+    }
+
+    .dnd-item.drag-over-bottom {
+      border-bottom: 3px solid var(--primary-color);
+      padding-bottom: calc(0.75rem - 2px);
+    }
+
+    /* Content styling */
+    .dnd-content {
+      flex-grow: 1;
+      font-weight: 500;
+    }
+
+    .dnd-meta {
+      font-size: 0.875rem;
+      color: #6b7280;
+    }
+
+    /* Disabled animations for users who prefer reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+      .dnd-item {
+        transition: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Interactive Task Planner</h1>
+
+  <!-- Static Assistive Description -->
+  <p id="dnd-instructions" class="instructions">
+    <strong>Accessibility Guide:</strong> Use standard drag-and-drop to reorder items using your mouse/touch.
+    Using a keyboard? Press <code>Tab</code> to focus on a handle, press <code>Space</code> to grab,
+    use <code>Arrow Up</code> or <code>Arrow Down</code> to swap positions, and <code>Space</code> again to drop.
+    Press <code>Escape</code> at any time to cancel.
+  </p>
+
+  <!-- Live ARIA Announcer Region -->
+  <div id="dnd-announcer" class="sr-only" aria-live="assertive" aria-atomic="true"></div>
+
+  <!-- Reorderable List Container -->
+  <ul class="dnd-list" id="sortable-list" role="list">
+
+    <li class="dnd-item" id="item-1" role="listitem">
+      <button class="dnd-handle"
+              aria-label="Reorder Task: Update landing page hero"
+              aria-describedby="dnd-instructions"
+              aria-pressed="false"
+              type="button">
+        <!-- Reorder Handle Icon -->
+        <svg viewBox="0 0 20 20">
+          <path d="M7 4a1 1 0 1 0 0 2h6a1 1 0 1 0 0-2H7zm0 5a1 1 0 1 0 0 2h6a1 1 0 1 0 0-2H7zm0 5a1 1 0 1 0 0 2h6a1 1 0 1 0 0-2H7z"/>
+        </svg>
+      </button>
+      <div class="dnd-content">Update landing page hero</div>
+      <div class="dnd-meta">Priority 1</div>
+    </li>
+
+    <li class="dnd-item" id="item-2" role="listitem">
+      <button class="dnd-handle"
+              aria-label="Reorder Task: Fix API routing latency"
+              aria-describedby="dnd-instructions"
+              aria-pressed="false"
+              type="button">
+        <svg viewBox="0 0 20 20">
+          <path d="M7 4a1 1 0 1 0 0 2h6a1 1 0 1 0 0-2H7zm0 5a1 1 0 1 0 0 2h6a1 1 0 1 0 0-2H7zm0 5a1 1 0 1 0 0 2h6a1 1 0 1 0 0-2H7z"/>
+        </svg>
+      </button>
+      <div class="dnd-content">Fix API routing latency</div>
+      <div class="dnd-meta">Priority 2</div>
+    </li>
+
+    <li class="dnd-item" id="item-3" role="listitem">
+      <button class="dnd-handle"
+              aria-label="Reorder Task: Refactor global CSS system"
+              aria-describedby="dnd-instructions"
+              aria-pressed="false"
+              type="button">
+        <svg viewBox="0 0 20 20">
+          <path d="M7 4a1 1 0 1 0 0 2h6a1 1 0 1 0 0-2H7zm0 5a1 1 0 1 0 0 2h6a1 1 0 1 0 0-2H7zm0 5a1 1 0 1 0 0 2h6a1 1 0 1 0 0-2H7z"/>
+        </svg>
+      </button>
+      <div class="dnd-content">Refactor global CSS system</div>
+      <div class="dnd-meta">Priority 3</div>
+    </li>
+
+    <li class="dnd-item" id="item-4" role="listitem">
+      <button class="dnd-handle"
+              aria-label="Reorder Task: Run security penetration audit"
+              aria-describedby="dnd-instructions"
+              aria-pressed="false"
+              type="button">
+        <svg viewBox="0 0 20 20">
+          <path d="M7 4a1 1 0 1 0 0 2h6a1 1 0 1 0 0-2H7zm0 5a1 1 0 1 0 0 2h6a1 1 0 1 0 0-2H7zm0 5a1 1 0 1 0 0 2h6a1 1 0 1 0 0-2H7z"/>
+        </svg>
+      </button>
+      <div class="dnd-content">Run security penetration audit</div>
+      <div class="dnd-meta">Priority 4</div>
+    </li>
+
+  </ul>
+
+  <script>
+    class AccessibleDnD {
+      constructor(listContainerId, announcerId) {
+        this.list = document.getElementById(listContainerId);
+        this.announcer = document.getElementById(announcerId);
+        this.activeItem = null;
+        this.grabbedIndex = -1;
+        this.originalOrder = [];
+
+        this.initKeyboard();
+        this.initPointerDrag();
+      }
+
+      // Live ARIA announcer helper
+      announce(text) {
+        this.announcer.textContent = '';
+        // Subtle setTimeout ensures NVDA and VoiceOver register the text node replacement
+        setTimeout(() => {
+          this.announcer.textContent = text;
+        }, 50);
+      }
+
+      getListName(item) {
+        return item.querySelector('.dnd-content').textContent.trim();
+      }
+
+      getCurrentIndex(item) {
+        return Array.from(this.list.children).indexOf(item);
+      }
+
+      // --- KEYBOARD METHODOLOGY ---
+      initKeyboard() {
+        this.list.addEventListener('keydown', (e) => {
+          const handle = e.target.closest('.dnd-handle');
+          if (!handle) return;
+
+          const item = handle.closest('.dnd-item');
+          const items = Array.from(this.list.children);
+          const currentIndex = items.indexOf(item);
+
+          switch (e.key) {
+            case ' ': // Spacebar
+            case 'Enter':
+              e.preventDefault();
+              this.toggleGrab(item, handle, currentIndex);
+              break;
+
+            case 'ArrowDown':
+            case 'ArrowRight':
+              if (this.activeItem) {
+                e.preventDefault();
+                this.moveItem(currentIndex, currentIndex + 1);
+              }
+              break;
+
+            case 'ArrowUp':
+            case 'ArrowLeft':
+              if (this.activeItem) {
+                e.preventDefault();
+                this.moveItem(currentIndex, currentIndex - 1);
+              }
+              break;
+
+            case 'Escape':
+              if (this.activeItem) {
+                e.preventDefault();
+                this.cancelReorder();
+              }
+              break;
+
+            case 'Tab':
+              // Auto-save/drop on blur
+              if (this.activeItem) {
+                this.toggleGrab(this.activeItem, this.activeItem.querySelector('.dnd-handle'), currentIndex);
+              }
+              break;
+          }
+        });
+      }
+
+      toggleGrab(item, handle, index) {
+        const isGrabbed = handle.getAttribute('aria-pressed') === 'true';
+
+        if (!isGrabbed) {
+          // GRAB ITEM
+          this.activeItem = item;
+          this.grabbedIndex = index;
+          this.originalOrder = Array.from(this.list.children);
+
+          item.classList.add('is-grabbed');
+          handle.setAttribute('aria-pressed', 'true');
+
+          this.announce(`Grabbed item "${this.getListName(item)}". Position ${index + 1} of ${this.originalOrder.length}. Use Arrow Up and Arrow Down to reorder, Spacebar to drop, Escape to cancel.`);
+        } else {
+          // DROP ITEM
+          this.activeItem = null;
+          item.classList.remove('is-grabbed');
+          handle.setAttribute('aria-pressed', 'false');
+
+          this.announce(`Dropped "${this.getListName(item)}" at position ${index + 1} of ${this.list.children.length}. List order updated.`);
+          this.onReorderComplete();
+        }
+      }
+
+      moveItem(fromIndex, toIndex) {
+        const items = Array.from(this.list.children);
+        if (toIndex < 0 || toIndex >= items.length) return;
+
+        const currentItem = items[fromIndex];
+        const targetItem = items[toIndex];
+
+        // Swap the nodes in the DOM
+        if (toIndex > fromIndex) {
+          // Moving down: insert after targetItem
+          this.list.insertBefore(currentItem, targetItem.nextSibling);
+        } else {
+          // Moving up: insert before targetItem
+          this.list.insertBefore(currentItem, targetItem);
+        }
+
+        // Mandatory: restore keyboard focus to the handle immediately to prevent browser-focus strip!
+        const handle = currentItem.querySelector('.dnd-handle');
+        handle.focus();
+
+        this.announce(`Moved item "${this.getListName(currentItem)}" to position ${toIndex + 1} of ${items.length}.`);
+      }
+
+      cancelReorder() {
+        if (!this.activeItem) return;
+
+        // Restore original node hierarchy
+        this.list.innerHTML = '';
+        this.originalOrder.forEach(node => this.list.appendChild(node));
+
+        const originalItem = this.originalOrder[this.grabbedIndex];
+        const handle = originalItem.querySelector('.dnd-handle');
+
+        originalItem.classList.remove('is-grabbed');
+        handle.setAttribute('aria-pressed', 'false');
+
+        // Return focus to the original handle
+        handle.focus();
+
+        this.announce(`Reordering canceled. "${this.getListName(originalItem)}" returned to position ${this.grabbedIndex + 1}.`);
+        this.activeItem = null;
+        this.originalOrder = [];
+      }
+
+      onReorderComplete() {
+        // Trigger save callbacks or API triggers here
+        console.log('New order saved:', Array.from(this.list.children).map(item => item.id));
+      }
+
+      // --- MOUSE & TOUCH POINTER DRAG ---
+      initPointerDrag() {
+        let draggedItem = null;
+        let dragOverItem = null;
+
+        // Turn on draggable attributes dynamically for pointers
+        const items = this.list.querySelectorAll('.dnd-item');
+        items.forEach(item => {
+          item.setAttribute('draggable', 'true');
+        });
+
+        this.list.addEventListener('dragstart', (e) => {
+          // Restrict dragging initiation to the handle element only
+          const handle = e.target.closest('.dnd-handle');
+          if (!handle) {
+            e.preventDefault();
+            return;
+          }
+
+          draggedItem = e.target.closest('.dnd-item');
+          if (!draggedItem) return;
+
+          draggedItem.classList.add('is-grabbed');
+          e.dataTransfer.effectAllowed = 'move';
+          e.dataTransfer.setData('text/plain', draggedItem.id);
+
+          this.announce(`Started dragging item "${this.getListName(draggedItem)}".`);
+        });
+
+        this.list.addEventListener('dragover', (e) => {
+          e.preventDefault(); // Required to allow drop events
+          const currentOverItem = e.target.closest('.dnd-item');
+          if (!currentOverItem || currentOverItem === draggedItem) return;
+
+          // Clear previous indicator styling
+          if (dragOverItem && dragOverItem !== currentOverItem) {
+            dragOverItem.classList.remove('drag-over', 'drag-over-bottom');
+          }
+
+          dragOverItem = currentOverItem;
+
+          // Determine mouse layout position to decide inserting above or below
+          const rect = dragOverItem.getBoundingClientRect();
+          const relativeY = e.clientY - rect.top;
+          const midY = rect.height / 2;
+
+          if (relativeY < midY) {
+            dragOverItem.classList.add('drag-over');
+            dragOverItem.classList.remove('drag-over-bottom');
+          } else {
+            dragOverItem.classList.add('drag-over-bottom');
+            dragOverItem.classList.remove('drag-over');
+          }
+        });
+
+        this.list.addEventListener('dragleave', (e) => {
+          const item = e.target.closest('.dnd-item');
+          if (item) {
+            item.classList.remove('drag-over', 'drag-over-bottom');
+          }
+        });
+
+        this.list.addEventListener('drop', (e) => {
+          e.preventDefault();
+          if (!draggedItem || !dragOverItem) return;
+
+          const isTopIndicator = dragOverItem.classList.contains('drag-over');
+
+          if (isTopIndicator) {
+            this.list.insertBefore(draggedItem, dragOverItem);
+          } else {
+            this.list.insertBefore(draggedItem, dragOverItem.nextSibling);
+          }
+
+          const newIdx = this.getCurrentIndex(draggedItem);
+          this.announce(`Dropped "${this.getListName(draggedItem)}" at position ${newIdx + 1} of ${this.list.children.length}.`);
+          this.onReorderComplete();
+        });
+
+        this.list.addEventListener('dragend', () => {
+          if (draggedItem) {
+            draggedItem.classList.remove('is-grabbed');
+          }
+          const allItems = this.list.querySelectorAll('.dnd-item');
+          allItems.forEach(item => item.classList.remove('drag-over', 'drag-over-bottom'));
+          draggedItem = null;
+          dragOverItem = null;
+        });
+      }
+    }
+
+    // Instantiation
+    document.addEventListener('DOMContentLoaded', () => {
+      new AccessibleDnD('sortable-list', 'dnd-announcer');
+    });
+  </script>
+</body>
+</html>
