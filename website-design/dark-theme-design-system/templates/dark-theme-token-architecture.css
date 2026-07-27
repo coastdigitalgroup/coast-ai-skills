@@ -1,0 +1,300 @@
+/**
+ * Dark Theme Design System Token Architecture
+ *
+ * This blueprint defines a unified, semantic, and highly maintainable design token
+ * architecture for dual-theme (Light & Dark) applications. It uses modern CSS Custom
+ * Properties, semantic mapping, interaction state patterns, and media adaptations.
+ *
+ * Usage:
+ * 1. Import this stylesheet into your project base.
+ * 2. Use the semantic tokens (e.g., var(--bg-canvas)) on elements, never primitive hex codes.
+ * 3. Toggle dark theme programmatically by setting document.documentElement.setAttribute('data-theme', 'dark')
+ *    or let it sync automatically with system user preferences.
+ */
+
+/* ==========================================================================
+   1. GLOBAL SYSTEM DEFINITIONS (LIGHT THEME DEFAULT)
+   ========================================================================== */
+
+:root {
+  /* --- A. Primitive Color Scale (OKLCH Space for perceptual consistency) --- */
+  /* Neutrals: Light and Dark Slate Grays */
+  --neutral-50: oklch(0.97 0.01 240);
+  --neutral-100: oklch(0.94 0.01 240);
+  --neutral-200: oklch(0.89 0.02 240);
+  --neutral-300: oklch(0.81 0.02 240);
+  --neutral-400: oklch(0.71 0.02 240);
+  --neutral-500: oklch(0.61 0.03 240);
+  --neutral-600: oklch(0.48 0.03 240);
+  --neutral-700: oklch(0.38 0.03 240);
+  --neutral-800: oklch(0.28 0.03 240);
+  --neutral-900: oklch(0.18 0.03 240);
+  --neutral-950: oklch(0.12 0.02 240);
+
+  /* Primary Brand Accents (Vibrant Blue in Light Mode) */
+  --brand-50: oklch(0.96 0.02 250);
+  --brand-100: oklch(0.92 0.04 250);
+  --brand-200: oklch(0.83 0.08 250);
+  --brand-300: oklch(0.73 0.13 250);
+  --brand-400: oklch(0.62 0.18 250);
+  --brand-500: oklch(0.51 0.22 250); /* Brand Base Light Mode */
+  --brand-600: oklch(0.43 0.23 250);
+  --brand-700: oklch(0.36 0.22 250);
+  --brand-800: oklch(0.29 0.19 250);
+  --brand-900: oklch(0.22 0.15 250);
+
+  /* Semantic Accents: Success (Green), Warning (Amber), Error (Red) */
+  --success-light: oklch(0.52 0.18 145);
+  --success-dark:  oklch(0.78 0.15 145);
+  --warning-light: oklch(0.65 0.17 75);
+  --warning-dark:  oklch(0.82 0.14 75);
+  --error-light:   oklch(0.55 0.22 25);
+  --error-dark:    oklch(0.74 0.17 25);
+
+  /* --- B. Semantic Tokens (Light Theme Values) --- */
+
+  /* Canvas & Surface Layers (Elevation) */
+  --bg-canvas: var(--neutral-50);         /* Level 0: Ground Base background */
+  --bg-surface: var(--neutral-100);       /* Level 1: Standard Card/Sheet background */
+  --bg-surface-raised: #ffffff;           /* Level 2: Nested widgets/floating panels */
+  --bg-surface-overlay: #ffffff;          /* Level 3: Dropdowns, Popovers, Modals */
+
+  /* Text & Typography (Hierarchy via contrast) */
+  --text-primary: var(--neutral-900);     /* High-importance headings/body (88%+ contrast) */
+  --text-secondary: var(--neutral-600);   /* Supporting text/labels (60% contrast) */
+  --text-tertiary: var(--neutral-400);    /* Disabled states/placeholders (38% contrast) */
+  --text-on-accent: #ffffff;              /* Readable text placed directly on top of brand accent */
+
+  /* Borders & Dividers */
+  --border-subtle: var(--neutral-200);    /* Soft line for card boundaries & table rows */
+  --border-strong: var(--neutral-300);    /* High-contrast borders for inputs and controls */
+
+  /* Interactive Accent States */
+  --accent-base: var(--brand-500);        /* Primary theme accent */
+  --accent-hover: var(--brand-600);       /* State: Hovered */
+  --accent-active: var(--brand-700);      /* State: Pressed/Active */
+  --accent-focus-ring: oklch(0.51 0.22 250 / 0.4); /* Transparent outline */
+
+  --bg-accent-subtle: var(--brand-100);   /* Pill background/subtle banners */
+  --text-accent: var(--brand-600);        /* Text hyperlinks / accent icons */
+
+  /* Semantic Status Maps */
+  --status-success-bg: oklch(0.52 0.18 145 / 0.1);
+  --status-success-text: var(--success-light);
+
+  --status-warning-bg: oklch(0.65 0.17 75 / 0.1);
+  --status-warning-text: var(--warning-light);
+
+  --status-error-bg: oklch(0.55 0.22 25 / 0.1);
+  --status-error-text: var(--error-light);
+
+  /* System UI */
+  --color-scheme: light;
+  --scrim-color: rgba(0, 0, 0, 0.4);
+  --shadow-intensity: 0.08;
+  --elevation-shadow: 0px 4px 6px -1px rgba(0, 0, 0, var(--shadow-intensity)),
+                      0px 2px 4px -1px rgba(0, 0, 0, calc(var(--shadow-intensity) * 0.7));
+
+  /* Typographic Optical Corrections */
+  --font-weight-bold-correction: 700;
+  --letter-spacing-correction: normal;
+}
+
+/* ==========================================================================
+   2. DARK THEME OVERRIDES
+   ========================================================================== */
+
+/* Defines how semantic tokens swap when dark theme is active.
+   Supports both system preferences and explicit class overrides. */
+
+:root[data-theme="dark"] {
+  /* --- A. Re-evaluate Canvas & Surface Elevation Scale (Lighter as it elevates) --- */
+  --bg-canvas: var(--neutral-950);        /* Level 0: Pure canvas background (#121214) */
+  --bg-surface: var(--neutral-900);       /* Level 1: Card Base background (Lighter) */
+  --bg-surface-raised: var(--neutral-800);/* Level 2: Raised card/sub-panels (Lighter still) */
+  --bg-surface-overlay: var(--neutral-700);/* Level 3: Modals and dropdown menus (Lightest dark slate) */
+
+  /* --- B. Calibrate Text and Off-Whites (Reduce glare/halation) --- */
+  --text-primary: var(--neutral-100);     /* Slightly tinted off-white; low-fatigue standard reading */
+  --text-secondary: var(--neutral-400);   /* Secondary description / helper labels */
+  --text-tertiary: var(--neutral-500);    /* Placeholders and inactive states */
+  --text-on-accent: var(--neutral-950);   /* Highly legible dark-charcoal text on glowing accents */
+
+  /* --- C. Contrast and Borders --- */
+  --border-subtle: oklch(0.28 0.03 240 / 0.4); /* Transparent boundary lines */
+  --border-strong: var(--neutral-600);    /* Safe input field border */
+
+  /* --- D. Desaturate Brand Accents (Avoid Neon Vibration) --- */
+  --accent-base: var(--brand-300);        /* Desaturated brand blue; prevents optical vibration */
+  --accent-hover: var(--brand-200);       /* Lightens towards user on hover */
+  --accent-active: var(--brand-100);      /* Strong highlight on active click */
+  --accent-focus-ring: oklch(0.73 0.13 250 / 0.5); /* High-contrast outline focus indicator */
+
+  --bg-accent-subtle: oklch(0.73 0.13 250 / 0.12); /* Subtle accent backdrop */
+  --text-accent: var(--brand-300);
+
+  /* --- E. Desaturate Semantic Status Colors --- */
+  --status-success-bg: oklch(0.78 0.15 145 / 0.15);
+  --status-success-text: var(--success-dark);
+
+  --status-warning-bg: oklch(0.82 0.14 75 / 0.15);
+  --status-warning-text: var(--warning-dark);
+
+  --status-error-bg: oklch(0.74 0.17 25 / 0.15);
+  --status-error-text: var(--error-dark);
+
+  /* --- F. System UI Overrides --- */
+  --color-scheme: dark;
+  --scrim-color: rgba(0, 0, 0, 0.65);     /* Darker backdrop to isolate modals from dark background */
+  --shadow-intensity: 0.35;               /* Heavy black shadow for elevated modal separation */
+  --elevation-shadow: 0px 10px 15px -3px rgba(0, 0, 0, var(--shadow-intensity)),
+                      0px 4px 6px -2px rgba(0, 0, 0, calc(var(--shadow-intensity) * 0.8));
+
+  /* --- G. Typographic Optical Calibration (Counter Irradiation) --- */
+  --font-weight-bold-correction: 600;     /* Reduces font-weight slightly so white text doesn't bleed */
+  --letter-spacing-correction: 0.015em;   /* Expands spacing slightly to preserve character separation */
+}
+
+/* Fallback auto-sync: Automatically applies dark overrides if user OS requests dark mode,
+   unless an explicit light theme is forced by the user. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    /* Copy over all variables from the [data-theme="dark"] block */
+    --bg-canvas: var(--neutral-950);
+    --bg-surface: var(--neutral-900);
+    --bg-surface-raised: var(--neutral-800);
+    --bg-surface-overlay: var(--neutral-700);
+    --text-primary: var(--neutral-100);
+    --text-secondary: var(--neutral-400);
+    --text-tertiary: var(--neutral-500);
+    --text-on-accent: var(--neutral-950);
+    --border-subtle: oklch(0.28 0.03 240 / 0.4);
+    --border-strong: var(--neutral-600);
+    --accent-base: var(--brand-300);
+    --accent-hover: var(--brand-200);
+    --accent-active: var(--brand-100);
+    --accent-focus-ring: oklch(0.73 0.13 250 / 0.5);
+    --bg-accent-subtle: oklch(0.73 0.13 250 / 0.12);
+    --text-accent: var(--brand-300);
+    --status-success-bg: oklch(0.78 0.15 145 / 0.15);
+    --status-success-text: var(--success-dark);
+    --status-warning-bg: oklch(0.82 0.14 75 / 0.15);
+    --status-warning-text: var(--warning-dark);
+    --status-error-bg: oklch(0.74 0.17 25 / 0.15);
+    --status-error-text: var(--error-dark);
+    --color-scheme: dark;
+    --scrim-color: rgba(0, 0, 0, 0.65);
+    --shadow-intensity: 0.35;
+    --elevation-shadow: 0px 10px 15px -3px rgba(0, 0, 0, var(--shadow-intensity)),
+                        0px 4px 6px -2px rgba(0, 0, 0, calc(var(--shadow-intensity) * 0.8));
+    --font-weight-bold-correction: 600;
+    --letter-spacing-correction: 0.015em;
+  }
+}
+
+/* ==========================================================================
+   3. BASIC STYLING & CLASS TEMPLATE
+   ========================================================================== */
+
+/* Global configuration to apply scheme and smooth background transitions */
+html {
+  color-scheme: var(--color-scheme);
+  background-color: var(--bg-canvas);
+  color: var(--text-primary);
+  letter-spacing: var(--letter-spacing-correction);
+  transition: background-color 0.25s ease, border-color 0.25s ease, color 0.2s ease;
+}
+
+/* High-priority headers with bold-weight correction */
+h1, h2, h3, h4, strong, b {
+  color: var(--text-primary);
+  font-weight: var(--font-weight-bold-correction);
+}
+
+/* Standard Canvas Component */
+.card {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: var(--elevation-shadow);
+  transition: background-color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+/* Raised Interactive State (e.g., elevated on hover) */
+.card-interactive:hover {
+  background-color: var(--bg-surface-raised);
+  transform: translateY(-2px);
+  /* The shadow scale natively becomes stronger in dark mode due to variable intensities */
+  box-shadow: 0px 12px 20px -5px rgba(0, 0, 0, calc(var(--shadow-intensity) * 1.2));
+}
+
+/* Primary Form Controls */
+input, select, textarea {
+  background-color: var(--bg-surface);
+  color: var(--text-primary);
+  border: 1px solid var(--border-strong);
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+}
+
+/* Keyboard Focus indicator: Critical Accessibility constraint.
+   The focus ring remains distinct against dark and light backdrops. */
+input:focus-visible,
+button:focus-visible,
+a:focus-visible {
+  outline: 3px solid var(--accent-focus-ring);
+  outline-offset: 2px;
+}
+
+/* Primary Action button */
+.btn-primary {
+  background-color: var(--accent-base);
+  color: var(--text-on-accent);
+  border: none;
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.btn-primary:hover {
+  background-color: var(--accent-hover);
+}
+
+.btn-primary:active {
+  background-color: var(--accent-active);
+}
+
+/* ==========================================================================
+   4. MEDIA AND RICH IMAGE ADAPTATIONS
+   ========================================================================== */
+
+/* Photos and photographic assets should be slightly dimmed and have
+   their contrast softened in dark mode to blend with the low ambient atmosphere. */
+[data-theme="dark"] img:not(.avatar):not(.icon),
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) img:not(.avatar):not(.icon) {
+    filter: brightness(0.82) contrast(0.92);
+    transition: filter 0.3s ease;
+  }
+}
+
+/* When bright white images must be swapped entirely (e.g. logos/diagrams) */
+.theme-logo-light {
+  display: block;
+}
+.theme-logo-dark {
+  display: none;
+}
+
+[data-theme="dark"] .theme-logo-light,
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .theme-logo-light {
+    display: none;
+  }
+  :root:not([data-theme="light"]) .theme-logo-dark {
+    display: block;
+  }
+}
