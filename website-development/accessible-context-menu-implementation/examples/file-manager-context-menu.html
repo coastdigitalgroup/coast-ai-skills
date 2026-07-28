@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Accessible Context Menu - File Manager Demo</title>
+  <style>
+    /* CSS Variables & Theme Setup */
+    :root {
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --bg-color: #f8fafc;
+      --card-bg: #ffffff;
+      --card-border: #e2e8f0;
+      --card-hover-border: #cbd5e1;
+      --card-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      --card-focus-ring: #3b82f6;
+      --text-color: #1e293b;
+      --text-muted: #64748b;
+
+      --menu-bg: #ffffff;
+      --menu-border: #cbd5e1;
+      --menu-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      --menu-item-hover: #f1f5f9;
+      --menu-item-focus: #2563eb;
+      --menu-item-focus-text: #ffffff;
+      --menu-item-danger-hover: #fef2f2;
+      --menu-item-danger-text: #dc2626;
+      --menu-separator: #e2e8f0;
+    }
+
+    /* Box Sizing & Reset */
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 40px 20px;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      font-family: var(--font-family);
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    header {
+      margin-bottom: 32px;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 16px;
+    }
+
+    h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin: 0 0 8px 0;
+    }
+
+    header p {
+      color: var(--text-muted);
+      margin: 0;
+      font-size: 1rem;
+    }
+
+    /* Grid Layout */
+    .file-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 40px;
+    }
+
+    /* Interactive File Card */
+    .file-card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      box-shadow: var(--card-shadow);
+      cursor: context-menu; /* Signifies context menu is available */
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+      position: relative;
+    }
+
+    .file-card:hover {
+      border-color: var(--card-hover-border);
+    }
+
+    /* Keyboard Focus Indicator */
+    .file-card:focus-visible {
+      outline: 2px solid var(--card-focus-ring);
+      outline-offset: 2px;
+    }
+
+    .file-icon {
+      font-size: 2.5rem;
+      margin-bottom: 12px;
+      user-select: none;
+    }
+
+    .file-name {
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin: 0 0 4px 0;
+      word-break: break-all;
+    }
+
+    .file-meta {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin: 0;
+    }
+
+    /* Option Button (Visual cue) */
+    .options-button {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: none;
+      border: none;
+      font-size: 1.2rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+
+    .options-button:hover {
+      background-color: var(--menu-item-hover);
+      color: var(--text-color);
+    }
+
+    .options-button:focus-visible {
+      outline: 2px solid var(--card-focus-ring);
+    }
+
+    /* Instruction Panel */
+    .instructions {
+      background-color: #eff6ff;
+      border-left: 4px solid #3b82f6;
+      padding: 16px;
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 24px;
+      font-size: 0.9rem;
+    }
+
+    .instructions h2 {
+      margin: 0 0 8px 0;
+      font-size: 1rem;
+      color: #1e3a8a;
+    }
+
+    .instructions ul {
+      margin: 0;
+      padding-left: 20px;
+    }
+
+    /* Activity Log */
+    .activity-log {
+      background-color: #1e293b;
+      color: #f8fafc;
+      padding: 16px;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 0.85rem;
+      max-height: 180px;
+      overflow-y: auto;
+    }
+
+    .activity-log-title {
+      font-weight: bold;
+      color: #38bdf8;
+      margin-bottom: 8px;
+    }
+
+    .log-entry {
+      margin-bottom: 4px;
+      animation: fadeIn 0.2s ease-out;
+    }
+
+    /* Accessible Context Menu Styles */
+    .context-menu {
+      position: absolute; /* Placed absolutely in the body */
+      z-index: 1000;
+      background-color: var(--menu-bg);
+      border: 1px solid var(--menu-border);
+      border-radius: 6px;
+      box-shadow: var(--menu-shadow);
+      min-width: 200px;
+      padding: 4px 0;
+      display: none; /* Controlled via JS */
+      user-select: none;
+    }
+
+    .context-menu-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .context-menu-item {
+      width: 100%;
+      background: none;
+      border: none;
+      text-align: left;
+      font-family: inherit;
+      font-size: 0.9rem;
+      color: var(--text-color);
+      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      outline: none; /* Relying on roving focus with tabIndex and custom styles */
+      transition: background-color 0.1s ease, color 0.1s ease;
+    }
+
+    .context-menu-item-danger {
+      color: var(--menu-item-danger-text);
+    }
+
+    /* Item Focus & Hover States */
+    .context-menu-item:hover,
+    .context-menu-item[tabindex="0"]:focus {
+      background-color: var(--menu-item-hover);
+    }
+
+    /* Active Keyboard focused item gets distinct visible styling */
+    .context-menu-item[tabindex="0"]:focus {
+      background-color: var(--menu-item-focus);
+      color: var(--menu-item-focus-text);
+    }
+
+    .context-menu-item-danger[tabindex="0"]:focus {
+      background-color: var(--menu-item-danger-text);
+      color: #ffffff;
+    }
+
+    .menuitem-icon {
+      font-size: 1.1rem;
+      margin-right: 12px;
+      width: 20px;
+      text-align: center;
+      display: inline-block;
+    }
+
+    .menuitem-label {
+      flex-grow: 1;
+    }
+
+    .menuitem-shortcut {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-left: 16px;
+    }
+
+    /* Shift shortcut colors when context item has focus */
+    .context-menu-item[tabindex="0"]:focus .menuitem-shortcut {
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    .context-menu-separator {
+      height: 1px;
+      background-color: var(--menu-separator);
+      margin: 4px 0;
+    }
+
+    /* Screen Reader Visual Announcement */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    /* Windows High Contrast Fallback Mode */
+    @media (forced-colors: active) {
+      .context-menu {
+        border: 2px solid ButtonText;
+      }
+      .context-menu-item[tabindex="0"]:focus {
+        background-color: SelectedText;
+        color: SelectedTextText;
+      }
+      .context-menu-separator {
+        background-color: ButtonText;
+      }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-3px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>Dashboard File Manager</h1>
+    <p>Accessible Context Menu Demonstration (Fully Keyboard, Screen Reader, & Mobile Touch Responsive)</p>
+  </header>
+
+  <section class="instructions">
+    <h2>Interactive Testing Instructions:</h2>
+    <ul>
+      <li><strong>Mouse:</strong> Right-click anywhere inside any card to trigger the custom context menu.</li>
+      <li><strong>Keyboard Navigation:</strong> Use <code>Tab</code> to focus a card, then press <code>Shift + F10</code> or the <code>Apps/Context Menu</code> key to launch the menu.</li>
+      <li><strong>Roving Focus:</strong> Navigate the open menu options using <code>ArrowUp</code> or <code>ArrowDown</code>. Press <code>Home</code>/<code>End</code> to jump directly. Note how standard page scrolling is suppressed!</li>
+      <li><strong>Dismissal:</strong> Press <code>Escape</code> or click anywhere outside to close the menu. Note that keyboard focus is automatically restored back to the active card!</li>
+      <li><strong>Mobile Emulation:</strong> Hold your touch for <code>500ms</code> (Long-Press) on any card. Tap anywhere outside or scroll the page to dismiss.</li>
+    </ul>
+  </section>
+
+  <!-- Live ARIA region for screen reader announcements -->
+  <div id="sr-announcements" class="sr-only" aria-live="polite"></div>
+
+  <!-- File Cards Grid -->
+  <main class="file-grid" id="file-grid">
+    <!-- Card 1 -->
+    <div class="file-card" tabindex="0" id="file-1" data-name="Quarterly_Report_2024.pdf" data-type="pdf">
+      <span class="file-icon" aria-hidden="true">📄</span>
+      <h3 class="file-name">Quarterly_Report_2024.pdf</h3>
+      <p class="file-meta">PDF Document • 4.2 MB</p>
+      <button class="options-button" type="button" aria-label="More options for Quarterly_Report_2024.pdf">
+        ⋮
+      </button>
+    </div>
+
+    <!-- Card 2 -->
+    <div class="file-card" tabindex="0" id="file-2" data-name="Product_Catalog_Images" data-type="folder">
+      <span class="file-icon" aria-hidden="true">📁</span>
+      <h3 class="file-name">Product_Catalog_Images</h3>
+      <p class="file-meta">Folder • 142 items</p>
+      <button class="options-button" type="button" aria-label="More options for Product_Catalog_Images">
+        ⋮
+      </button>
+    </div>
+
+    <!-- Card 3 -->
+    <div class="file-card" tabindex="0" id="file-3" data-name="User_Subscribers_Database.xlsx" data-type="excel">
+      <span class="file-icon" aria-hidden="true">📊</span>
+      <h3 class="file-name">User_Subscribers_Database.xlsx</h3>
+      <p class="file-meta">Excel Spreadsheet • 12.8 MB</p>
+      <button class="options-button" type="button" aria-label="More options for User_Subscribers_Database.xlsx">
+        ⋮
+      </button>
+    </div>
+
+    <!-- Card 4 -->
+    <div class="file-card" tabindex="0" id="file-4" data-name="Website_Hero_Banner.png" data-type="image">
+      <span class="file-icon" aria-hidden="true">🖼️</span>
+      <h3 class="file-name">Website_Hero_Banner.png</h3>
+      <p class="file-meta">PNG Image • 1.1 MB</p>
+      <button class="options-button" type="button" aria-label="More options for Website_Hero_Banner.png">
+        ⋮
+      </button>
+    </div>
+  </main>
+
+  <section>
+    <div class="activity-log-title">Interactive Operation Log:</div>
+    <div class="activity-log" id="activity-log">
+      <div class="log-entry">[System initialized] Waiting for operations...</div>
+    </div>
+  </section>
+</div>
+
+<!-- Accessible Context Menu (Appended directly to body root to avoid overflow clipping) -->
+<div id="app-context-menu" class="context-menu" role="menu" aria-hidden="true">
+  <ul class="context-menu-list">
+    <li role="presentation">
+      <button type="button" role="menuitem" class="context-menu-item" data-action="open" tabindex="-1">
+        <span class="menuitem-icon" aria-hidden="true">📂</span>
+        <span class="menuitem-label">Open / Preview</span>
+        <span class="menuitem-shortcut">Enter</span>
+      </button>
+    </li>
+    <li role="presentation">
+      <button type="button" role="menuitem" class="context-menu-item" data-action="download" tabindex="-1">
+        <span class="menuitem-icon" aria-hidden="true">⬇️</span>
+        <span class="menuitem-label">Download File</span>
+        <span class="menuitem-shortcut">Ctrl+S</span>
+      </button>
+    </li>
+    <li role="presentation">
+      <button type="button" role="menuitem" class="context-menu-item" data-action="rename" tabindex="-1">
+        <span class="menuitem-icon" aria-hidden="true">✏️</span>
+        <span class="menuitem-label">Rename Item</span>
+        <span class="menuitem-shortcut">F2</span>
+      </button>
+    </li>
+    <li role="presentation">
+      <button type="button" role="menuitem" class="context-menu-item" data-action="share" tabindex="-1">
+        <span class="menuitem-icon" aria-hidden="true">🔗</span>
+        <span class="menuitem-label">Copy Share Link</span>
+        <span class="menuitem-shortcut"></span>
+      </button>
+    </li>
+    <li role="separator" class="context-menu-separator"></li>
+    <li role="presentation">
+      <button type="button" role="menuitem" class="context-menu-item context-menu-item-danger" data-action="delete" tabindex="-1">
+        <span class="menuitem-icon" aria-hidden="true">🗑️</span>
+        <span class="menuitem-label">Delete Item</span>
+        <span class="menuitem-shortcut">Del</span>
+      </button>
+    </li>
+  </ul>
+</div>
+
+<script>
+  // Setup Dom References
+  const menu = document.getElementById('app-context-menu');
+  const fileGrid = document.getElementById('file-grid');
+  const cards = document.querySelectorAll('.file-card');
+  const activityLog = document.getElementById('activity-log');
+  const srAnnouncements = document.getElementById('sr-announcements');
+
+  let activeTriggerCard = null;
+  let rovingFocusInstance = null;
+  let touchTimer = null;
+  let touchStartCoords = null;
+
+  // Logging Helper
+  function log(message) {
+    const time = new Date().toLocaleTimeString();
+    const entry = document.createElement('div');
+    entry.className = 'log-entry';
+    entry.textContent = `[${time}] ${message}`;
+    activityLog.appendChild(entry);
+    activityLog.scrollTop = activityLog.scrollHeight;
+
+    // Announce to Screen Readers
+    srAnnouncements.textContent = message;
+  }
+
+  // Position Calculator
+  function calculateMenuPosition(x, y) {
+    menu.style.display = 'block'; // Make visible temporarily to calculate heights
+    const menuWidth = menu.offsetWidth;
+    const menuHeight = menu.offsetHeight;
+
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+
+    const scrollX = window.scrollX || window.pageXOffset;
+    const scrollY = window.scrollY || window.pageYOffset;
+
+    let finalX = x + scrollX;
+    let finalY = y + scrollY;
+
+    // Boundary Check - Horizontal
+    if (x + menuWidth > viewportWidth) {
+      finalX = (x - menuWidth) + scrollX;
+      if (finalX < 0) finalX = scrollX;
+    }
+
+    // Boundary Check - Vertical
+    if (y + menuHeight > viewportHeight) {
+      finalY = (y - menuHeight) + scrollY;
+      if (finalY < 0) finalY = scrollY;
+    }
+
+    return { x: finalX, y: finalY };
+  }
+
+  // Open Context Menu Function
+  function openContextMenu(clientX, clientY, cardElement) {
+    activeTriggerCard = cardElement;
+    const name = cardElement.getAttribute('data-name');
+    log(`Requested context menu on "${name}"`);
+
+    // Calculate position
+    const coords = calculateMenuPosition(clientX, clientY);
+    menu.style.left = `${coords.x}px`;
+    menu.style.top = `${coords.y}px`;
+
+    // Accessibility Show State
+    menu.setAttribute('aria-hidden', 'false');
+
+    // Initialize key handlers for roving index
+    if (rovingFocusInstance) {
+      rovingFocusInstance.destroy();
+    }
+    rovingFocusInstance = new RovingFocusMenu(menu, cardElement);
+  }
+
+  // Close Context Menu Function
+  function closeContextMenu() {
+    if (menu.getAttribute('aria-hidden') === 'false') {
+      menu.style.display = 'none';
+      menu.setAttribute('aria-hidden', 'true');
+      if (rovingFocusInstance) {
+        rovingFocusInstance.destroy();
+        rovingFocusInstance = null;
+      }
+      if (activeTriggerCard) {
+        activeTriggerCard.focus(); // Focus restoration
+        log(`Dismissed menu. Focus restored to card.`);
+        activeTriggerCard = null;
+      }
+    }
+  }
+
+  // Roving Focus Class Controller
+  class RovingFocusMenu {
+    constructor(menuEl, triggerEl) {
+      this.menu = menuEl;
+      this.trigger = triggerEl;
+      this.items = Array.from(this.menu.querySelectorAll('[role="menuitem"]'));
+      this.currentIndex = 0;
+
+      this.handleKeyDown = this.handleKeyDown.bind(this);
+      this.handleItemClick = this.handleItemClick.bind(this);
+
+      this.init();
+    }
+
+    init() {
+      // Set all to non-focusable, but first to focusable
+      this.items.forEach((item, index) => {
+        item.setAttribute('tabindex', index === 0 ? '0' : '-1');
+        item.addEventListener('click', this.handleItemClick);
+      });
+
+      // Bind Keydown on container
+      this.menu.addEventListener('keydown', this.handleKeyDown);
+
+      // Instantly focus first item
+      setTimeout(() => {
+        this.items[0].focus();
+        const itemName = this.trigger.getAttribute('data-name');
+        log(`Menu opened. Screen reader focuses "${this.items[0].querySelector('.menuitem-label').textContent}" on context "${itemName}"`);
+      }, 50);
+    }
+
+    handleKeyDown(e) {
+      switch (e.key) {
+        case 'ArrowDown':
+          e.preventDefault();
+          this.moveFocus(1);
+          break;
+        case 'ArrowUp':
+          e.preventDefault();
+          this.moveFocus(-1);
+          break;
+        case 'Home':
+          e.preventDefault();
+          this.currentIndex = 0;
+          this.focusCurrentItem();
+          break;
+        case 'End':
+          e.preventDefault();
+          this.currentIndex = this.items.length - 1;
+          this.focusCurrentItem();
+          break;
+        case 'Escape':
+          e.preventDefault();
+          closeContextMenu();
+          break;
+        case 'Tab':
+          // Confine focus inside menu
+          e.preventDefault();
+          break;
+      }
+    }
+
+    moveFocus(direction) {
+      this.items[this.currentIndex].setAttribute('tabindex', '-1');
+      this.currentIndex = (this.currentIndex + direction + this.items.length) % this.items.length;
+      this.focusCurrentItem();
+    }
+
+    focusCurrentItem() {
+      const activeItem = this.items[this.currentIndex];
+      activeItem.setAttribute('tabindex', '0');
+      activeItem.focus();
+    }
+
+    handleItemClick(e) {
+      const btn = e.currentTarget;
+      const action = btn.getAttribute('data-action');
+      const label = btn.querySelector('.menuitem-label').textContent;
+      const cardName = this.trigger.getAttribute('data-name');
+
+      log(`Action executed: "${label}" (${action.toUpperCase()}) on "${cardName}"`);
+
+      // Close menu
+      closeContextMenu();
+    }
+
+    destroy() {
+      this.menu.removeEventListener('keydown', this.handleKeyDown);
+      this.items.forEach(item => {
+        item.removeEventListener('click', this.handleItemClick);
+      });
+    }
+  }
+
+  // --- Setup Mouse and Keyboard Listeners ---
+  cards.forEach(card => {
+    // 1. Right Click Event
+    card.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+
+      // Verify if keyboard-triggered
+      const isKeyboard = e.button === 0 || (e.clientX === 0 && e.clientY === 0);
+      let posX = e.clientX;
+      let posY = e.clientY;
+
+      if (isKeyboard) {
+        const rect = card.getBoundingClientRect();
+        posX = rect.left + 24;
+        posY = rect.bottom - 12;
+      }
+
+      openContextMenu(posX, posY, card);
+    });
+
+    // 2. Keyboard Launch Shortcut (In case browser doesn't route contextmenu properly)
+    card.addEventListener('keydown', (e) => {
+      if (e.shiftKey && e.key === 'F10') {
+        e.preventDefault();
+        const rect = card.getBoundingClientRect();
+        openContextMenu(rect.left + 24, rect.bottom - 12, card);
+      }
+    });
+
+    // 3. Options Button Handler
+    const optBtn = card.querySelector('.options-button');
+    optBtn.addEventListener('click', (e) => {
+      e.stopPropagation(); // Avoid card bubble
+      const rect = optBtn.getBoundingClientRect();
+      openContextMenu(rect.left, rect.bottom, card);
+    });
+
+    // 4. Mobile Long-Press Emulation Setup
+    card.addEventListener('touchstart', (e) => {
+      const touch = e.touches[0];
+      touchStartCoords = { x: touch.clientX, y: touch.clientY };
+
+      touchTimer = setTimeout(() => {
+        // Long-press threshold reached
+        e.preventDefault();
+        openContextMenu(touch.clientX, touch.clientY, card);
+      }, 550); // standard mobile touch delay
+    }, { passive: false });
+
+    card.addEventListener('touchmove', (e) => {
+      if (!touchStartCoords) return;
+      const touch = e.touches[0];
+      const diffX = Math.abs(touch.clientX - touchStartCoords.x);
+      const diffY = Math.abs(touch.clientY - touchStartCoords.y);
+
+      // If moved finger > 8px, user is scrolling the view. Cancel menu
+      if (diffX > 8 || diffY > 8) {
+        clearTimeout(touchTimer);
+      }
+    }, { passive: true });
+
+    card.addEventListener('touchend', () => {
+      clearTimeout(touchTimer);
+      touchStartCoords = null;
+    });
+
+    card.addEventListener('touchcancel', () => {
+      clearTimeout(touchTimer);
+      touchStartCoords = null;
+    });
+  });
+
+  // 5. Dismissal: Out-click closure
+  document.addEventListener('click', (e) => {
+    // If click lies outside menu and is not on an active card trigger
+    if (!menu.contains(e.target) && !e.target.closest('.file-card')) {
+      closeContextMenu();
+    }
+  });
+
+  document.addEventListener('contextmenu', (e) => {
+    // If right-clicked outside active trigger regions, dismiss current custom context menu
+    if (!e.target.closest('.file-card') && !menu.contains(e.target)) {
+      closeContextMenu();
+    }
+  });
+
+</script>
+</body>
+</html>
