@@ -7,6 +7,7 @@ All notable changes to this project will be documented here. The format follows
 
 ### Added
 
+- `sticky-and-floating-ui-system` skill to `website-design` category, defining a systematic framework for designing, specifying, and auditing persistent, overlaying, and scroll-responsive UI elements (progressive headers, mobile bottom docks, floating action buttons, and sticky sidebars) to maximize utility and conversion without causing visual fatigue or WCAG focus obscuration.
 - `focus-indicator-design-system` skill to `website-design` category, defining a systematic framework for designing, specifying, and auditing keyboard focus indicators across standard and custom interactive elements to ensure compliance with WCAG 2.1/2.2, brand integration, and High Contrast Mode support.
 - `accessible-range-slider-implementation` skill to `website-development` category, covering standard single and dual-thumb range sliders using native elements, cross-browser vendor styles, and keyboard/touch tracking.
 - `command-palette-system` skill to `website-design` category, defining a systematic framework for accessible, keyboard-first Cmd+K menus.

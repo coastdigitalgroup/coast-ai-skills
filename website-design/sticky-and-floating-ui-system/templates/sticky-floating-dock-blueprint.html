@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sticky, Floating & Docked UI System Blueprint</title>
+  <style>
+    /* ==========================================================================
+       DESIGN TOKENS & SYSTEM VARIABLES
+       ========================================================================== */
+    :root {
+      /* Colors and Contrast (WCAG AA Compliant) */
+      --color-brand: #0f172a;        /* Slate 900 */
+      --color-brand-light: #f8fafc;  /* Slate 50 */
+      --color-accent: #0284c7;       /* Sky 600 */
+      --color-accent-hover: #0369a1; /* Sky 700 */
+      --color-text-primary: #0f172a;
+      --color-text-muted: #475569;
+      --color-border: #e2e8f0;
+      --color-focus: #ff7a00;        /* Orange 500 (High visibility focus contrast) */
+
+      /* Surface Tints (Derived OKLCH/RGB Mixes) */
+      --surface-header-blur: rgba(255, 255, 255, 0.85);
+      --surface-dock: #ffffff;
+
+      /* Spacing and Dimensions */
+      --header-height-desktop: 72px;
+      --header-height-mobile: 60px;
+      --space-xs: 4px;
+      --space-s: 8px;
+      --space-m: 16px;
+      --space-l: 24px;
+      --space-xl: 32px;
+
+      /* Elevation & Shadows (implied top-center light source) */
+      --elevation-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --elevation-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --elevation-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      --elevation-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+      /* Transitions */
+      --transition-smooth: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s, opacity 0.2s;
+    }
+
+    /* Base Setup & Layout Protection */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: var(--color-text-primary);
+      background-color: var(--color-brand-light);
+      line-height: 1.5;
+    }
+
+    /* A11Y Focus Outline Standard */
+    button:focus-visible,
+    a:focus-visible {
+      outline: 3px solid var(--color-focus);
+      outline-offset: 3px;
+    }
+
+    /* Prevent keyboard focus obscuration (WCAG 2.2 SC 2.4.11) */
+    :target,
+    [id] {
+      scroll-margin-top: calc(var(--header-height-desktop) + var(--space-l));
+    }
+
+    @media (max-width: 768px) {
+      :target,
+      [id] {
+        scroll-margin-top: calc(var(--header-height-mobile) + var(--space-m));
+      }
+    }
+
+    /* ==========================================================================
+       PROGRESSIVE HEADER SYSTEM (Desktop & Mobile)
+       ========================================================================== */
+    .layout-header-wrapper {
+      /* DESIGN NOTE: Reserve height to prevent Cumulative Layout Shift (CLS) */
+      min-height: var(--header-height-desktop);
+      width: 100%;
+      position: relative;
+    }
+
+    @media (max-width: 768px) {
+      .layout-header-wrapper {
+        min-height: var(--header-height-mobile);
+      }
+    }
+
+    .progressive-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: var(--header-height-desktop);
+      z-index: 100; /* Stacking Tier Level 3 */
+      background-color: var(--surface-header-blur);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--color-border);
+      box-shadow: var(--elevation-sm);
+      transition: var(--transition-smooth);
+      transform: translateY(0); /* Default: Visible */
+    }
+
+    @media (max-width: 768px) {
+      .progressive-header {
+        height: var(--header-height-mobile);
+      }
+    }
+
+    /* Behavior Modifier Classes (usually toggled via IntersectionObserver / scroll delta JS) */
+    .progressive-header--hidden {
+      /* DESIGN NOTE: Translates off-screen completely on scroll-down to save space */
+      transform: translateY(-100%);
+    }
+
+    .progressive-header--scrolled {
+      /* DESIGN NOTE: Adds elevation separation and slightly denser surface tint once scrolled */
+      box-shadow: var(--elevation-md);
+      background-color: rgba(255, 255, 255, 0.95);
+    }
+
+    .header-container {
+      max-width: 1200px;
+      height: 100%;
+      margin: 0 auto;
+      padding: 0 var(--space-m);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo-link {
+      font-weight: 700;
+      font-size: 1.25rem;
+      text-decoration: none;
+      color: var(--color-brand);
+      display: flex;
+      align-items: center;
+      height: 44px; /* Target size */
+    }
+
+    .nav-links {
+      display: flex;
+      gap: var(--space-l);
+      list-style: none;
+    }
+
+    .nav-link {
+      text-decoration: none;
+      color: var(--color-text-muted);
+      font-weight: 500;
+      transition: color 0.2s;
+      display: inline-flex;
+      align-items: center;
+      height: 44px; /* Target size */
+    }
+
+    .nav-link:hover {
+      color: var(--color-brand);
+    }
+
+    .nav-link--active {
+      color: var(--color-accent);
+      border-bottom: 2px solid var(--color-accent);
+    }
+
+    /* Skip Link to main content for screen readers & tab keys */
+    .skip-to-content {
+      position: absolute;
+      top: -100px;
+      left: var(--space-m);
+      background-color: var(--color-accent);
+      color: white;
+      padding: var(--space-s) var(--space-m);
+      border-radius: 4px;
+      z-index: 1000;
+      text-decoration: none;
+      font-weight: 600;
+      transition: top 0.2s;
+    }
+
+    .skip-to-content:focus {
+      top: 10px;
+    }
+
+    /* ==========================================================================
+       MOBILE PERSISTENT BOTTOM DOCK
+       ========================================================================== */
+    .mobile-bottom-dock {
+      display: none; /* Hidden on Desktop */
+    }
+
+    @media (max-width: 768px) {
+      .mobile-bottom-dock {
+        display: flex;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 150; /* Stacking Tier Level 3+ */
+        background-color: var(--surface-dock);
+        border-top: 1px solid var(--color-border);
+        box-shadow: var(--elevation-xl);
+
+        /* DESIGN NOTE: Explicitly utilize environmental metrics to prevent iOS/Android native chrome overlap */
+        padding-top: var(--space-m);
+        padding-left: var(--space-m);
+        padding-right: var(--space-m);
+        padding-bottom: calc(var(--space-m) + env(safe-area-inset-bottom));
+
+        transition: var(--transition-smooth);
+        transform: translateY(100%); /* Start hidden: Slides up past Hero threshold */
+      }
+
+      .mobile-bottom-dock--active {
+        transform: translateY(0);
+      }
+
+      .dock-container {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr; /* 50/50 Split Grid */
+        gap: var(--space-m);
+        align-items: center;
+      }
+
+      .dock-meta-info {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+
+      .dock-meta-title {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        color: var(--color-text-muted);
+        letter-spacing: 0.05em;
+        font-weight: 600;
+      }
+
+      .dock-meta-price {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--color-brand);
+      }
+
+      .dock-cta-button {
+        width: 100%;
+        height: 48px; /* Comfortable 48px thumb target size */
+        background-color: var(--color-accent);
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: background-color 0.2s;
+        text-decoration: none;
+      }
+
+      .dock-cta-button:hover,
+      .dock-cta-button:active {
+        background-color: var(--color-accent-hover);
+      }
+    }
+
+    /* ==========================================================================
+       FLOATING ACTION BUTTONS (FABs) & BACK TO TOP
+       ========================================================================== */
+    .floating-back-to-top {
+      position: fixed;
+      bottom: var(--space-l);
+      right: var(--space-l);
+      width: 48px;
+      height: 48px; /* High tactile accuracy */
+      border-radius: 50%;
+      background-color: var(--color-brand);
+      color: white;
+      border: none;
+      box-shadow: var(--elevation-lg);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 200; /* Stacking Tier Level 3 (Floater) */
+      opacity: 0;
+      transform: scale(0.8);
+      pointer-events: none;
+      transition: var(--transition-smooth);
+    }
+
+    .floating-back-to-top--visible {
+      opacity: 1;
+      transform: scale(1);
+      pointer-events: auto;
+    }
+
+    .floating-back-to-top:hover {
+      background-color: var(--color-accent);
+    }
+
+    /* Adjust FAB positioning on mobile to sit above the sticky bottom dock */
+    @media (max-width: 768px) {
+      .floating-back-to-top {
+        bottom: calc(72px + env(safe-area-inset-bottom) + var(--space-s)); /* Stacked cleanly above dock */
+        right: var(--space-m);
+      }
+    }
+
+    /* ==========================================================================
+       DEMO PAGE CONTENT (FOR TESTING VERTICAL SCROLL RHYTHM)
+       ========================================================================== */
+    .hero-section {
+      height: 95vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: var(--space-l);
+      background-color: var(--color-brand);
+      color: white;
+    }
+
+    .hero-title {
+      font-size: 3rem;
+      margin-bottom: var(--space-m);
+      font-weight: 800;
+    }
+
+    .hero-subtitle {
+      font-size: 1.25rem;
+      color: #94a3b8;
+      max-width: 600px;
+      margin-bottom: var(--space-xl);
+    }
+
+    .hero-inline-cta {
+      padding: var(--space-m) var(--space-xl);
+      background-color: var(--color-accent);
+      color: white;
+      text-decoration: none;
+      border-radius: 6px;
+      font-weight: 600;
+      transition: background-color 0.2s;
+    }
+
+    .scroll-indicator-visual {
+      margin-top: var(--space-xl);
+      font-size: 0.875rem;
+      color: #64748b;
+      animation: pulse 2s infinite;
+    }
+
+    .content-section {
+      max-width: 800px;
+      margin: 120px auto;
+      padding: 0 var(--space-m);
+    }
+
+    .section-title {
+      font-size: 2rem;
+      margin-bottom: var(--space-m);
+      font-weight: 700;
+    }
+
+    .section-text {
+      font-size: 1.125rem;
+      color: var(--color-text-muted);
+      margin-bottom: var(--space-l);
+      line-height: 1.7;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Skip link for keyboard-only screen reader accessibility navigation -->
+  <a href="#main-content" class="skip-to-content">Skip to Main Content</a>
+
+  <!-- ==========================================================================
+       PROGRESSIVE HEADER STRUCTURE
+       ========================================================================== -->
+  <!-- DESIGN NOTE: Outer wrapper preserves layout space to prevent CLS collapse -->
+  <div class="layout-header-wrapper">
+    <header class="progressive-header" id="global-header" role="banner">
+      <div class="header-container">
+        <a href="#" class="logo-link" aria-label="Brand Home">
+          <span>PORTABLE.UI</span>
+        </a>
+        <nav aria-label="Main Navigation">
+          <ul class="nav-links">
+            <li><a href="#section-benefits" class="nav-link">Benefits</a></li>
+            <li><a href="#section-specs" class="nav-link">Specifications</a></li>
+            <li><a href="#section-checkout" class="nav-link">Get Started</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+  </div>
+
+  <main id="main-content">
+
+    <!-- Hero Section with Inline CTA -->
+    <section class="hero-section">
+      <h1 class="hero-title">Experience Spatial Utility</h1>
+      <p class="hero-subtitle">Learn how to build lightweight, fluid sticky components that support conversion without compromising the screen.</p>
+      <a href="#section-checkout" class="hero-inline-cta" id="hero-cta-trigger">Unlock Access Now</a>
+      <div class="scroll-indicator-visual">Scroll Down to View System Adaptations &darr;</div>
+    </section>
+
+    <!-- Content Section 1: Benefits -->
+    <section class="content-section" id="section-benefits">
+      <h2 class="section-title">Design with Zero Clutter</h2>
+      <p class="section-text">Traditional sticky elements remain fixed on the viewport at all times, covering valuable content and leading to high user fatigue. Progressive headers, on the other hand, step out of the way when the user is scrolling down to read, and return immediately when they scroll up to navigate.</p>
+      <p class="section-text">This spatial logic respects the user's focus, while keeping vital conversion metrics stable.</p>
+    </section>
+
+    <!-- Content Section 2: Specifications -->
+    <section class="content-section" id="section-specs">
+      <h2 class="section-title">Technical Specifications</h2>
+      <p class="section-text">Every floating trigger or persistent dock must utilize native CSS environment features like safe-area insets. Hard-coding bottom values like <code>bottom: 0px</code> triggers severe layout bugs on physical devices where browsers use dynamic home panels.</p>
+      <p class="section-text">Additionally, keyboard focus preservation ensures that users utilizing screen readers or keyboard navigation never suffer from focused links disappearing beneath overlay components.</p>
+    </section>
+
+    <!-- Content Section 3: Final Call to Action -->
+    <section class="content-section" id="section-checkout">
+      <h2 class="section-title">Get Started Today</h2>
+      <p class="section-text">Integrate this template blueprint directly into your design libraries. Focus rings, touch target metrics, and fluid responsive spacing tokens are pre-engineered to comply with WCAG 2.2 AA standards as a baseline.</p>
+      <a href="#" class="hero-inline-cta" style="display: inline-block;">Finalize Enrollment</a>
+    </section>
+
+  </main>
+
+  <!-- ==========================================================================
+       MOBILE PERSISTENT BOTTOM DOCK
+       ========================================================================== -->
+  <div class="mobile-bottom-dock" id="mobile-bottom-dock" role="complementary" aria-label="Quick Checkout">
+    <div class="dock-container">
+      <div class="dock-meta-info" aria-live="polite">
+        <span class="dock-meta-title">Enrollment Package</span>
+        <span class="dock-meta-price">$199.00</span>
+      </div>
+      <a href="#section-checkout" class="dock-cta-button">Buy Now</a>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       FLOATING ACTION TRIGGER: BACK TO TOP
+       ========================================================================== */ -->
+  <button class="floating-back-to-top" id="back-to-top-button" aria-label="Scroll back to top" title="Back to Top">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="18 15 12 9 6 15"></polyline>
+    </svg>
+  </button>
+
+  <!-- ==========================================================================
+       SCROLL TRANSITION BEHAVIOR SCRIPT
+       ========================================================================== -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const header = document.getElementById('global-header');
+      const mobileDock = document.getElementById('mobile-bottom-dock');
+      const backToTopBtn = document.getElementById('back-to-top-button');
+      const heroCta = document.getElementById('hero-cta-trigger');
+
+      let lastScrollY = window.scrollY;
+      const scrollThreshold = 120; // px before progressive header reacts
+      const delta = 15; // px scroll delta threshold to trigger action
+
+      // Listen to scroll events to trigger progressive states
+      window.addEventListener('scroll', () => {
+        const currentScrollY = window.scrollY;
+
+        /* 1. Progressive Header Toggle */
+        if (currentScrollY <= scrollThreshold) {
+          // At the top: Reset styles, fully visible
+          header.classList.remove('progressive-header--hidden');
+          header.classList.remove('progressive-header--scrolled');
+        } else {
+          // Scrolled down past threshold
+          header.classList.add('progressive-header--scrolled');
+
+          if (Math.abs(currentScrollY - lastScrollY) > delta) {
+            if (currentScrollY > lastScrollY) {
+              // Scrolling down: Hide header
+              header.classList.add('progressive-header--hidden');
+            } else {
+              // Scrolling up: Show header
+              header.classList.remove('progressive-header--hidden');
+            }
+          }
+        }
+
+        /* 2. Mobile Bottom Dock Trigger */
+        if (heroCta) {
+          const heroCtaBottom = heroCta.getBoundingClientRect().bottom + window.scrollY;
+          // Reveal dock once viewport passes the inline Hero CTA
+          if (currentScrollY > heroCtaBottom) {
+            mobileDock.classList.add('mobile-bottom-dock--active');
+          } else {
+            mobileDock.classList.remove('mobile-bottom-dock--active');
+          }
+        }
+
+        /* 3. Floating Back to Top Button Trigger */
+        if (currentScrollY > (window.innerHeight * 1.5)) {
+          backToTopBtn.classList.add('floating-back-to-top--visible');
+        } else {
+          backToTopBtn.classList.remove('floating-back-to-top--visible');
+        }
+
+        lastScrollY = currentScrollY;
+      }, { passive: true });
+
+      // Action event for back to top button
+      backToTopBtn.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        // Return focus to the skip-to-content or main container
+        document.querySelector('.skip-to-content').focus();
+      });
+    });
+  </script>
+
+</body>
+</html>
