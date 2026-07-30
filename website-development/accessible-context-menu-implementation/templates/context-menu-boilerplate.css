@@ -1,0 +1,160 @@
+/* ==========================================================================
+   Accessible Context Menu Boilerplate CSS
+   ========================================================================== */
+
+:root {
+  /* Design Tokens for Theme integration */
+  --cm-bg: #ffffff;
+  --cm-border-color: #cbd5e1;
+  --cm-border-radius: 6px;
+  --cm-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  --cm-text-color: #1e293b;
+  --cm-text-muted: #64748b;
+
+  --cm-item-padding: 8px 16px;
+  --cm-item-font-size: 0.9rem;
+  --cm-item-hover-bg: #f1f5f9;
+
+  --cm-item-focus-bg: #2563eb;
+  --cm-item-focus-text: #ffffff;
+  --cm-item-focus-muted-text: rgba(255, 255, 255, 0.7);
+
+  --cm-danger-color: #e11d48;
+  --cm-danger-hover-bg: #fff1f2;
+}
+
+/* Core Context Menu Container */
+.context-menu {
+  position: absolute;
+  z-index: 1000;
+  display: none; /* Controlled programmatically via JavaScript */
+  background-color: var(--cm-bg);
+  border: 1px solid var(--cm-border-color);
+  border-radius: var(--cm-border-radius);
+  box-shadow: var(--cm-shadow);
+  min-width: 200px;
+  padding: 4px 0;
+  margin: 0;
+  user-select: none;
+  font-family: inherit;
+}
+
+/* List Structure */
+.context-menu-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* Reset buttons inside menu lists to look like clean selectable options */
+.context-menu-item {
+  width: 100%;
+  background: none;
+  border: none;
+  margin: 0;
+  padding: var(--cm-item-padding);
+  font-family: inherit;
+  font-size: var(--cm-item-font-size);
+  color: var(--cm-text-color);
+  text-align: left;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  outline: none; /* Focus is indicated customly on tabIndex="0" */
+  transition: background-color 0.1s ease, color 0.1s ease;
+}
+
+/* Hover and Focus behavior on focusable item */
+.context-menu-item:hover,
+.context-menu-item[tabindex="0"]:focus {
+  background-color: var(--cm-item-hover-bg);
+}
+
+/* Roving Focus - Active Keyboard item receives highly visible primary accent state */
+.context-menu-item[tabindex="0"]:focus {
+  background-color: var(--cm-item-focus-bg);
+  color: var(--cm-item-focus-text);
+}
+
+/* Visual Layout Columns */
+.menuitem-icon {
+  margin-right: 12px;
+  flex-shrink: 0;
+  font-size: 1.1rem;
+  width: 20px;
+  text-align: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.menuitem-label {
+  flex-grow: 1;
+}
+
+/* Shortcuts aligned to the right-most margin */
+.menuitem-shortcut {
+  margin-left: 16px;
+  font-size: 0.75rem;
+  color: var(--cm-text-muted);
+  flex-shrink: 0;
+}
+
+/* Highlight shortcuts when keyboard navigation is active */
+.context-menu-item[tabindex="0"]:focus .menuitem-shortcut {
+  color: var(--cm-item-focus-muted-text);
+}
+
+/* Horizontal Separator/Divider */
+.context-menu-separator {
+  height: 1px;
+  background-color: var(--cm-border-color);
+  margin: 4px 0;
+}
+
+/* Context actions that convey destructive or high-alert danger options */
+.context-menu-item-danger {
+  color: var(--cm-danger-color);
+}
+
+.context-menu-item-danger:hover {
+  background-color: var(--cm-danger-hover-bg);
+}
+
+.context-menu-item-danger[tabindex="0"]:focus {
+  background-color: var(--cm-danger-color);
+  color: #ffffff;
+}
+
+/* Prevent native selection overlay on elements that trigger hold menus */
+.prevent-select {
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none;   /* Safari */
+  -khtml-user-select: none;     /* Konqueror HTML */
+  -moz-user-select: none;      /* Firefox */
+  -ms-user-select: none;       /* Internet Explorer/Edge */
+  user-select: none;           /* Non-prefixed version, supported by Chrome, Opera, Edge */
+}
+
+/* ==========================================================================
+   Accessibility: Windows Forced Colors / High Contrast Mode Support
+   ========================================================================== */
+@media (forced-colors: active) {
+  .context-menu {
+    border: 2px solid ButtonText;
+    background-color: Canvas;
+  }
+
+  .context-menu-item {
+    color: ButtonText;
+  }
+
+  .context-menu-item[tabindex="0"]:focus {
+    background-color: SelectedText;
+    color: SelectedTextText;
+  }
+
+  .context-menu-separator {
+    background-color: ButtonText;
+  }
+}
