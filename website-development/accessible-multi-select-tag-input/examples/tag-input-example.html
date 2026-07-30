@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Accessible Multi-Select Tag Input Demo</title>
+  <style>
+    :root {
+      --color-primary: #2563eb;
+      --color-primary-dark: #1d4ed8;
+      --color-primary-light: #eff6ff;
+      --color-gray-50: #f8fafc;
+      --color-gray-100: #f1f5f9;
+      --color-gray-200: #e2e8f0;
+      --color-gray-400: #94a3b8;
+      --color-gray-600: #475569;
+      --color-gray-800: #1e293b;
+      --color-white: #ffffff;
+      --border-radius: 6px;
+      --font-stack: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-stack);
+      color: var(--color-gray-800);
+      background-color: var(--color-gray-50);
+      line-height: 1.5;
+      padding: 2rem 1rem;
+    }
+
+    .container {
+      max-width: 650px;
+      margin: 0 auto;
+      background: var(--color-white);
+      border: 1px solid var(--color-gray-200);
+      border-radius: 8px;
+      padding: 2rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    }
+
+    h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--color-gray-800);
+      margin-bottom: 0.5rem;
+    }
+
+    .subtitle {
+      color: var(--color-gray-600);
+      margin-bottom: 2rem;
+      font-size: 0.95rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: var(--color-gray-800);
+      margin-bottom: 0.5rem;
+    }
+
+    /* Outer compound container styled like an input */
+    .tag-input-container {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem;
+      border: 2px solid var(--color-gray-200);
+      border-radius: var(--border-radius);
+      background-color: var(--color-white);
+      cursor: text;
+      transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+
+    .tag-input-container:focus-within {
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+
+    /* Tag list styling */
+    .selected-tags-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      list-style: none;
+    }
+
+    /* Individual Chip styling */
+    .tag-chip {
+      display: inline-flex;
+      align-items: center;
+      background-color: var(--color-primary-light);
+      color: var(--color-primary-dark);
+      border: 1px solid rgba(37, 99, 235, 0.2);
+      border-radius: 4px;
+      padding: 0.2rem 0.5rem;
+      font-size: 0.85rem;
+      font-weight: 500;
+      user-select: none;
+      transition: background-color 0.1s ease, border-color 0.1s ease;
+    }
+
+    /* Focus styling using Roving Tabindex */
+    .tag-chip:focus {
+      outline: none;
+      background-color: var(--color-primary);
+      color: var(--color-white);
+      border-color: var(--color-primary-dark);
+      box-shadow: 0 0 0 2px var(--color-white), 0 0 0 4px var(--color-primary);
+    }
+
+    .tag-label {
+      margin-right: 0.35rem;
+    }
+
+    /* Deletion Button Inside Chip */
+    .tag-remove-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: none;
+      border: none;
+      color: inherit;
+      cursor: pointer;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      font-size: 1rem;
+      line-height: 1;
+      padding: 0;
+      transition: background-color 0.1s ease;
+    }
+
+    /* Touch target padding & interactive states */
+    .tag-chip:focus .tag-remove-btn {
+      color: var(--color-white);
+    }
+
+    .tag-remove-btn:hover {
+      background-color: rgba(37, 99, 235, 0.15);
+    }
+
+    .tag-chip:focus .tag-remove-btn:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .tag-remove-btn:focus {
+      outline: none;
+      box-shadow: 0 0 0 2px currentColor;
+    }
+
+    /* Text Entry Field */
+    .tag-input-field {
+      flex: 1 1 120px;
+      border: none;
+      background: transparent;
+      padding: 0.25rem 0.5rem;
+      font-family: inherit;
+      font-size: 0.9rem;
+      color: var(--color-gray-800);
+      min-width: 80px;
+    }
+
+    .tag-input-field:focus {
+      outline: none;
+    }
+
+    /* Helper & Status text styling */
+    .input-helper {
+      font-size: 0.8rem;
+      color: var(--color-gray-600);
+      margin-top: 0.5rem;
+    }
+
+    /* Screen reader announcement container */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      border: 0;
+    }
+
+    /* Interactive Log Panel to show live screen reader announcements visually */
+    .live-log-container {
+      margin-top: 2rem;
+      background-color: var(--color-gray-100);
+      border: 1px dashed var(--color-gray-400);
+      border-radius: var(--border-radius);
+      padding: 1rem;
+    }
+
+    .live-log-title {
+      font-size: 0.8rem;
+      font-weight: bold;
+      color: var(--color-gray-600);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
+    }
+
+    .live-log-text {
+      font-family: monospace;
+      font-size: 0.85rem;
+      color: var(--color-gray-800);
+      background: var(--color-white);
+      border: 1px solid var(--color-gray-200);
+      padding: 0.5rem;
+      border-radius: 4px;
+      min-height: 2.5rem;
+      display: flex;
+      align-items: center;
+    }
+
+    .button-group {
+      margin-top: 1rem;
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .btn {
+      padding: 0.4rem 0.8rem;
+      font-size: 0.85rem;
+      font-weight: 500;
+      background-color: var(--color-gray-100);
+      border: 1px solid var(--color-gray-200);
+      color: var(--color-gray-800);
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.1s ease;
+    }
+
+    .btn:hover {
+      background-color: var(--color-gray-200);
+    }
+
+    .btn-submit {
+      background-color: var(--color-primary);
+      border-color: var(--color-primary-dark);
+      color: var(--color-white);
+    }
+
+    .btn-submit:hover {
+      background-color: var(--color-primary-dark);
+    }
+
+    /* Visual instruction box */
+    .instruction-box {
+      margin-top: 1.5rem;
+      padding: 1rem;
+      background-color: #fef08a; /* Light yellow */
+      border: 1px solid #eab308;
+      border-radius: var(--border-radius);
+      font-size: 0.85rem;
+      color: #713f12;
+    }
+
+    .instruction-box ul {
+      margin-left: 1.25rem;
+      margin-top: 0.25rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>Accessible Multi-Select Tag Input</h1>
+    <p class="subtitle">Demonstrating a robust roving-tabindex tag selection component conforming to WAI-ARIA standards with real-time screen reader announcements.</p>
+
+    <form id="demo-form" onsubmit="event.preventDefault();">
+      <div class="form-group">
+        <label id="tech-input-label" for="tech-input">Add Technologies</label>
+
+        <!-- Outer compound input wrapper -->
+        <div class="tag-input-container" id="tag-input-container-el">
+
+          <!-- Roving Tabindex list holding selected chips -->
+          <ul class="selected-tags-list" id="tag-list" role="list" aria-label="Selected tags">
+            <li role="listitem" class="tag-chip" data-value="React" tabindex="-1">
+              <span class="tag-label">React</span>
+              <button type="button" class="tag-remove-btn" aria-label="Remove React tag" tabindex="-1">&times;</button>
+            </li>
+            <li role="listitem" class="tag-chip" data-value="TypeScript" tabindex="-1">
+              <span class="tag-label">TypeScript</span>
+              <button type="button" class="tag-remove-btn" aria-label="Remove TypeScript tag" tabindex="-1">&times;</button>
+            </li>
+            <li role="listitem" class="tag-chip" data-value="CSS" tabindex="-1">
+              <span class="tag-label">CSS</span>
+              <button type="button" class="tag-remove-btn" aria-label="Remove CSS tag" tabindex="-1">&times;</button>
+            </li>
+          </ul>
+
+          <!-- Primary Interactive Text Box -->
+          <input
+            type="text"
+            id="tech-input"
+            class="tag-input-field"
+            placeholder="Type and press Enter..."
+            autocomplete="off"
+            aria-describedby="selected-tags-list"
+          />
+        </div>
+
+        <p class="input-helper" id="helper-text">
+          Type a technology and press Enter to add. Use Left/Right Arrow keys to navigate chips when empty, and Backspace/Delete to remove.
+        </p>
+      </div>
+
+      <div class="button-group">
+        <button type="submit" class="btn btn-submit">Submit Form</button>
+        <button type="button" class="btn" id="btn-reset">Reset Tags</button>
+      </div>
+    </form>
+
+    <!-- Visually Hidden ARIA Live Region for Screen Readers -->
+    <div id="sr-announcement" class="sr-only" aria-live="polite"></div>
+
+    <!-- Live visual debugger panel simulating screen reader updates -->
+    <div class="live-log-container">
+      <p class="live-log-title">Screen Reader Announcement Simulator</p>
+      <div class="live-log-text" id="live-log-output">No events logged yet. Try adding or deleting a tag!</div>
+    </div>
+
+    <!-- Instruction Helper Card -->
+    <div class="instruction-box">
+      <strong>How to test keyboard accessibility:</strong>
+      <ul>
+        <li><strong>Add:</strong> Type a term (e.g. "HTML") and press <code>Enter</code>.</li>
+        <li><strong>Navigate to tags:</strong> Ensure input is empty, and press <code>Backspace</code> or <code>Left Arrow</code>. Focus moves to the "CSS" chip.</li>
+        <li><strong>Browse:</strong> Use <code>Left Arrow</code> and <code>Right Arrow</code> to move focus through chips. Focus stays bound as a single tab stop!</li>
+        <li><strong>Delete:</strong> Focus a chip and press <code>Backspace</code> or <code>Delete</code>. Focus moves to the next/prev chip.</li>
+        <li><strong>Exit:</strong> Press <code>Escape</code> or arrow right past the last tag to return focus immediately back to the typing input.</li>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    class AccessibleTagInput {
+      constructor(containerId, listId, inputId, announcementId, visualLogId) {
+        this.container = document.getElementById(containerId);
+        this.list = document.getElementById(listId);
+        this.input = document.getElementById(inputId);
+        this.announcer = document.getElementById(announcementId);
+        this.visualLog = document.getElementById(visualLogId);
+
+        this.focusedChipIndex = -1;
+
+        this.init();
+      }
+
+      init() {
+        // Input event bindings
+        this.input.addEventListener('keydown', (e) => this.handleInputKeydown(e));
+
+        // Container click delegation (focusing the input when clicking the wrapper)
+        this.container.addEventListener('click', (e) => {
+          if (e.target === this.container || e.target === this.list) {
+            this.input.focus();
+          }
+        });
+
+        // List key and button event bindings
+        this.list.addEventListener('keydown', (e) => this.handleListKeydown(e));
+        this.list.addEventListener('click', (e) => this.handleListClick(e));
+      }
+
+      getChips() {
+        return Array.from(this.list.querySelectorAll('.tag-chip'));
+      }
+
+      announce(text) {
+        // Update screen-reader live region
+        this.announcer.textContent = text;
+
+        // Update visual simulator log with timestamp
+        const now = new Date().toLocaleTimeString();
+        this.visualLog.textContent = `[${now}] "${text}"`;
+      }
+
+      addTag(value) {
+        const trimmed = value.trim();
+        if (!trimmed) return;
+
+        // Check for duplicates
+        const existingChips = this.getChips();
+        const exists = existingChips.some(chip => chip.dataset.value.toLowerCase() === trimmed.toLowerCase());
+        if (exists) {
+          this.announce(`Tag "${trimmed}" already exists.`);
+          this.input.value = '';
+          return;
+        }
+
+        // Create chip element
+        const li = document.createElement('li');
+        li.className = 'tag-chip';
+        li.setAttribute('role', 'listitem');
+        li.setAttribute('tabindex', '-1');
+        li.dataset.value = trimmed;
+
+        // Create visual label
+        const span = document.createElement('span');
+        span.className = 'tag-label';
+        span.textContent = trimmed;
+
+        // Create close button
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'tag-remove-btn';
+        button.setAttribute('aria-label', `Remove ${trimmed} tag`);
+        button.setAttribute('tabindex', '-1');
+        button.innerHTML = '&times;';
+
+        li.appendChild(span);
+        li.appendChild(button);
+        this.list.appendChild(li);
+
+        this.input.value = '';
+        this.announce(`Added tag: ${trimmed}`);
+      }
+
+      removeTag(chipElement) {
+        const value = chipElement.dataset.value;
+        const chips = this.getChips();
+        const index = chips.indexOf(chipElement);
+
+        // Remove element from DOM
+        chipElement.remove();
+
+        const remainingChips = this.getChips();
+        this.announce(`Removed tag: ${value}. ${remainingChips.length} tag${remainingChips.length === 1 ? '' : 's'} remaining.`);
+
+        // Focus Restoration Strategy
+        if (this.focusedChipIndex !== -1) {
+          if (remainingChips.length === 0) {
+            this.focusedChipIndex = -1;
+            this.input.focus();
+          } else {
+            // Determine logical next focus target
+            let nextFocusIndex = index;
+            if (nextFocusIndex >= remainingChips.length) {
+              nextFocusIndex = remainingChips.length - 1;
+            }
+            this.focusChip(nextFocusIndex);
+          }
+        } else {
+          // If deleted via clicking remove button while input was active
+          this.input.focus();
+        }
+      }
+
+      focusChip(index) {
+        const chips = this.getChips();
+
+        // Reset all chips to non-focusable
+        chips.forEach(chip => {
+          chip.setAttribute('tabindex', '-1');
+          chip.querySelector('.tag-remove-btn').setAttribute('tabindex', '-1');
+        });
+
+        if (index >= 0 && index < chips.length) {
+          this.focusedChipIndex = index;
+          const targetChip = chips[index];
+          targetChip.setAttribute('tabindex', '0');
+          // Important: Keep the inner remove button at tabindex="-1" so tabbing doesn't register twice,
+          // but let it be accessible visually and via screen-readers inside the focused list item.
+          targetChip.focus();
+        } else {
+          this.focusedChipIndex = -1;
+          this.input.focus();
+        }
+      }
+
+      handleInputKeydown(e) {
+        const value = this.input.value;
+        const chips = this.getChips();
+
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          this.addTag(value);
+        } else if (e.key === 'Backspace' && value === '' && chips.length > 0) {
+          // Empty input Backspace moves focus to the last tag
+          e.preventDefault();
+          this.focusChip(chips.length - 1);
+        } else if (e.key === 'ArrowLeft' && value === '' && this.input.selectionStart === 0 && chips.length > 0) {
+          // ArrowLeft at starting index moves focus to the last tag
+          e.preventDefault();
+          this.focusChip(chips.length - 1);
+        }
+      }
+
+      handleListKeydown(e) {
+        const chips = this.getChips();
+        if (chips.length === 0) return;
+
+        switch (e.key) {
+          case 'ArrowLeft':
+            e.preventDefault();
+            if (this.focusedChipIndex > 0) {
+              this.focusChip(this.focusedChipIndex - 1);
+            }
+            break;
+
+          case 'ArrowRight':
+            e.preventDefault();
+            if (this.focusedChipIndex < chips.length - 1) {
+              this.focusChip(this.focusedChipIndex + 1);
+            } else {
+              // Move focus back to the text entry field
+              this.focusChip(-1);
+            }
+            break;
+
+          case 'Backspace':
+          case 'Delete':
+            e.preventDefault();
+            if (this.focusedChipIndex !== -1) {
+              this.removeTag(chips[this.focusedChipIndex]);
+            }
+            break;
+
+          case 'Escape':
+            e.preventDefault();
+            this.focusChip(-1);
+            break;
+
+          case 'Home':
+            e.preventDefault();
+            this.focusChip(0);
+            break;
+
+          case 'End':
+            e.preventDefault();
+            this.focusChip(chips.length - 1);
+            break;
+        }
+      }
+
+      handleListClick(e) {
+        // Delegate button clicks
+        const removeBtn = e.target.closest('.tag-remove-btn');
+        if (removeBtn) {
+          e.stopPropagation();
+          const chip = removeBtn.closest('.tag-chip');
+          this.removeTag(chip);
+          return;
+        }
+
+        // Delegate chip click (place roving focus directly on the chip)
+        const chip = e.target.closest('.tag-chip');
+        if (chip) {
+          e.stopPropagation();
+          const chips = this.getChips();
+          const index = chips.indexOf(chip);
+          this.focusChip(index);
+        }
+      }
+
+      reset() {
+        this.list.innerHTML = '';
+        this.input.value = '';
+        this.focusedChipIndex = -1;
+        this.announce('All tags cleared.');
+        this.input.focus();
+      }
+    }
+
+    // Instantiate demo component
+    const tagInputComponent = new AccessibleTagInput(
+      'tag-input-container-el',
+      'tag-list',
+      'tech-input',
+      'sr-announcement',
+      'live-log-output'
+    );
+
+    document.getElementById('btn-reset').addEventListener('click', () => {
+      tagInputComponent.reset();
+    });
+  </script>
+</body>
+</html>
