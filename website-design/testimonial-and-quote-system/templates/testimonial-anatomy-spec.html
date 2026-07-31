@@ -1,0 +1,318 @@
+<!--
+  TESTIMONIAL ANATOMY SPECIFICATION
+
+  This template provides highly semantic, accessible, and responsive layouts
+  for customer testimonials. It uses vanilla HTML and CSS Custom Properties
+  for maximum portability across UI frameworks (React, Vue, Svelte, Web Components).
+
+  Accessibility Compliance:
+  - WCAG 2.2 AA Contrast Standards: Foreground text meets >= 4.5:1 ratio.
+  - Semantic markup: Wraps testimonials in <figure> and blockquote.
+  - Decorative icons and quotes are hidden from screen readers via aria-hidden="true".
+-->
+
+<style>
+  /* Base Spatial Design Tokens */
+  :root {
+    --color-text-primary: #0f172a;   /* Slate 900 */
+    --color-text-secondary: #334155; /* Slate 700 */
+    --color-text-muted: #64748b;     /* Slate 500 */
+    --color-border-subtle: #e2e8f0;  /* Slate 200 */
+    --color-brand-primary: #0f62fe;  /* Brand Accent */
+    --color-bg-card: #ffffff;
+    --color-bg-badge: #e0f2fe;       /* Sky 100 */
+    --color-text-badge: #0369a1;     /* Sky 700 */
+
+    --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --font-serif: Georgia, Cambria, "Times New Roman", Times, serif;
+
+    --space-s: 8px;
+    --space-m: 16px;
+    --space-l: 24px;
+    --space-xl: 32px;
+    --space-xxl: 48px;
+
+    --radius-m: 8px;
+    --radius-l: 12px;
+    --radius-full: 9999px;
+  }
+
+  /* Global Reset & Utility Styles */
+  .testimonial-font-sans {
+    font-family: var(--font-sans);
+  }
+
+  /* =========================================================================
+     PATTERN 1: SPOTLIGHT TESTIMONIAL (CENTERED & HIGH-IMPACT)
+     ========================================================================= */
+  .testimonial-spotlight {
+    position: relative;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: var(--space-xxl) var(--space-xl);
+    text-align: center;
+    background-color: transparent;
+  }
+
+  /* Large decorative quote marks positioned absolutely to avoid content overlapping */
+  .testimonial-spotlight::before {
+    content: "“";
+    position: absolute;
+    top: var(--space-m);
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: var(--font-serif);
+    font-size: 120px;
+    line-height: 1;
+    color: var(--color-border-subtle);
+    opacity: 0.5;
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  .testimonial-spotlight blockquote {
+    margin: 0 0 var(--space-xl) 0;
+    padding: 0;
+  }
+
+  .testimonial-spotlight .quote-text {
+    font-family: var(--font-serif);
+    font-size: 28px;
+    font-weight: 500;
+    line-height: 1.35;
+    color: var(--color-text-primary);
+  }
+
+  .testimonial-spotlight figcaption {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-m);
+  }
+
+  .testimonial-spotlight .avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: var(--radius-full);
+    object-fit: cover;
+    border: 2px solid var(--color-border-subtle);
+  }
+
+  .testimonial-spotlight .author-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .testimonial-spotlight .author-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+  }
+
+  .testimonial-spotlight .author-meta {
+    font-size: 14px;
+    color: var(--color-text-muted);
+  }
+
+  /* Trust & Source Verification Badge */
+  .testimonial-spotlight .trust-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    background-color: var(--color-bg-badge);
+    color: var(--color-text-badge);
+    border-radius: var(--radius-full);
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  /* Responsive Design Rules for Spotlight */
+  @media (max-width: 768px) {
+    .testimonial-spotlight {
+      padding: var(--space-xl) var(--space-m);
+    }
+    .testimonial-spotlight .quote-text {
+      font-size: 20px;
+    }
+    .testimonial-spotlight::before {
+      font-size: 90px;
+      top: 0;
+    }
+  }
+
+  /* =========================================================================
+     PATTERN 2: TESTIMONIAL CARD (GRID PLACEMENT)
+     ========================================================================= */
+  .testimonial-card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--space-l);
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: var(--space-xl) var(--space-m);
+  }
+
+  .testimonial-card {
+    background-color: var(--color-bg-card);
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--radius-l);
+    padding: var(--space-xl);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .testimonial-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+  }
+
+  .testimonial-card blockquote {
+    margin: 0 0 var(--space-l) 0;
+    padding: 0;
+  }
+
+  .testimonial-card .quote-text {
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--color-text-secondary);
+  }
+
+  .testimonial-card figcaption {
+    display: flex;
+    align-items: center;
+    gap: var(--space-m);
+    border-top: 1px solid var(--color-border-subtle);
+    padding-top: var(--space-m);
+  }
+
+  .testimonial-card .avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-full);
+    object-fit: cover;
+  }
+
+  .testimonial-card .author-info {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .testimonial-card .author-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+  }
+
+  .testimonial-card .author-meta {
+    font-size: 12px;
+    color: var(--color-text-muted);
+  }
+</style>
+
+<!-- =========================================================================
+     REUSABLE TEMPLATE BLOCK 1: SPOTLIGHT HERO TESTIMONIAL
+     ========================================================================= -->
+<figure class="testimonial-spotlight testimonial-font-sans">
+  <blockquote>
+    <!-- Decorative quotation marks are hidden from screen readers.
+         Direct semantic quote text is announced clearly. -->
+    <p class="quote-text">
+      “Since deploying SentryFlow, we've reduced our audit preparation overhead by 80%. Our compliance team went from manual spreadsheets to automated evidence collection in less than a week.”
+    </p>
+  </blockquote>
+  <figcaption>
+    <!-- Headshot with appropriate decorative alt text or semantic naming -->
+    <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=150&h=150&q=80"
+         alt="Sarah Jenkins headshot"
+         class="avatar"
+         loading="lazy">
+    <div class="author-info">
+      <span class="author-name">Sarah Jenkins</span>
+      <span class="author-meta">
+        Chief Compliance Officer at <cite>AcmeCorp</cite>
+      </span>
+    </div>
+    <!-- Trust Indicator -->
+    <span class="trust-badge">
+      <span aria-hidden="true">✓</span> Verified Customer
+    </span>
+  </figcaption>
+</figure>
+
+
+<!-- =========================================================================
+     REUSABLE TEMPLATE BLOCK 2: MULTI-COLUMN TESTIMONIAL GRID CONTAINER
+     ========================================================================= -->
+<section class="testimonial-card-grid testimonial-font-sans" aria-label="Customer Success Stories">
+
+  <!-- Testimonial Card 1 -->
+  <figure class="testimonial-card">
+    <blockquote>
+      <p class="quote-text">
+        “The developer documentation is completely world-class. We had our first secure pipeline running within three hours of creating an account.”
+      </p>
+    </blockquote>
+    <figcaption>
+      <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100&h=100&q=80"
+           alt="Marcus Chen headshot"
+           class="avatar"
+           loading="lazy">
+      <div class="author-info">
+        <span class="author-name">Marcus Chen</span>
+        <span class="author-meta">
+          Lead Architect at <cite>DevCo</cite>
+        </span>
+      </div>
+    </figcaption>
+  </figure>
+
+  <!-- Testimonial Card 2 -->
+  <figure class="testimonial-card">
+    <blockquote>
+      <p class="quote-text">
+        “We expected SentryFlow to protect our infrastructure, but we didn't expect it to accelerate release cycles. It is an absolute game-changer.”
+      </p>
+    </blockquote>
+    <figcaption>
+      <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&h=100&q=80"
+           alt="Elena Rostova headshot"
+           class="avatar"
+           loading="lazy">
+      <div class="author-info">
+        <span class="author-name">Elena Rostova</span>
+        <span class="author-meta">
+          VP of Engineering at <cite>ScaleUp</cite>
+        </span>
+      </div>
+    </figcaption>
+  </figure>
+
+  <!-- Testimonial Card 3 -->
+  <figure class="testimonial-card">
+    <blockquote>
+      <p class="quote-text">
+        “Customer support migrated our legacy configuration rules into production without a single millisecond of downtime. Exceptional service.”
+      </p>
+    </blockquote>
+    <figcaption>
+      <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=100&h=100&q=80"
+           alt="Liam Vance headshot"
+           class="avatar"
+           loading="lazy">
+      <div class="author-info">
+        <span class="author-name">Liam Vance</span>
+        <span class="author-meta">
+          Chief Operating Officer at <cite>FinGrowth</cite>
+        </span>
+      </div>
+    </figcaption>
+  </figure>
+
+</section>
