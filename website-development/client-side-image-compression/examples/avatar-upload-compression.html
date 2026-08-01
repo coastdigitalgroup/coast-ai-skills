@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Client-Side Image Compression - Avatar Upload Example</title>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --primary-light: #eff6ff;
+      --success: #16a34a;
+      --error: #dc2626;
+      --gray-50: #f9fafb;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-400: #9ca3af;
+      --gray-700: #374151;
+      --gray-900: #111827;
+      --border-radius: 12px;
+      --transition: all 0.2s ease-in-out;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: #f0f2f5;
+      color: var(--gray-700);
+      line-height: 1.5;
+      padding: 2rem 1rem;
+    }
+
+    main {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      color: var(--gray-900);
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+      text-align: center;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: var(--gray-400);
+      margin-bottom: 2.5rem;
+    }
+
+    .card {
+      background: white;
+      border-radius: var(--border-radius);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      padding: 2.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--gray-900);
+    }
+
+    /* Drag and Drop Zone */
+    .drop-zone {
+      border: 2px dashed var(--gray-200);
+      border-radius: var(--border-radius);
+      padding: 3rem 1.5rem;
+      text-align: center;
+      cursor: pointer;
+      background-color: var(--gray-50);
+      transition: var(--transition);
+      outline: none;
+    }
+
+    .drop-zone:hover, .drop-zone.drag-over {
+      border-color: var(--primary);
+      background-color: var(--primary-light);
+    }
+
+    .drop-zone:focus-visible {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.3);
+    }
+
+    .drop-zone svg {
+      width: 48px;
+      height: 48px;
+      color: var(--gray-400);
+      margin-bottom: 1rem;
+      transition: var(--transition);
+    }
+
+    .drop-zone:hover svg, .drop-zone.drag-over svg {
+      color: var(--primary);
+    }
+
+    .drop-zone-text {
+      font-size: 1rem;
+      color: var(--gray-700);
+      margin-bottom: 0.5rem;
+    }
+
+    .drop-zone-hint {
+      font-size: 0.85rem;
+      color: var(--gray-400);
+    }
+
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      border: 0;
+    }
+
+    /* Status Indicator & Live Region */
+    .status-container {
+      margin-top: 1.5rem;
+      padding: 1rem;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      display: none;
+    }
+
+    .status-container.processing {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      background-color: var(--primary-light);
+      color: var(--primary-hover);
+      border: 1px solid rgba(37, 99, 235, 0.15);
+    }
+
+    .status-container.success {
+      display: block;
+      background-color: #f0fdf4;
+      color: var(--success);
+      border: 1px solid rgba(22, 163, 74, 0.15);
+    }
+
+    .status-container.error {
+      display: block;
+      background-color: #fef2f2;
+      color: var(--error);
+      border: 1px solid rgba(220, 38, 38, 0.15);
+    }
+
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(37, 99, 235, 0.15);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Comparison Section */
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+
+    @media (min-width: 640px) {
+      .comparison-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .preview-box {
+      border: 1px solid var(--gray-200);
+      border-radius: var(--border-radius);
+      padding: 1rem;
+      background: white;
+      text-align: center;
+    }
+
+    .preview-box h3 {
+      font-size: 1rem;
+      margin-bottom: 0.75rem;
+      color: var(--gray-900);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .preview-image-wrapper {
+      width: 150px;
+      height: 150px;
+      margin: 0 auto 1rem;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 3px solid var(--gray-200);
+      background-color: var(--gray-100);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .preview-image-wrapper img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .metadata {
+      font-size: 0.9rem;
+      text-align: left;
+      border-top: 1px solid var(--gray-100);
+      padding-top: 0.75rem;
+    }
+
+    .metadata-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.25rem;
+    }
+
+    .metadata-label {
+      color: var(--gray-400);
+    }
+
+    .metadata-value {
+      font-weight: 600;
+      color: var(--gray-900);
+    }
+
+    .saving-badge {
+      display: inline-block;
+      background-color: var(--success);
+      color: white;
+      font-weight: bold;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.8rem;
+    }
+
+    /* Submit Action */
+    .submit-container {
+      margin-top: 2rem;
+      text-align: right;
+    }
+
+    .btn {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .btn:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+    }
+
+    .btn:disabled {
+      background-color: var(--gray-200);
+      color: var(--gray-400);
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+
+  <main>
+    <h1>Avatar Upload & Client-Side Compression</h1>
+    <p class="subtitle">See how raw photographs are downsized and optimized instantly before leaving your browser.</p>
+
+    <div class="card">
+      <div class="form-group">
+        <label id="upload-label" class="form-label">Upload Profile Photo</label>
+
+        <!-- Accessible Drag-and-Drop Zone (Fires file explorer on click/Enter) -->
+        <div class="drop-zone" id="drop-zone" tabindex="0" aria-labelledby="upload-label" role="button">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+          </svg>
+          <p class="drop-zone-text">Drag & drop your photo here, or <strong>click to browse</strong></p>
+          <p class="drop-zone-hint">Supports JPEG, PNG, or WebP. Max raw file size: 25MB.</p>
+
+          <input type="file" id="file-input" class="visually-hidden" accept="image/jpeg,image/png,image/webp">
+        </div>
+      </div>
+
+      <!-- ARIA Live Announcement Region (Polite level avoids disrupting reader flows, but guarantees delivery) -->
+      <div id="live-announcement" class="visually-hidden" aria-live="polite" aria-atomic="true"></div>
+
+      <!-- UI Visible Progress and State Alerts -->
+      <div id="status-alert" class="status-container" role="status"></div>
+
+      <!-- Visual Preview Comparison Grid (Hidden initially, shown after processing) -->
+      <div class="comparison-grid" id="comparison-section" style="display: none;">
+
+        <!-- Before Panel -->
+        <div class="preview-box">
+          <h3>Original Image</h3>
+          <div class="preview-image-wrapper">
+            <img id="original-preview" src="" alt="Original upload preview">
+          </div>
+          <div class="metadata">
+            <div class="metadata-row">
+              <span class="metadata-label">File Name:</span>
+              <span id="orig-name" class="metadata-value">-</span>
+            </div>
+            <div class="metadata-row">
+              <span class="metadata-label">Dimensions:</span>
+              <span id="orig-dims" class="metadata-value">-</span>
+            </div>
+            <div class="metadata-row">
+              <span class="metadata-label">File Size:</span>
+              <span id="orig-size" class="metadata-value">-</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- After Panel -->
+        <div class="preview-box">
+          <h3>Optimized Image</h3>
+          <div class="preview-image-wrapper">
+            <img id="compressed-preview" src="" alt="Compressed upload preview">
+          </div>
+          <div class="metadata">
+            <div class="metadata-row">
+              <span class="metadata-label">Output Format:</span>
+              <span id="comp-format" class="metadata-value">image/jpeg</span>
+            </div>
+            <div class="metadata-row">
+              <span class="metadata-label">Dimensions:</span>
+              <span id="comp-dims" class="metadata-value">-</span>
+            </div>
+            <div class="metadata-row">
+              <span class="metadata-label">File Size:</span>
+              <span id="comp-size" class="metadata-value">-</span>
+            </div>
+            <div class="metadata-row" style="margin-top: 0.5rem; align-items: center;">
+              <span class="metadata-label">Storage Saved:</span>
+              <span id="comp-savings" class="saving-badge">-</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Submit Action Button -->
+      <div class="submit-container">
+        <button type="button" class="btn" id="submit-btn" disabled>Upload Optimized Avatar</button>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('file-input');
+    const liveAnnouncement = document.getElementById('live-announcement');
+    const statusAlert = document.getElementById('status-alert');
+    const comparisonSection = document.getElementById('comparison-section');
+    const submitBtn = document.getElementById('submit-btn');
+
+    // Image Previews
+    const originalPreview = document.getElementById('original-preview');
+    const compressedPreview = document.getElementById('compressed-preview');
+
+    // Metadata Elements
+    const origName = document.getElementById('orig-name');
+    const origDims = document.getElementById('orig-dims');
+    const origSize = document.getElementById('orig-size');
+    const compFormat = document.getElementById('comp-format');
+    const compDims = document.getElementById('comp-dims');
+    const compSize = document.getElementById('comp-size');
+    const compSavings = document.getElementById('comp-savings');
+
+    // Settings for avatar optimization
+    const CONFIG = {
+      maxWidth: 400,
+      maxHeight: 400,
+      quality: 0.8,
+      mimeType: 'image/jpeg'
+    };
+
+    let compressedBlob = null;
+    let originalObjectURL = null;
+    let compressedObjectURL = null;
+
+    // Trigger File Picker from keyboard/click on dropZone
+    dropZone.addEventListener('click', () => fileInput.click());
+    dropZone.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        fileInput.click();
+      }
+    });
+
+    // Handle Drag & Drop events
+    ['dragenter', 'dragover'].forEach(eventName => {
+      dropZone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        dropZone.classList.add('drag-over');
+      }, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+      dropZone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('drag-over');
+      }, false);
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+      const files = e.dataTransfer.files;
+      if (files.length > 0) {
+        handleFile(files[0]);
+      }
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) {
+        handleFile(e.target.files[0]);
+      }
+    });
+
+    function formatBytes(bytes) {
+      if (bytes === 0) return '0 Bytes';
+      const k = 1024;
+      const sizes = ['Bytes', 'KB', 'MB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    function announce(message, alertClass = 'processing') {
+      liveAnnouncement.textContent = message;
+      statusAlert.className = `status-container ${alertClass}`;
+
+      if (alertClass === 'processing') {
+        statusAlert.innerHTML = `<div class="spinner"></div><span>${message}</span>`;
+      } else {
+        statusAlert.textContent = message;
+      }
+    }
+
+    // High performance sequential client-side compression pipeline
+    async function handleFile(file) {
+      // Clean up previous URLs to prevent memory leaks
+      if (originalObjectURL) URL.revokeObjectURL(originalObjectURL);
+      if (compressedObjectURL) URL.revokeObjectURL(compressedObjectURL);
+
+      comparisonSection.style.display = 'none';
+      submitBtn.disabled = true;
+
+      // Type verification
+      if (!file.type.startsWith('image/')) {
+        announce('Error: Selected file is not an image. Please choose JPEG, PNG, or WebP.', 'error');
+        return;
+      }
+
+      // Max size guard (25MB)
+      if (file.size > 25 * 1024 * 1024) {
+        announce('Error: The image file is too large (exceeds 25MB limit).', 'error');
+        return;
+      }
+
+      announce(`Processing ${file.name}... Preparing canvas compression.`, 'processing');
+
+      try {
+        originalObjectURL = URL.createObjectURL(file);
+
+        // 1. Construct image element to load the raw binary
+        const img = new Image();
+        img.src = originalObjectURL;
+
+        await new Promise((resolve, reject) => {
+          img.onload = resolve;
+          img.onerror = () => reject(new Error('Failed to parse image file.'));
+        });
+
+        // Populate Original Metadata
+        origName.textContent = file.name;
+        origDims.textContent = `${img.naturalWidth} x ${img.naturalHeight} px`;
+        origSize.textContent = formatBytes(file.size);
+        originalPreview.src = originalObjectURL;
+
+        announce(`Compressing image to targeted boundary (${CONFIG.maxWidth}x${CONFIG.maxHeight})...`, 'processing');
+
+        // Calculate proportional dimensions
+        let targetWidth = img.naturalWidth;
+        let targetHeight = img.naturalHeight;
+
+        if (targetWidth > CONFIG.maxWidth || targetHeight > CONFIG.maxHeight) {
+          const ratio = Math.min(CONFIG.maxWidth / targetWidth, CONFIG.maxHeight / targetHeight);
+          targetWidth = Math.round(targetWidth * ratio);
+          targetHeight = Math.round(targetHeight * ratio);
+        }
+
+        // Initialize CPU/GPU offscreen canvas for resizing
+        const canvas = document.createElement('canvas');
+        canvas.width = targetWidth;
+        canvas.height = targetHeight;
+        const ctx = canvas.getContext('2d');
+
+        // Handle alpha transparent PNG to JPEG solid backgrounds
+        if (CONFIG.mimeType === 'image/jpeg' && file.type === 'image/png') {
+          ctx.fillStyle = '#ffffff'; // Fill background white to avoid solid black rendering
+          ctx.fillRect(0, 0, targetWidth, targetHeight);
+        }
+
+        // Single-step drawing on Canvas Context
+        ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
+
+        // Compress and extract blob asynchronous callback
+        compressedBlob = await new Promise((resolve) => {
+          canvas.toBlob((blob) => {
+            resolve(blob);
+          }, CONFIG.mimeType, CONFIG.quality);
+        });
+
+        if (!compressedBlob) {
+          throw new Error('Canvas conversion returned an empty blob.');
+        }
+
+        compressedObjectURL = URL.createObjectURL(compressedBlob);
+        compressedPreview.src = compressedObjectURL;
+
+        // Populate Optimized Metadata
+        compFormat.textContent = CONFIG.mimeType;
+        compDims.textContent = `${targetWidth} x ${targetHeight} px`;
+        compSize.textContent = formatBytes(compressedBlob.size);
+
+        // Saving percentage calculation
+        const savingsPercent = Math.round(((file.size - compressedBlob.size) / file.size) * 100);
+        compSavings.textContent = savingsPercent > 0 ? `Saved ${savingsPercent}%` : '0% (Already Optimized)';
+
+        announce(`Success! Image compressed successfully by ${savingsPercent > 0 ? savingsPercent : 0}%.`, 'success');
+        comparisonSection.style.display = 'grid';
+        submitBtn.disabled = false;
+
+      } catch (err) {
+        announce(`Error processing image: ${err.message}`, 'error');
+        console.error(err);
+      }
+    }
+
+    submitBtn.addEventListener('click', () => {
+      if (!compressedBlob) return;
+
+      announce('Mock upload sequence initiated. Outgoing packet size: ' + formatBytes(compressedBlob.size), 'processing');
+
+      // Simulate fetch upload
+      setTimeout(() => {
+        announce('Profile picture uploaded successfully! Database transaction finalized.', 'success');
+        submitBtn.disabled = true;
+      }, 1500);
+    });
+  </script>
+</body>
+</html>
