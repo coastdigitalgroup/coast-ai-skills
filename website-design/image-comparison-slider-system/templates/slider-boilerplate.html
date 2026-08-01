@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Accessible Image Comparison Slider Template</title>
+  <style>
+    /* -------------------------------------------------------------------------
+       1. Design Tokens & Root Custom Properties
+       ------------------------------------------------------------------------- */
+    :root {
+      --slider-width: 100%;
+      --slider-max-width: 800px;
+      --slider-aspect-ratio: 16 / 9;
+
+      /* Colors */
+      --color-primary: #3b82f6; /* Focus outline ring color */
+      --color-white: #ffffff;
+      --color-black: #000000;
+      --color-badge-bg: rgba(15, 23, 42, 0.75); /* Dark gray background for labels */
+
+      /* Borders & Shadows */
+      --border-radius-m: 12px;
+      --border-radius-pill: 9999px;
+      --shadow-m: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      --shadow-handle: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+
+      /* Interaction Speeds */
+      --transition-speed-fast: 150ms;
+      --transition-ease: cubic-bezier(0.4, 0, 0.2, 1);
+
+      /* Initial Position Custom Property (Controlled by JS or fallback) */
+      --slider-position: 50%;
+    }
+
+    /* Support prefers-reduced-motion media query */
+    @media (prefers-reduced-motion: reduce) {
+      :root {
+        --transition-speed-fast: 0ms;
+      }
+    }
+
+    /* -------------------------------------------------------------------------
+       2. Outer Container & Base Sizing (Aspect Ratio Lock to prevent CLS)
+       ------------------------------------------------------------------------- */
+    .img-comp-container {
+      position: relative;
+      width: var(--slider-width);
+      max-width: var(--slider-max-width);
+      aspect-ratio: var(--slider-aspect-ratio);
+      margin: 0 auto;
+      border-radius: var(--border-radius-m);
+      overflow: hidden;
+      box-shadow: var(--shadow-m);
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: pan-y; /* Intercept X swipes for slider, allow standard Y scrolling */
+    }
+
+    /* -------------------------------------------------------------------------
+       3. Underlapping and Overlapping Image Layers
+       ------------------------------------------------------------------------- */
+    .img-comp-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    /* The 'before' layer is static and underlying */
+    .layer-before {
+      z-index: 1;
+    }
+
+    /* The 'after' layer is absolute on top and clipped by the dynamic slider width */
+    .layer-after {
+      z-index: 2;
+      width: var(--slider-position);
+    }
+
+    /* Image containment styling to guarantee identical visual rendering & crops */
+    .img-comp-layer img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      pointer-events: none;
+    }
+
+    /* -------------------------------------------------------------------------
+       4. Contextual Label Badges
+       ------------------------------------------------------------------------- */
+    .img-comp-badge {
+      position: absolute;
+      top: 16px;
+      padding: 6px 14px;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--color-white);
+      background-color: var(--color-badge-bg);
+      border-radius: var(--border-radius-pill);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      z-index: 4;
+      pointer-events: none;
+      transition: opacity var(--transition-speed-fast) var(--transition-ease);
+    }
+
+    .badge-before {
+      left: 16px;
+    }
+
+    .badge-after {
+      right: 16px;
+    }
+
+    /* Fade out labels when slider handle is pushed close to either screen boundary */
+    .img-comp-container.hide-badge-before .badge-before {
+      opacity: 0;
+    }
+
+    .img-comp-container.hide-badge-after .badge-after {
+      opacity: 0;
+    }
+
+    /* -------------------------------------------------------------------------
+       5. Sliding Divider Line & Tactile Handle Badge
+       ------------------------------------------------------------------------- */
+    .img-comp-divider {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background-color: var(--color-white);
+      box-shadow: 0 0 8px rgba(0, 0, 0, 0.4);
+      z-index: 3;
+      pointer-events: none;
+      transform: translateX(-50%);
+      left: var(--slider-position);
+      transition: background-color var(--transition-speed-fast) var(--transition-ease);
+    }
+
+    /* The central tactile circle */
+    .img-comp-handle {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 44px;
+      height: 44px;
+      background-color: var(--color-white);
+      border-radius: var(--border-radius-pill);
+      box-shadow: var(--shadow-handle);
+      transform: translate(-50%, -50%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: transform var(--transition-speed-fast) var(--transition-ease),
+                  background-color var(--transition-speed-fast) var(--transition-ease);
+    }
+
+    /* Handle internal chevron graphics */
+    .img-comp-handle::before,
+    .img-comp-handle::after {
+      content: "";
+      width: 0;
+      height: 0;
+      border-top: 5px solid transparent;
+      border-bottom: 5px solid transparent;
+      position: absolute;
+    }
+
+    /* Left Arrow (←) pointer */
+    .img-comp-handle::before {
+      border-right: 7px solid #475569;
+      left: 12px;
+    }
+
+    /* Right Arrow (→) pointer */
+    .img-comp-handle::after {
+      border-left: 7px solid #475569;
+      right: 12px;
+    }
+
+    /* -------------------------------------------------------------------------
+       6. Interactive Input Range Overlay (Captures mouse/touch/keyboard)
+       ------------------------------------------------------------------------- */
+    .img-comp-input {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      opacity: 0; /* Fully transparent, overlays the entire canvas */
+      cursor: col-resize;
+      z-index: 5;
+    }
+
+    /* -------------------------------------------------------------------------
+       7. Interactive Focus, Hover, and Active States
+       ------------------------------------------------------------------------- */
+
+    /* Interactive Hover Styling */
+    .img-comp-container:hover .img-comp-divider {
+      background-color: var(--color-primary);
+    }
+
+    .img-comp-container:hover .img-comp-handle {
+      transform: translate(-50%, -50%) scale(1.1);
+    }
+
+    /* Focused State (Activated when keyboard users tab into the range input) */
+    .img-comp-input:focus-visible ~ .img-comp-divider .img-comp-handle {
+      outline: 3px solid var(--color-primary);
+      outline-offset: 3px;
+      background-color: #f8fafc;
+      transform: translate(-50%, -50%) scale(1.1);
+    }
+
+    /* Active State (Dragging with mouse or swiping) */
+    .img-comp-input:active ~ .img-comp-divider .img-comp-handle {
+      background-color: #e2e8f0;
+      transform: translate(-50%, -50%) scale(0.95);
+    }
+
+    /* -------------------------------------------------------------------------
+       8. Progressive Enhancement (No-JS Fallback)
+       ------------------------------------------------------------------------- */
+    .no-js .img-comp-container {
+      aspect-ratio: auto;
+      height: auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      overflow: visible;
+      background-color: transparent;
+      box-shadow: none;
+    }
+
+    .no-js .img-comp-layer {
+      position: relative;
+      width: 100% !important;
+      aspect-ratio: var(--slider-aspect-ratio);
+      border-radius: var(--border-radius-m);
+      overflow: hidden;
+      box-shadow: var(--shadow-m);
+    }
+
+    .no-js .img-comp-layer img {
+      position: relative;
+    }
+
+    .no-js .img-comp-badge {
+      top: auto;
+      bottom: 16px;
+    }
+
+    .no-js .img-comp-divider,
+    .no-js .img-comp-input {
+      display: none;
+    }
+
+    /* Responsive shift for No-JS fallback */
+    @media (max-width: 640px) {
+      .no-js .img-comp-container {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!--
+    The slider container element.
+    To test the No-JS fallback style, replace 'class="img-comp-container"' with 'class="img-comp-container no-js"'.
+  -->
+  <div class="img-comp-container" id="myCompSlider" style="--slider-position: 50%;">
+
+    <!-- Underlapping "Before" (Left) View -->
+    <div class="img-comp-layer layer-before">
+      <img src="https://picsum.photos/id/1015/1200/675" alt="High contrast landscape image representing the unoptimized before state." />
+      <span class="img-comp-badge badge-before">Before</span>
+    </div>
+
+    <!-- Overlapping "After" (Right) View -->
+    <div class="img-comp-layer layer-after">
+      <img src="https://picsum.photos/id/1015/1200/675" alt="Optimized landscape image representing the optimized after state." />
+      <span class="img-comp-badge badge-after">After</span>
+    </div>
+
+    <!-- Sliding Separator Bar -->
+    <div class="img-comp-divider">
+      <div class="img-comp-handle"></div>
+    </div>
+
+    <!--
+      Tactile Control Input.
+      The 'aria-label' must convey usage directions clearly to screen reader nodes.
+    -->
+    <input type="range"
+           class="img-comp-input"
+           min="0"
+           max="100"
+           value="50"
+           aria-label="Image comparison slider. Use the left and right arrow keys to slide between the before state on the left and the after state on the right." />
+  </div>
+
+  <!--
+    Minimal, high-performance Javascript controller to update Custom Properties
+    and manage contextual badge fading.
+  -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const sliderContainer = document.getElementById("myCompSlider");
+      if (!sliderContainer) return;
+
+      const rangeInput = sliderContainer.querySelector(".img-comp-input");
+
+      const updateSlider = () => {
+        const value = rangeInput.value;
+        sliderContainer.style.setProperty("--slider-position", `${value}%`);
+
+        // Context-aware label badge concealment
+        // Hide "Before" badge when handle gets within 15% of the left boundary
+        if (value < 15) {
+          sliderContainer.classList.add("hide-badge-before");
+        } else {
+          sliderContainer.classList.remove("hide-badge-before");
+        }
+
+        // Hide "After" badge when handle gets within 15% of the right boundary
+        if (value > 85) {
+          sliderContainer.classList.add("hide-badge-after");
+        } else {
+          sliderContainer.classList.remove("hide-badge-after");
+        }
+      };
+
+      // Listen to both input (real-time scrubbing) and change (fallback tracking) events
+      rangeInput.addEventListener("input", updateSlider);
+      rangeInput.addEventListener("change", updateSlider);
+
+      // Initialize layout
+      updateSlider();
+    });
+  </script>
+
+</body>
+</html>
