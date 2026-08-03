@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Testimonial Anatomy Specification Template</title>
+  <style>
+    /* ==========================================================================
+       DESIGN TOKENS & RESPONSIVE SETUP
+       ========================================================================== */
+    :root {
+      /* Brand Color System (WCAG AA Compliant Contrasts) */
+      --color-bg-canvas: #f8fafc;        /* Slate 50 */
+      --color-bg-card: #ffffff;          /* Pure White */
+      --color-border-card: #e2e8f0;      /* Slate 200 */
+      --color-text-quote: #0f172a;       /* Slate 900 (Contrast 21:1) */
+      --color-text-author: #1e293b;      /* Slate 800 (Contrast 17.5:1) */
+      --color-text-meta: #475569;        /* Slate 600 (Contrast 5.4:1) */
+      --color-star-fill: #f59e0b;        /* Gold/Amber 500 */
+      --color-badge-bg: #ecfdf5;         /* Emerald 50 (Verified Background) */
+      --color-badge-text: #047857;       /* Emerald 700 (Contrast 4.8:1) */
+      --color-badge-border: #a7f3d0;     /* Emerald 200 */
+      --color-focus-outline: #2563eb;    /* Royal Blue 600 */
+
+      /* Typography Scale (Fluid clamp values from fluid-typography-system) */
+      --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --font-serif: Georgia, Cambria, "Times New Roman", Times, serif;
+      --font-size-quote: clamp(1.125rem, 2vw, 1.25rem); /* Responsive quote text size */
+      --font-size-author: 1rem;
+      --font-size-meta: 0.875rem;
+
+      /* Spacing System (fluid-spacing-system variables) */
+      --space-s: clamp(0.75rem, 1.5vw, 1rem);
+      --space-m: clamp(1rem, 2vw, 1.5rem);
+      --space-l: clamp(1.5rem, 3vw, 2.25rem);
+
+      /* Border Radii (Concentric nested curves rule) */
+      --radius-outer-card: 16px;
+      --radius-inner-avatar: 50%; /* Circular avatar default */
+      --radius-inner-badge: 6px;
+    }
+
+    /* Core Page Reset */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--color-bg-canvas);
+      padding: var(--space-l);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    /* ==========================================================================
+       SEMANTIC TESTIMONIAL CARD STRUCTURAL LAYOUT
+       ========================================================================== */
+    .testimonial-card {
+      background-color: var(--color-bg-card);
+      border: 1px solid var(--color-border-card);
+      border-radius: var(--radius-outer-card);
+      padding: var(--space-l);
+      max-width: 650px;
+      width: 100%;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05),
+                  0 2px 4px -2px rgba(0, 0, 0, 0.05);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-m);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    /* Optional link behavior if the entire testimonial card is interactive */
+    .testimonial-card[href] {
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .testimonial-card[href]:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08),
+                  0 4px 6px -4px rgba(0, 0, 0, 0.08);
+    }
+
+    .testimonial-card[href]:focus-visible {
+      outline: 3px solid var(--color-focus-outline);
+      outline-offset: 4px;
+    }
+
+    /* 1. Rating Header Block */
+    .testimonial-rating-row {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+    }
+
+    .star-icon {
+      width: 20px;
+      height: 20px;
+      fill: var(--color-star-fill);
+    }
+
+    /* 2. Quotation Core Block */
+    .testimonial-quote-block {
+      position: relative;
+    }
+
+    /* Decorative Quote Icon (Positioned inside card padding boundary) */
+    .testimonial-quote-block::before {
+      content: "“";
+      font-family: var(--font-serif);
+      font-size: 5rem;
+      color: var(--color-border-card);
+      line-height: 1;
+      position: absolute;
+      top: -30px;
+      left: -10px;
+      user-select: none;
+      pointer-events: none;
+      opacity: 0.5;
+    }
+
+    .testimonial-quote-text {
+      font-family: var(--font-serif);
+      font-size: var(--font-size-quote);
+      line-height: 1.5;
+      color: var(--color-text-quote);
+      position: relative;
+      z-index: 1; /* Keeps text above background quote watermark */
+    }
+
+    /* Highlight key value elements inside the testimonial text */
+    .testimonial-quote-highlight {
+      font-weight: 600;
+      border-bottom: 2px solid var(--color-badge-border);
+      color: var(--color-text-quote);
+    }
+
+    /* 3. Citation & Professional Bio Footer Block */
+    .testimonial-citation-footer {
+      display: flex;
+      align-items: center;
+      gap: var(--space-m);
+      border-top: 1px solid var(--color-border-card);
+      padding-top: var(--space-m);
+      margin-top: auto; /* Forces citation to the bottom if container has explicit height */
+    }
+
+    /* Avatar styling with concentric layout preservation */
+    .testimonial-avatar-wrapper {
+      flex-shrink: 0;
+      position: relative;
+    }
+
+    .testimonial-avatar-image {
+      width: 56px;
+      height: 56px;
+      border-radius: var(--radius-inner-avatar);
+      object-fit: cover;
+      background-color: var(--color-bg-canvas);
+      border: 2px solid var(--color-bg-card);
+      box-shadow: 0 0 0 1px var(--color-border-card); /* concentric outline border */
+    }
+
+    /* Citation text details */
+    .testimonial-bio-block {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .testimonial-author-name {
+      font-family: var(--font-sans);
+      font-size: var(--font-size-author);
+      font-weight: 600;
+      color: var(--color-text-author);
+      font-style: normal; /* Override default blockquote cite italic styles */
+    }
+
+    .testimonial-author-meta {
+      font-family: var(--font-sans);
+      font-size: var(--font-size-meta);
+      color: var(--color-text-meta);
+      line-height: 1.3;
+    }
+
+    /* 4. Trust / Verification Badge Block */
+    .testimonial-verified-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background-color: var(--color-badge-bg);
+      color: var(--color-badge-text);
+      border: 1px solid var(--color-badge-border);
+      border-radius: var(--radius-inner-badge);
+      padding: 3px 8px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      align-self: flex-start;
+      margin-top: 2px;
+    }
+
+    .badge-check-icon {
+      width: 12px;
+      height: 12px;
+      fill: currentColor;
+    }
+
+    /* ==========================================================================
+       RESPONSIVE REFLOW PATTERNS
+       ========================================================================== */
+    @media (max-width: 480px) {
+      :root {
+        --radius-outer-card: 12px; /* scale down border curve on tiny devices */
+      }
+
+      .testimonial-card {
+        padding: var(--space-m);
+        gap: var(--space-s);
+      }
+
+      .testimonial-citation-footer {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-s);
+        padding-top: var(--space-s);
+      }
+
+      .testimonial-avatar-image {
+        width: 48px;
+        height: 48px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!--
+    REUSABLE ACCESSIBLE TESTIMONIAL BLUEPRINT
+    - Nested within a semantic <figure> block for clean markup partitioning.
+    - Quote and author metadata are explicitly mapped to respect screen readers (WCAG 2.1 SC 1.3.1).
+  -->
+  <figure class="testimonial-card">
+
+    <!-- 1. Star Rating Block (Purely visual fallback with accessible parent label) -->
+    <div class="testimonial-rating-row" aria-label="Rating: 5 out of 5 stars" role="img">
+      <!-- Standard SVG Star Icons (aria-hidden is enforced as screen-reader parses parent aria-label) -->
+      <svg class="star-icon" viewBox="0 0 24 24" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+      </svg>
+      <svg class="star-icon" viewBox="0 0 24 24" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+      </svg>
+      <svg class="star-icon" viewBox="0 0 24 24" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+      </svg>
+      <svg class="star-icon" viewBox="0 0 24 24" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+      </svg>
+      <svg class="star-icon" viewBox="0 0 24 24" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+      </svg>
+    </div>
+
+    <!-- 2. Testimonial Quote Block -->
+    <div class="testimonial-quote-block">
+      <blockquote class="testimonial-quote-text">
+        <p>
+          "SentryNet identified and mitigated <span class="testimonial-quote-highlight">three critical supply chain vulnerabilities</span> within forty-eight hours of deployment. Its real-time monitoring and threat mapping has saved our team countless hours of manual diagnostics."
+        </p>
+      </blockquote>
+    </div>
+
+    <!-- 3. Citation Details (Wrapped in figcaption or footer for screen-readers) -->
+    <figcaption class="testimonial-citation-footer">
+
+      <!-- Avatar profile wrapper -->
+      <div class="testimonial-avatar-wrapper">
+        <!--
+          Decorative Avatar Image
+          - Alt text is set to blank ("") since name is read aloud by the <cite> element directly adjacent.
+          - This eliminates redundant voiceover parsing (e.g. "Photo of Elena, Elena Rostova...").
+        -->
+        <img class="testimonial-avatar-image"
+             src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=150&h=150"
+             alt=""
+             loading="lazy"
+             aria-hidden="true">
+      </div>
+
+      <!-- Author Identity Block -->
+      <div class="testimonial-bio-block">
+        <!-- Semantic Cite tag containing the individual's name -->
+        <cite class="testimonial-author-name">Elena Rostova</cite>
+
+        <!-- Job Title and Organization details -->
+        <div class="testimonial-author-meta">
+          <span>Director of Cloud Infrastructure</span>
+          <br>
+          <span>CyberFlow Systems</span>
+        </div>
+
+        <!-- 4. Verified Buyer Trust Badge -->
+        <div class="testimonial-verified-badge" role="status" aria-label="Verified Customer Profile">
+          <!-- Small Emerald Check Icon -->
+          <svg class="badge-check-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+          </svg>
+          <span>Verified SentryNet Partner</span>
+        </div>
+      </div>
+
+    </figcaption>
+
+  </figure>
+
+</body>
+</html>
