@@ -1,0 +1,410 @@
+<!--
+  Image Gallery & Lightbox Specification Template
+  =============================================
+  Category: website-design
+  Skill: image-gallery-and-lightbox-system
+
+  Description:
+  A highly portable, structured, and responsive blueprint for an image gallery
+  that triggers a WCAG AA-compliant fullscreen lightbox dialog. Use this skeleton
+  to hand off designs or bootstrap implementations.
+-->
+
+<!-- 1. GALLERY GRID CONTAINER -->
+<section class="gallery-wrapper" aria-labelledby="gallery-heading">
+  <h2 id="gallery-heading" class="sr-only">Product Showcase Gallery</h2>
+
+  <ul class="gallery-grid" role="list">
+    <!-- Gallery Item 1 -->
+    <li class="gallery-item">
+      <button type="button"
+              class="gallery-trigger"
+              aria-haspopup="dialog"
+              aria-controls="lightbox-overlay"
+              data-index="0"
+              aria-label="View high-resolution version of Blue Sport Sneakers">
+        <img class="gallery-thumbnail"
+             src="/assets/images/products/sneakers-blue-thumb.webp"
+             alt="Blue Sport Sneakers - side profile view"
+             loading="lazy" />
+        <span class="zoom-icon-indicator" aria-hidden="true">
+          <!-- Inline SVG zoom icon -->
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            <line x1="11" y1="8" x2="11" y2="14"></line>
+            <line x1="8" y1="11" x2="14" y2="11"></line>
+          </svg>
+        </span>
+      </button>
+    </li>
+
+    <!-- Gallery Item 2 -->
+    <li class="gallery-item">
+      <button type="button"
+              class="gallery-trigger"
+              aria-haspopup="dialog"
+              aria-controls="lightbox-overlay"
+              data-index="1"
+              aria-label="View high-resolution version of Blue Sport Sneakers in action">
+        <img class="gallery-thumbnail"
+             src="/assets/images/products/sneakers-blue-action-thumb.webp"
+             alt="Athlete wearing Blue Sport Sneakers running on track"
+             loading="lazy" />
+        <span class="zoom-icon-indicator" aria-hidden="true">
+          <!-- Inline SVG zoom icon -->
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            <line x1="11" y1="8" x2="11" y2="14"></line>
+            <line x1="8" y1="11" x2="14" y2="11"></line>
+          </svg>
+        </span>
+      </button>
+    </li>
+  </ul>
+</section>
+
+
+<!-- 2. FULLSCREEN LIGHTBOX OVERLAY (MODAL DIALOG) -->
+<!--
+  Accessibility Note:
+  - Set `aria-hidden="true"` on main content sibling wrappers when this overlay is open.
+  - Apply `role="dialog"` and `aria-modal="true"`.
+  - Trap keyboard focus inside this container when active.
+-->
+<div id="lightbox-overlay"
+     class="lightbox-overlay"
+     role="dialog"
+     aria-modal="true"
+     aria-hidden="true"
+     aria-labelledby="lightbox-title"
+     tabindex="-1">
+
+  <!-- Backdrop / Dismiss Zone -->
+  <div class="lightbox-backdrop" data-action="close"></div>
+
+  <div class="lightbox-dialog-container">
+
+    <!-- HEADER BAR: Navigation and Metadata -->
+    <header class="lightbox-header">
+      <h3 id="lightbox-title" class="lightbox-title sr-only">Image Gallery Fullscreen Viewer</h3>
+
+      <!-- Screen Reader Live Region for Slide index updates -->
+      <div class="lightbox-index-announcer sr-only" role="status" aria-live="polite">
+        Image 1 of 2
+      </div>
+
+      <div id="lightbox-index-visible" class="lightbox-index-indicator">
+        1 / 2
+      </div>
+
+      <!-- Close Trigger -->
+      <button type="button"
+              class="lightbox-close-button"
+              data-action="close"
+              aria-label="Close Lightbox (Esc)">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </header>
+
+    <!-- MAIN MEDIA PANEL -->
+    <main class="lightbox-media-panel">
+      <!-- Previous Trigger (Desktop Only, hidden on mobile) -->
+      <button type="button"
+              class="lightbox-nav-button lightbox-nav-button--prev"
+              data-action="prev"
+              aria-label="Previous Slide (Left Arrow)">
+        <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+      </button>
+
+      <!-- Active Media Container -->
+      <div class="lightbox-viewport"
+           aria-roledescription="carousel"
+           aria-label="Product Photos">
+
+        <!-- Loading Spinner Container -->
+        <div class="lightbox-loader" role="progressbar" aria-busy="true" aria-label="Loading high-resolution asset...">
+          <div class="spinner-ring"></div>
+        </div>
+
+        <!-- The Active Image (Dynamically Swapped/Injected) -->
+        <img id="lightbox-active-image"
+             class="lightbox-active-image"
+             src="/assets/images/products/sneakers-blue-large.webp"
+             alt="Blue Sport Sneakers - side profile view" />
+      </div>
+
+      <!-- Next Trigger (Desktop Only, hidden on mobile) -->
+      <button type="button"
+              class="lightbox-nav-button lightbox-nav-button--next"
+              data-action="next"
+              aria-label="Next Slide (Right Arrow)">
+        <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+          <polyline points="9 18 15 12 9 6"></polyline>
+        </svg>
+      </button>
+    </main>
+
+    <!-- FOOTER PANEL: Caption and Thumbnails -->
+    <footer class="lightbox-footer">
+      <figcaption id="lightbox-caption" class="lightbox-caption">
+        Blue Sport Sneakers - side profile view
+      </figcaption>
+
+      <!-- Sub-thumbnails strip for rapid hopping -->
+      <nav class="lightbox-thumbnails-nav" aria-label="Showcase thumbnails">
+        <ul class="lightbox-thumbnails-list" role="list">
+          <li class="lightbox-thumbnail-item">
+            <button type="button"
+                    class="lightbox-thumb-btn is-active"
+                    data-slide-to="0"
+                    aria-label="Go to slide 1: Blue Sport Sneakers side profile"
+                    aria-current="true">
+              <img src="/assets/images/products/sneakers-blue-thumb.webp" alt="" aria-hidden="true" />
+            </button>
+          </li>
+          <li class="lightbox-thumbnail-item">
+            <button type="button"
+                    class="lightbox-thumb-btn"
+                    data-slide-to="1"
+                    aria-label="Go to slide 2: Blue Sport Sneakers in action"
+                    aria-current="false">
+              <img src="/assets/images/products/sneakers-blue-action-thumb.webp" alt="" aria-hidden="true" />
+            </button>
+          </li>
+        </ul>
+      </nav>
+    </footer>
+
+  </div>
+</div>
+
+
+<!-- 3. COMPONENT STYLING BLUEPRINT (CSS VARIABLES) -->
+<style>
+  :root {
+    /* Design System Tokens (Mapped from fluid-spacing & accessible-color) */
+    --lightbox-backdrop-color: rgba(10, 10, 10, 0.96);
+    --lightbox-control-color: #ffffff;
+    --lightbox-control-bg-hover: rgba(255, 255, 255, 0.15);
+    --lightbox-control-focus-ring: #3b82f6; /* Accessible blue outline ring */
+    --lightbox-caption-color: #f3f4f6;
+
+    /* Layout heights to prevent vertical overflow */
+    --lightbox-header-height: 64px;
+    --lightbox-footer-height: 120px;
+  }
+
+  /* Utility Screen Reader class */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  /* Main Overlays */
+  .lightbox-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 1000;
+    display: none; /* Controlled via state toggling */
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .lightbox-overlay[aria-hidden="false"] {
+    display: flex;
+    opacity: 1;
+  }
+
+  .lightbox-backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--lightbox-backdrop-color);
+    backdrop-filter: blur(8px);
+    z-index: 1;
+  }
+
+  .lightbox-dialog-container {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  /* Header specs */
+  .lightbox-header {
+    height: var(--lightbox-header-height);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 var(--space-m);
+    color: var(--lightbox-control-color);
+  }
+
+  /* Main slide media section */
+  .lightbox-media-panel {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    padding: var(--space-s) 0;
+  }
+
+  .lightbox-viewport {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: calc(100vh - var(--lightbox-header-height) - var(--lightbox-footer-height) - 40px);
+    position: relative;
+  }
+
+  .lightbox-active-image {
+    max-width: 90vw;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain; /* CRITICAL: Never crop inside the lightbox view */
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  }
+
+  /* Interactive Controls */
+  .lightbox-close-button,
+  .lightbox-nav-button {
+    background: transparent;
+    border: none;
+    border-radius: 50%;
+    color: var(--lightbox-control-color);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+    outline: none;
+  }
+
+  .lightbox-close-button {
+    width: 48px;
+    height: 48px;
+  }
+
+  .lightbox-nav-button {
+    width: 64px;
+    height: 64px;
+    margin: 0 var(--space-m);
+    background-color: rgba(10, 10, 10, 0.4);
+    z-index: 3;
+  }
+
+  .lightbox-close-button:hover,
+  .lightbox-nav-button:hover {
+    background-color: var(--lightbox-control-bg-hover);
+    transform: scale(1.05);
+  }
+
+  .lightbox-close-button:focus-visible,
+  .lightbox-nav-button:focus-visible,
+  .lightbox-thumb-btn:focus-visible {
+    box-shadow: 0 0 0 3px var(--lightbox-control-focus-ring);
+    outline: 2px solid transparent;
+  }
+
+  /* Footer and Caption bar */
+  .lightbox-footer {
+    height: var(--lightbox-footer-height);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-around;
+    padding-bottom: var(--space-s);
+  }
+
+  .lightbox-caption {
+    color: var(--lightbox-caption-color);
+    font-size: var(--text-base);
+    text-align: center;
+    padding: 0 var(--space-l);
+  }
+
+  /* Thumbnails bar */
+  .lightbox-thumbnails-list {
+    display: flex;
+    gap: var(--space-xs);
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .lightbox-thumb-btn {
+    background: transparent;
+    border: 2px solid transparent;
+    padding: 0;
+    cursor: pointer;
+    width: 48px;
+    height: 48px;
+    border-radius: 4px;
+    overflow: hidden;
+    opacity: 0.6;
+    transition: opacity 0.2s ease, border-color 0.2s ease;
+  }
+
+  .lightbox-thumb-btn.is-active,
+  .lightbox-thumb-btn:hover {
+    opacity: 1;
+  }
+
+  .lightbox-thumb-btn.is-active {
+    border-color: var(--lightbox-control-color);
+  }
+
+  .lightbox-thumb-btn img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* RESPONSIVE DESIGN ADJUSTMENTS */
+  @media (max-width: 768px) {
+    :root {
+      --lightbox-header-height: 56px;
+      --lightbox-footer-height: 80px;
+    }
+
+    /* Mobile: Hide Prev/Next arrows in favor of touch swipe swipes */
+    .lightbox-nav-button {
+      display: none;
+    }
+
+    .lightbox-active-image {
+      max-width: 95vw;
+    }
+
+    /* Hide thumbnails on tiny screens to optimize space */
+    .lightbox-thumbnails-nav {
+      display: none;
+    }
+  }
+</style>
