@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Client-Side Avatar Upload and Compression Demo</title>
+  <style>
+    :root {
+      --primary-color: #2563eb;
+      --primary-hover: #1d4ed8;
+      --bg-color: #f8fafc;
+      --card-bg: #ffffff;
+      --text-color: #1e293b;
+      --border-color: #cbd5e1;
+      --success-color: #16a34a;
+      --error-color: #dc2626;
+      --font-stack: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-stack);
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      line-height: 1.5;
+      padding: 2rem 1rem;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    header {
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 0.5rem;
+    }
+
+    p.subtitle {
+      color: #64748b;
+      font-size: 1.1rem;
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+
+    @media (min-width: 768px) {
+      .main-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+      border: 1px solid #e2e8f0;
+    }
+
+    .card h2 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: #0f172a;
+      border-bottom: 2px solid #f1f5f9;
+      padding-bottom: 0.5rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 600;
+      margin-bottom: 0.375rem;
+      color: #334155;
+    }
+
+    select, input[type="range"] {
+      width: 100%;
+      padding: 0.5rem;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background-color: #fff;
+      font-family: inherit;
+      font-size: 0.95rem;
+    }
+
+    .range-val-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .range-val {
+      font-size: 0.875rem;
+      font-weight: 700;
+      color: var(--primary-color);
+    }
+
+    /* Drag and Drop Area */
+    .drop-zone {
+      border: 2px dashed var(--border-color);
+      border-radius: 8px;
+      padding: 2rem;
+      text-align: center;
+      cursor: pointer;
+      transition: background-color 0.2s, border-color 0.2s;
+      background-color: #f8fafc;
+    }
+
+    .drop-zone:hover, .drop-zone.drag-over {
+      border-color: var(--primary-color);
+      background-color: #eff6ff;
+    }
+
+    .drop-zone input[type="file"] {
+      display: none;
+    }
+
+    .drop-icon {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .drop-text {
+      font-size: 0.95rem;
+      color: #475569;
+    }
+
+    .drop-text strong {
+      color: var(--primary-color);
+    }
+
+    /* Results and Previews */
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .preview-box {
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 0.75rem;
+      text-align: center;
+      background-color: #f8fafc;
+    }
+
+    .preview-box h3 {
+      font-size: 0.875rem;
+      color: #475569;
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .img-wrapper {
+      width: 100%;
+      aspect-ratio: 1;
+      border-radius: 6px;
+      overflow: hidden;
+      background-color: #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 0.75rem;
+      border: 1px dashed #cbd5e1;
+    }
+
+    .img-wrapper img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+
+    .placeholder-text {
+      color: #94a3b8;
+      font-size: 0.875rem;
+      padding: 1rem;
+    }
+
+    .size-badge {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.825rem;
+      font-weight: 700;
+      background-color: #cbd5e1;
+      color: #1e293b;
+    }
+
+    .size-badge.optimized {
+      background-color: #dcfce7;
+      color: #15803d;
+    }
+
+    /* Metrics List */
+    .metrics-list {
+      margin-top: 1rem;
+      background-color: #f8fafc;
+      border-radius: 8px;
+      padding: 1rem;
+      border: 1px solid #e2e8f0;
+    }
+
+    .metric-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.375rem 0;
+      border-bottom: 1px dashed #e2e8f0;
+      font-size: 0.9rem;
+    }
+
+    .metric-row:last-child {
+      border-bottom: none;
+    }
+
+    .metric-label {
+      color: #64748b;
+    }
+
+    .metric-value {
+      font-weight: 600;
+      color: #0f172a;
+    }
+
+    .metric-value.highlight {
+      color: var(--success-color);
+      font-weight: 700;
+    }
+
+    /* Focus styling */
+    button:focus-visible,
+    select:focus-visible,
+    input:focus-visible,
+    .drop-zone:focus-visible {
+      outline: 3px solid var(--primary-color);
+      outline-offset: 2px;
+    }
+
+    .upload-btn {
+      display: block;
+      width: 100%;
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 0.75rem;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      margin-top: 1rem;
+    }
+
+    .upload-btn:hover {
+      background-color: var(--primary-hover);
+    }
+
+    .upload-btn:disabled {
+      background-color: #94a3b8;
+      cursor: not-allowed;
+    }
+
+    /* Screen reader polite helper */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      border: 0;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <h1>Client-Side Image Compression</h1>
+      <p class="subtitle">Optimize user avatars in the browser before they hit your server bandwidth and storage limits.</p>
+    </header>
+
+    <main class="main-grid">
+      <!-- Left Column: Controls & Input -->
+      <section class="card" aria-labelledby="settings-title">
+        <h2 id="settings-title">Compression Parameters</h2>
+
+        <div class="form-group">
+          <label for="format-select">Target Format</label>
+          <select id="format-select">
+            <option value="image/jpeg">JPEG (Universal)</option>
+            <option value="image/webp" selected>WebP (Highly Optimized)</option>
+            <option value="image/png">PNG (Lossless - Sizing Only)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <div class="range-val-container">
+            <label for="quality-range">Quality (Lossy compression ratio)</label>
+            <span class="range-val" id="quality-display">80%</span>
+          </div>
+          <input type="range" id="quality-range" min="10" max="100" value="80" step="5">
+        </div>
+
+        <div class="form-group">
+          <div class="range-val-container">
+            <label for="dimension-range">Max Width / Height Bound</label>
+            <span class="range-val" id="dimension-display">800px</span>
+          </div>
+          <input type="range" id="dimension-range" min="200" max="2000" value="800" step="50">
+        </div>
+
+        <!-- Accessible Interactive Drop Zone -->
+        <div class="form-group">
+          <label>Profile Avatar Selection</label>
+          <div class="drop-zone" id="file-drop-zone" tabindex="0" role="button" aria-describedby="drop-zone-desc">
+            <div class="drop-icon">📸</div>
+            <p class="drop-text" id="drop-zone-desc">Drag and drop profile image, or <strong>browse files</strong></p>
+            <p style="font-size: 0.75rem; color: #94a3b8; margin-top: 0.5rem;">Supports JPEG, PNG, WebP up to 15MB</p>
+            <input type="file" id="file-input" accept="image/jpeg, image/png, image/webp">
+          </div>
+        </div>
+
+        <button type="button" class="upload-btn" id="simulate-upload-btn" disabled>Simulate Server Upload</button>
+      </section>
+
+      <!-- Right Column: Visual Previews & Compression Savings -->
+      <section class="card" aria-labelledby="results-title">
+        <h2 id="results-title">Compression Results</h2>
+
+        <div class="comparison-grid">
+          <div class="preview-box">
+            <h3>Original</h3>
+            <div class="img-wrapper" id="original-wrapper">
+              <span class="placeholder-text">No image loaded</span>
+            </div>
+            <span class="size-badge" id="original-size">-</span>
+          </div>
+
+          <div class="preview-box">
+            <h3>Compressed</h3>
+            <div class="img-wrapper" id="compressed-wrapper">
+              <span class="placeholder-text">Awaiting source</span>
+            </div>
+            <span class="size-badge optimized" id="compressed-size">-</span>
+          </div>
+        </div>
+
+        <!-- Technical Statistics Block -->
+        <div class="metrics-list">
+          <div class="metric-row">
+            <span class="metric-label">Original Resolution</span>
+            <span class="metric-value" id="metric-original-res">-</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-label">Target Max Cap</span>
+            <span class="metric-value" id="metric-target-cap">-</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-label">Compressed Resolution</span>
+            <span class="metric-value" id="metric-compressed-res">-</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-label">Processing Time</span>
+            <span class="metric-value" id="metric-duration">-</span>
+          </div>
+          <div class="metric-row" style="background-color: #f0fdf4; padding: 0.5rem; border-radius: 4px; border: 1px solid #bbf7d0;">
+            <span class="metric-label" style="color: #15803d; font-weight: 600;">Overall Data Savings</span>
+            <span class="metric-value highlight" id="metric-savings">-</span>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Screen Reader Announcements Polite Live Region -->
+  <div id="sr-announcer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+  <script>
+    // Elements
+    const fileInput = document.getElementById('file-input');
+    const fileDropZone = document.getElementById('file-drop-zone');
+    const formatSelect = document.getElementById('format-select');
+    const qualityRange = document.getElementById('quality-range');
+    const qualityDisplay = document.getElementById('quality-display');
+    const dimensionRange = document.getElementById('dimension-range');
+    const dimensionDisplay = document.getElementById('dimension-display');
+    const simulateBtn = document.getElementById('simulate-upload-btn');
+    const srAnnouncer = document.getElementById('sr-announcer');
+
+    // Previews & Badges
+    const originalWrapper = document.getElementById('original-wrapper');
+    const compressedWrapper = document.getElementById('compressed-wrapper');
+    const originalSizeBadge = document.getElementById('original-size');
+    const compressedSizeBadge = document.getElementById('compressed-size');
+
+    // Metrics Values
+    const metricOriginalRes = document.getElementById('metric-original-res');
+    const metricTargetCap = document.getElementById('metric-target-cap');
+    const metricCompressedRes = document.getElementById('metric-compressed-res');
+    const metricDuration = document.getElementById('metric-duration');
+    const metricSavings = document.getElementById('metric-savings');
+
+    // State Variables
+    let currentSourceFile = null;
+    let originalObjectUrl = null;
+    let compressedObjectUrl = null;
+    let compressedBlob = null;
+
+    // Listeners for ranges
+    qualityRange.addEventListener('input', (e) => {
+      qualityDisplay.textContent = `${e.target.value}%`;
+      if (currentSourceFile) processFile(currentSourceFile);
+    });
+
+    dimensionRange.addEventListener('input', (e) => {
+      dimensionDisplay.textContent = `${e.target.value}px`;
+      if (currentSourceFile) processFile(currentSourceFile);
+    });
+
+    formatSelect.addEventListener('change', () => {
+      // Disable quality range if format is lossless PNG
+      if (formatSelect.value === 'image/png') {
+        qualityRange.disabled = true;
+        qualityDisplay.textContent = 'N/A (Lossless)';
+      } else {
+        qualityRange.disabled = false;
+        qualityDisplay.textContent = `${qualityRange.value}%`;
+      }
+      if (currentSourceFile) processFile(currentSourceFile);
+    });
+
+    // Keyboard trigger on drag zone
+    fileDropZone.addEventListener('click', () => fileInput.click());
+    fileDropZone.addEventListener('keydown', (e) => {
+      if (e.key === ' ' || e.key === 'Enter') {
+        e.preventDefault();
+        fileInput.click();
+      }
+    });
+
+    // Drag-and-drop mechanics
+    fileDropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      fileDropZone.classList.add('drag-over');
+    });
+
+    fileDropZone.addEventListener('dragleave', () => {
+      fileDropZone.classList.remove('drag-over');
+    });
+
+    fileDropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      fileDropZone.classList.remove('drag-over');
+      if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+        handleFileSelection(e.dataTransfer.files[0]);
+      }
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files && e.target.files[0]) {
+        handleFileSelection(e.target.files[0]);
+      }
+    });
+
+    // File selection boundary routing
+    function handleFileSelection(file) {
+      if (!file.type.match('image.*')) {
+        announceToScreenReader("Error: The selected file is not a supported image format.");
+        alert("Please upload a valid raster image (JPEG, PNG, WebP).");
+        return;
+      }
+      currentSourceFile = file;
+      processFile(file);
+    }
+
+    // Dynamic Image Compression Processing Routine
+    async function processFile(file) {
+      const startTime = performance.now();
+
+      // Revoke any previous URLs to prevent memory leak
+      if (originalObjectUrl) URL.revokeObjectURL(originalObjectUrl);
+      if (compressedObjectUrl) URL.revokeObjectURL(compressedObjectUrl);
+
+      // 1. Create native object URL representing the selected original source file
+      originalObjectUrl = URL.createObjectURL(file);
+      originalWrapper.innerHTML = `<img src="${originalObjectUrl}" alt="Original uploaded image preview">`;
+
+      const originalKB = (file.size / 1024).toFixed(1);
+      originalSizeBadge.textContent = formatBytes(file.size);
+
+      announceToScreenReader(`Compressing image ${file.name}, please wait...`);
+
+      // 2. Load the source image to extract dimensions and prepare scaling
+      const img = new Image();
+      img.src = originalObjectUrl;
+
+      img.onload = () => {
+        const origWidth = img.naturalWidth;
+        const origHeight = img.naturalHeight;
+        metricOriginalRes.textContent = `${origWidth}px x ${origHeight}px`;
+
+        const maxBound = parseInt(dimensionRange.value);
+        metricTargetCap.textContent = `${maxBound}px max`;
+
+        // 3. Compute target aspect-ratio-locked constraints
+        let targetWidth = origWidth;
+        let targetHeight = origHeight;
+
+        if (origWidth > maxBound || origHeight > maxBound) {
+          const ratio = origWidth / origHeight;
+          if (ratio > 1) {
+            targetWidth = maxBound;
+            targetHeight = Math.round(maxBound / ratio);
+          } else {
+            targetHeight = maxBound;
+            targetWidth = Math.round(maxBound * ratio);
+          }
+        }
+
+        // 4. Configure intermediate sizing passes (Bilinear / Step-down optimization to avoid aliasing)
+        const canvas = document.createElement('canvas');
+        canvas.width = targetWidth;
+        canvas.height = targetHeight;
+        const ctx = canvas.getContext('2d');
+
+        // Check if downsampling is large enough to warrant a step-down pass to prevent visual jaggedness
+        if (origWidth / targetWidth >= 2) {
+          // Double scale-down: process on a temporary intermediate halved canvas size
+          const stepCanvas = document.createElement('canvas');
+          stepCanvas.width = origWidth / 2;
+          stepCanvas.height = origHeight / 2;
+          const stepCtx = stepCanvas.getContext('2d');
+          stepCtx.drawImage(img, 0, 0, stepCanvas.width, stepCanvas.height);
+
+          ctx.drawImage(stepCanvas, 0, 0, targetWidth, targetHeight);
+        } else {
+          // Direct canvas render (small scaling, sharp details)
+          ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
+        }
+
+        // 5. Export to compressed blob format
+        const targetFormat = formatSelect.value;
+        const qualityVal = parseInt(qualityRange.value) / 100;
+
+        canvas.toBlob((blob) => {
+          if (!blob) {
+            console.error("Blob extraction failed.");
+            announceToScreenReader("Error: Image processing canvas pipeline failed.");
+            return;
+          }
+
+          compressedBlob = blob;
+          compressedObjectUrl = URL.createObjectURL(blob);
+          compressedWrapper.innerHTML = `<img src="${compressedObjectUrl}" alt="Compressed optimized image preview">`;
+
+          const compSize = blob.size;
+          compressedSizeBadge.textContent = formatBytes(compSize);
+          metricCompressedRes.textContent = `${targetWidth}px x ${targetHeight}px`;
+
+          // Statistics tracking
+          const duration = (performance.now() - startTime).toFixed(0);
+          metricDuration.textContent = `${duration}ms`;
+
+          const savings = (((file.size - compSize) / file.size) * 100).toFixed(1);
+          metricSavings.textContent = `${savings}% (${formatBytes(file.size - compSize)} saved)`;
+
+          simulateBtn.disabled = false;
+
+          // Announce success for assistive accessibility screen readers
+          announceToScreenReader(
+            `Optimization complete. Image size reduced by ${savings} percent, from ${formatBytes(file.size)} down to ${formatBytes(compSize)} in ${duration} milliseconds.`
+          );
+        }, targetFormat, targetFormat === 'image/png' ? undefined : qualityVal);
+      };
+
+      img.onerror = () => {
+        announceToScreenReader("Error: Could not load selected file as a readable image.");
+        originalWrapper.innerHTML = `<span class="placeholder-text" style="color: var(--error-color);">Invalid Image</span>`;
+        compressedWrapper.innerHTML = `<span class="placeholder-text" style="color: var(--error-color);">Processing Failed</span>`;
+      };
+    }
+
+    // Format bytes helper
+    function formatBytes(bytes) {
+      if (bytes === 0) return '0 Bytes';
+      const k = 1024;
+      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    // Accessible announcer helper
+    function announceToScreenReader(message) {
+      srAnnouncer.textContent = '';
+      setTimeout(() => {
+        srAnnouncer.textContent = message;
+      }, 50);
+    }
+
+    // Simulate Server upload action click handler
+    simulateBtn.addEventListener('click', () => {
+      if (!compressedBlob) return;
+
+      simulateBtn.disabled = true;
+      simulateBtn.textContent = 'Uploading optimized blob...';
+      announceToScreenReader("Uploading optimized profile avatar. Please wait.");
+
+      // Emulate high-speed AJAX/Fetch upload
+      setTimeout(() => {
+        simulateBtn.textContent = 'Simulate Server Upload';
+        simulateBtn.disabled = false;
+        announceToScreenReader("Success: Optimized avatar image uploaded successfully.");
+        alert(`Successfully simulated upload!\n\nPayload Sent: ${formatBytes(compressedBlob.size)} (originally ${formatBytes(currentSourceFile.size)})\nFormat: ${compressedBlob.type}`);
+      }, 1500);
+    });
+  </script>
+</body>
+</html>
