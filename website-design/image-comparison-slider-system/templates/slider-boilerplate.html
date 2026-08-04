@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Accessible Image Comparison Slider Template</title>
+  <style>
+    /*
+      IMAGE COMPARISON SLIDER BOILERPLATE STYLES
+      Follows layout preservation guidelines to prevent CLS.
+    */
+
+    /* Core design tokens */
+    :root {
+      --exposure-ratio: 50%;
+      --handle-width: 2px;
+      --handle-color: rgba(255, 255, 255, 0.95);
+      --handle-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+      --thumb-size: 38px;
+      --thumb-touch-size: 48px;
+      --focus-ring-color: #005fcc;
+      --label-bg: rgba(0, 0, 0, 0.7);
+      --label-color: #ffffff;
+      --aspect-ratio-desktop: 16 / 9;
+    }
+
+    /* Container holding the comparison slider */
+    .comparison-container {
+      position: relative;
+      width: 100%;
+      max-width: 960px;
+      margin: 2rem auto;
+      aspect-ratio: var(--aspect-ratio-desktop);
+      background-color: #1a1a1a;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    /* Keep both images matching the container perfectly */
+    .comparison-container img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      pointer-events: none;
+    }
+
+    /* Background state (The "After" image is the base layer) */
+    .image-after {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 1;
+    }
+
+    /* Foreground state wrapper (The "Before" image) */
+    .image-before-wrapper {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 2;
+      /* Dynamic clipping of the before image based on CSS custom property */
+      clip-path: inset(0 calc(100% - var(--exposure-ratio)) 0 0);
+      -webkit-clip-path: inset(0 calc(100% - var(--exposure-ratio)) 0 0);
+      will-change: clip-path;
+    }
+
+    /* Corner Labels */
+    .comparison-label {
+      position: absolute;
+      top: 16px;
+      z-index: 4;
+      background-color: var(--label-bg);
+      color: var(--label-color);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 6px 12px;
+      border-radius: 4px;
+      backdrop-filter: blur(4px);
+      transition: opacity 0.2s ease-in-out;
+      pointer-events: none;
+    }
+
+    .label-before {
+      left: 16px;
+    }
+
+    .label-after {
+      right: 16px;
+    }
+
+    /* Hide labels when user is actively dragging the slider to improve clarity */
+    .comparison-container.active-dragging .comparison-label {
+      opacity: 0.2;
+    }
+
+    /* Vertical Divider Line */
+    .slider-handle-line {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: var(--exposure-ratio);
+      width: var(--handle-width);
+      background-color: var(--handle-color);
+      box-shadow: var(--handle-shadow);
+      z-index: 3;
+      transform: translateX(-50%);
+      pointer-events: none;
+      will-change: left;
+    }
+
+    /* Interactive Grab Thumb */
+    .slider-grab-thumb {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: var(--thumb-size);
+      height: var(--thumb-size);
+      background-color: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.15);
+      border-radius: 50%;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: ew-resize;
+    }
+
+    /* Expand the invisible touch target to meet the WCAG AA 44x44px minimum */
+    .slider-grab-thumb::after {
+      content: '';
+      position: absolute;
+      width: var(--thumb-touch-size);
+      height: var(--thumb-touch-size);
+      border-radius: 50%;
+    }
+
+    /* Symmetrical double arrows inside the thumb */
+    .arrow-icon {
+      width: 14px;
+      height: 14px;
+      color: #333333;
+    }
+
+    /*
+      ACCESSIBILITY BACKING CONTROLLER
+      This input is overlaid transparently on top of the container.
+      It naturally intercepts focus, handles touch events on mobile,
+      and responds to standard keyboard interactions natively.
+    */
+    .range-input-controller {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      opacity: 0;
+      cursor: pointer;
+      z-index: 5;
+    }
+
+    /* Custom high-contrast outline indicating keyboard focus state */
+    .range-input-controller:focus-visible ~ .slider-handle-line .slider-grab-thumb {
+      outline: 3px solid var(--focus-ring-color);
+      outline-offset: 3px;
+      box-shadow: 0 0 12px var(--focus-ring-color);
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      :root {
+        --aspect-ratio-desktop: 4 / 3; /* Taller on mobile for better visibility */
+        --thumb-size: 34px;
+        --thumb-touch-size: 54px; /* Larger hit-area on mobile */
+      }
+      .comparison-label {
+        font-size: 0.7rem;
+        padding: 4px 8px;
+        top: 10px;
+      }
+      .label-before { left: 10px; }
+      .label-after { right: 10px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .comparison-label {
+        transition: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Image Comparison Component Mark-up -->
+  <div class="comparison-container" id="custom-slider-container">
+
+    <!-- 1. The Underlay Image ("After" State) -->
+    <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80"
+         alt="The beach scene fully restored with vibrant colors and rich details"
+         class="image-after" />
+
+    <!-- 2. The Overlaid Image Wrapper ("Before" State) -->
+    <div class="image-before-wrapper">
+      <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80"
+           style="filter: grayscale(100%) contrast(85%);"
+           alt="The original black and white faded beach photograph"
+           class="image-before" />
+    </div>
+
+    <!-- 3. Readable Text labels -->
+    <span class="comparison-label label-before">Original</span>
+    <span class="comparison-label label-after">Restored</span>
+
+    <!-- 4. Interactive Handle Line -->
+    <div class="slider-handle-line">
+      <!-- Symmetrical grab thumb containing bidirectional chevron SVGs -->
+      <div class="slider-grab-thumb">
+        <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="8 5 1 12 8 19"></polyline>
+          <polyline points="16 5 23 12 16 19"></polyline>
+        </svg>
+      </div>
+    </div>
+
+    <!-- 5. Accessible backing input element -->
+    <input type="range"
+           min="0"
+           max="100"
+           value="50"
+           class="range-input-controller"
+           id="slider-control-input"
+           aria-label="Before and After image comparison slider"
+           aria-valuemin="0"
+           aria-valuemax="100"
+           aria-valuenow="50" />
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const container = document.getElementById('custom-slider-container');
+      const input = document.getElementById('slider-control-input');
+
+      if (!container || !input) return;
+
+      // Synchronize the CSS Custom Property with the Input Range value
+      const updateSliderPosition = (value) => {
+        container.style.setProperty('--exposure-ratio', `${value}%`);
+        input.setAttribute('aria-valuenow', value);
+      };
+
+      // Input Event captures drag, mousemove, touch, and keyboard interactions instantly
+      input.addEventListener('input', (e) => {
+        updateSliderPosition(e.target.value);
+      });
+
+      // Visual state helpers to dim the corner labels on active interaction
+      const startDragging = () => {
+        container.classList.add('active-dragging');
+      };
+
+      const stopDragging = () => {
+        container.classList.remove('active-dragging');
+      };
+
+      input.addEventListener('pointerdown', startDragging);
+      input.addEventListener('pointerup', stopDragging);
+      input.addEventListener('pointercancel', stopDragging);
+
+      // Accessibility: ensure keydown events also trigger the visual dragging state
+      input.addEventListener('keydown', (e) => {
+        const arrowKeys = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End', 'PageUp', 'PageDown'];
+        if (arrowKeys.includes(e.key)) {
+          startDragging();
+        }
+      });
+
+      input.addEventListener('keyup', (e) => {
+        stopDragging();
+      });
+    });
+  </script>
+</body>
+</html>
