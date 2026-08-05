@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product Detail Layout Spec Template</title>
+  <style>
+    /* --- DESIGN TOKENS (Skeletons / Placeholders) --- */
+    :root {
+      --color-slate-900: #0f172a;
+      --color-slate-800: #1e293b;
+      --color-slate-600: #475569;
+      --color-slate-200: #e2e8f0;
+      --color-slate-100: #f1f5f9;
+      --color-white: #ffffff;
+      --color-crimson: #be123c;
+      --color-amber: #d97706;
+      --color-blue-focus: #2563eb;
+      --color-green-trust: #15803d;
+
+      --space-xxs: 4px;
+      --space-xs: 8px;
+      --space-s: 12px;
+      --space-m: 16px;
+      --space-l: 24px;
+      --space-xl: 32px;
+      --space-xxl: 48px;
+
+      --radius-s: 4px;
+      --radius-m: 8px;
+      --radius-l: 16px;
+
+      --global-header-height: 70px;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: var(--color-slate-800);
+      background-color: var(--color-white);
+      margin: 0;
+      padding: 0;
+      line-height: 1.5;
+    }
+
+    /* --- LAYOUT WRAPPERS --- */
+    .pdp-wrapper {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: var(--space-l);
+    }
+
+    .breadcrumbs {
+      font-size: 0.875rem;
+      color: var(--color-slate-600);
+      margin-bottom: var(--space-m);
+    }
+
+    .breadcrumbs a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .breadcrumbs a:hover {
+      text-decoration: underline;
+    }
+
+    /* --- THE DUAL-PANE GRID SYSTEM --- */
+    .pdp-grid {
+      display: grid;
+      grid-template-columns: minmax(320px, 1.1fr) minmax(320px, 1fr);
+      gap: clamp(24px, 4vw, 48px);
+      align-items: start;
+    }
+
+    /* Sticky Media Gallery Pane */
+    .pdp-media-pane {
+      position: sticky;
+      top: calc(var(--global-header-height) + var(--space-m));
+    }
+
+    /* Configurator / Buy Box Pane */
+    .pdp-configurator-pane {
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* --- MEDIA GALLERY UI --- */
+    .gallery-main {
+      width: 100%;
+      aspect-ratio: 1 / 1; /* Retains geometry before image loads, preventing CLS */
+      background-color: var(--color-slate-100);
+      border-radius: var(--radius-m);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .gallery-main img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .gallery-zoom-trigger {
+      position: absolute;
+      bottom: var(--space-m);
+      right: var(--space-m);
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(4px);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s ease;
+    }
+
+    .gallery-zoom-trigger:hover {
+      background: rgba(255, 255, 255, 0.95);
+    }
+
+    .gallery-thumbnails {
+      display: flex;
+      gap: var(--space-s);
+      margin-top: var(--space-m);
+      list-style: none;
+      padding: 0;
+    }
+
+    .thumb-item {
+      width: 70px;
+      height: 70px;
+      border-radius: var(--radius-s);
+      overflow: hidden;
+      cursor: pointer;
+      background-color: var(--color-slate-100);
+      padding: 0;
+      border: 1px solid var(--color-slate-200);
+      transition: border-color 0.2s ease;
+    }
+
+    .thumb-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .thumb-item:hover {
+      border-color: var(--color-slate-800);
+    }
+
+    .thumb-item[aria-current="true"] {
+      border: 3px solid var(--color-slate-900);
+      outline: 2px solid var(--color-white);
+      outline-offset: -5px;
+    }
+
+    /* --- BUY BOX ENGINE --- */
+    .product-title {
+      font-size: clamp(1.75rem, 3.5vw, 2.25rem);
+      font-weight: 700;
+      margin: 0 0 var(--space-xxs) 0;
+      color: var(--color-slate-900);
+    }
+
+    .product-reviews-summary {
+      display: flex;
+      align-items: center;
+      gap: var(--space-xs);
+      margin-bottom: var(--space-l);
+      font-size: 0.875rem;
+    }
+
+    .stars-block {
+      color: var(--color-amber);
+    }
+
+    .reviews-link {
+      color: var(--color-blue-focus);
+      text-decoration: none;
+    }
+
+    .reviews-link:hover {
+      text-decoration: underline;
+    }
+
+    /* Price Presentation Section */
+    .pricing-block {
+      margin-bottom: var(--space-xl);
+    }
+
+    .price-row {
+      display: flex;
+      align-items: baseline;
+      gap: var(--space-s);
+    }
+
+    .price-current {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: var(--color-slate-900);
+    }
+
+    .price-original {
+      font-size: 1.125rem;
+      text-decoration: line-through;
+      color: var(--color-slate-600);
+    }
+
+    .price-discount-badge {
+      font-size: 0.875rem;
+      font-weight: 700;
+      color: var(--color-crimson);
+      background-color: rgba(190, 18, 60, 0.1);
+      padding: 2px 8px;
+      border-radius: var(--radius-s);
+    }
+
+    .price-installments {
+      font-size: 0.875rem;
+      color: var(--color-slate-600);
+      margin-top: var(--space-xxs);
+    }
+
+    /* Variant Options Fieldset styling */
+    .variant-section {
+      border: none;
+      padding: 0;
+      margin: 0 0 var(--space-xl) 0;
+    }
+
+    .variant-label {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--color-slate-900);
+      margin-bottom: var(--space-s);
+      display: block;
+    }
+
+    .variant-value-preview {
+      font-weight: 400;
+      color: var(--color-slate-600);
+    }
+
+    /* Custom Color Swatches using Radio Buttons */
+    .swatch-group {
+      display: flex;
+      gap: var(--space-s);
+    }
+
+    .swatch-item {
+      position: relative;
+      cursor: pointer;
+    }
+
+    .swatch-item input[type="radio"] {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .swatch-visual {
+      display: block;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .swatch-item:hover .swatch-visual {
+      transform: scale(1.1);
+    }
+
+    /* Double concentric borders indicating focus & select state */
+    .swatch-item input[type="radio"]:checked + .swatch-visual {
+      box-shadow: 0 0 0 2px var(--color-white), 0 0 0 4px var(--color-slate-900);
+    }
+
+    .swatch-item input[type="radio"]:focus-visible + .swatch-visual {
+      box-shadow: 0 0 0 2px var(--color-white), 0 0 0 4px var(--color-blue-focus);
+    }
+
+    /* Custom Size Buttons using Radio Buttons */
+    .size-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-xs);
+    }
+
+    .size-item {
+      position: relative;
+      cursor: pointer;
+    }
+
+    .size-item input[type="radio"] {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .size-visual {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 48px;
+      height: 48px;
+      padding: 0 var(--space-m);
+      border-radius: var(--radius-s);
+      border: 1px solid var(--color-slate-200);
+      font-size: 0.875rem;
+      font-weight: 600;
+      background-color: var(--color-white);
+      transition: all 0.2s ease;
+    }
+
+    .size-item:hover .size-visual {
+      border-color: var(--color-slate-900);
+    }
+
+    .size-item input[type="radio"]:checked + .size-visual {
+      background-color: var(--color-slate-900);
+      color: var(--color-white);
+      border-color: var(--color-slate-900);
+    }
+
+    .size-item input[type="radio"]:focus-visible + .size-visual {
+      outline: 3px solid var(--color-blue-focus);
+      outline-offset: 2px;
+    }
+
+    /* Out of Stock (Disabled Variant State) */
+    .size-item.disabled {
+      cursor: not-allowed;
+      opacity: 0.4;
+    }
+
+    .size-item.disabled .size-visual {
+      background: linear-gradient(to bottom right, transparent calc(50% - 1px), var(--color-slate-600) 50%, transparent calc(50% + 1px));
+      border-color: var(--color-slate-200);
+    }
+
+    /* Quantity and Call-to-Action Row */
+    .purchase-actions-row {
+      display: flex;
+      gap: var(--space-m);
+      margin-bottom: var(--space-l);
+    }
+
+    .qty-selector {
+      display: flex;
+      align-items: center;
+      border: 1px solid var(--color-slate-200);
+      border-radius: var(--radius-s);
+      overflow: hidden;
+      height: 48px;
+    }
+
+    .qty-btn {
+      width: 40px;
+      height: 100%;
+      border: none;
+      background: var(--color-slate-100);
+      font-size: 1.125rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .qty-btn:hover {
+      background: var(--color-slate-200);
+    }
+
+    .qty-input {
+      width: 44px;
+      height: 100%;
+      border: none;
+      text-align: center;
+      font-weight: 600;
+      font-size: 0.875rem;
+      color: var(--color-slate-900);
+    }
+
+    .pdp-cta-button {
+      flex: 1;
+      height: 48px;
+      background-color: var(--color-slate-900);
+      color: var(--color-white);
+      border: none;
+      border-radius: var(--radius-s);
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .pdp-cta-button:hover {
+      background-color: var(--color-slate-800);
+    }
+
+    .pdp-cta-button:focus-visible {
+      outline: 3px solid var(--color-blue-focus);
+      outline-offset: 2px;
+    }
+
+    /* Trust indicators and badges */
+    .reassurance-list {
+      margin-bottom: var(--space-xl);
+      padding: 0;
+      list-style: none;
+    }
+
+    .reassurance-item {
+      display: flex;
+      align-items: center;
+      gap: var(--space-xs);
+      font-size: 0.875rem;
+      color: var(--color-green-trust);
+      margin-bottom: var(--space-xs);
+    }
+
+    /* Spec Accordion Trigger */
+    .accordion-trigger {
+      width: 100%;
+      background: none;
+      border: none;
+      border-top: 1px solid var(--color-slate-200);
+      padding: var(--space-m) 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 700;
+      color: var(--color-slate-900);
+      cursor: pointer;
+      text-align: left;
+    }
+
+    .accordion-trigger:focus-visible {
+      outline: 2px solid var(--color-blue-focus);
+      outline-offset: 4px;
+    }
+
+    /* --- MOBILE STICKY BUY DRAWER --- */
+    .mobile-sticky-buy-drawer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--color-white);
+      box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.05);
+      border-top: 1px solid var(--color-slate-200);
+      /* Use env safe zone to prevent iOS notch overlay conflicts */
+      padding: var(--space-s) var(--space-m) calc(var(--space-s) + env(safe-area-inset-bottom)) var(--space-m);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 150;
+      transform: translateY(100%);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* Class when the drawer slides up actively on scroll */
+    .mobile-sticky-buy-drawer.active {
+      transform: translateY(0);
+    }
+
+    .drawer-product-info {
+      display: flex;
+      align-items: center;
+      gap: var(--space-s);
+    }
+
+    .drawer-thumb {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-s);
+      background-color: var(--color-slate-100);
+      object-fit: cover;
+    }
+
+    .drawer-text {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .drawer-title {
+      font-size: 0.875rem;
+      font-weight: 700;
+      color: var(--color-slate-900);
+      margin: 0;
+    }
+
+    .drawer-price {
+      font-size: 0.8125rem;
+      color: var(--color-slate-600);
+    }
+
+    .drawer-cta {
+      height: 40px;
+      padding: 0 var(--space-l);
+      background-color: var(--color-slate-900);
+      color: var(--color-white);
+      border: none;
+      border-radius: var(--radius-s);
+      font-weight: 700;
+      font-size: 0.875rem;
+      cursor: pointer;
+    }
+
+    /* --- RESPONSIVE BREAKPOINTS --- */
+    @media (max-width: 768px) {
+      .pdp-grid {
+        grid-template-columns: 1fr; /* Single column flow for mobile */
+        gap: var(--space-l);
+      }
+
+      .pdp-media-pane {
+        position: static; /* Disable sticky media panel on mobile */
+      }
+
+      .gallery-main {
+        border-radius: 0; /* Bleed image slightly on narrow screens */
+      }
+
+      .pdp-wrapper {
+        padding: var(--space-m) 0;
+      }
+
+      .breadcrumbs, .product-title, .product-reviews-summary, .pricing-block, .variant-section, .purchase-actions-row, .reassurance-list {
+        padding: 0 var(--space-m);
+      }
+    }
+
+    /* Screen Reader Only Utility */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Screen Reader polite dynamic status announcer -->
+  <div id="pdp-live-announcer" class="sr-only" aria-live="polite"></div>
+
+  <main class="pdp-wrapper">
+
+    <!-- Breadcrumb Wayfinding -->
+    <nav class="breadcrumbs" aria-label="Breadcrumb">
+      <a href="/shop">Shop</a> &gt;
+      <a href="/shop/apparel">Apparel</a> &gt;
+      <span>Outerwear</span>
+    </nav>
+
+    <!-- Master Product Detail Container -->
+    <div class="pdp-grid">
+
+      <!-- Left Column: Sticky Media Pane -->
+      <section class="pdp-media-pane" aria-label="Product Media Gallery">
+        <div class="gallery-main">
+          <!-- Aspect ratio is pre-reserved to guarantee layout stability (zero CLS) -->
+          <img id="main-product-image" src="https://images.unsplash.com/photo-1544022613-e87ca75a784a?w=600&auto=format&fit=crop&q=80" alt="Vanguard Expedition Parka in Slate Red">
+          <button class="gallery-zoom-trigger" aria-label="Enlarge product image">
+            <!-- Simple placeholder icon -->
+            🔍
+          </button>
+        </div>
+
+        <ul class="gallery-thumbnails" aria-label="Product image gallery thumbnails">
+          <li>
+            <button class="thumb-item" aria-current="true" aria-label="View product image 1, Slate Red">
+              <img src="https://images.unsplash.com/photo-1544022613-e87ca75a784a?w=100&auto=format&fit=crop&q=80" alt="Slate Red front angle">
+            </button>
+          </li>
+          <li>
+            <button class="thumb-item" aria-current="false" aria-label="View product image 2, Charcoal Black">
+              <img src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=100&auto=format&fit=crop&q=80" alt="Charcoal Black front angle">
+            </button>
+          </li>
+        </ul>
+      </section>
+
+      <!-- Right Column: Scrolling Purchase Configurator -->
+      <section class="pdp-configurator-pane" aria-label="Product Purchase Configurator">
+        <h1 class="product-title">Vanguard Expedition Parka</h1>
+
+        <!-- Star rating and Anchor path -->
+        <div class="product-reviews-summary">
+          <span class="stars-block" aria-hidden="true">★ ★ ★ ★ ☆</span>
+          <span class="sr-only">4 out of 5 stars</span>
+          <a href="#reviews" class="reviews-link">128 reviews</a>
+        </div>
+
+        <!-- Pricing Engine Block -->
+        <div class="pricing-block">
+          <div class="price-row">
+            <span class="price-current">$299.00</span>
+            <span class="price-original" aria-label="Regular Price">$349.00</span>
+            <span class="price-discount-badge" aria-label="Savings Amount">Save $50</span>
+          </div>
+          <div class="price-installments">
+            Or 4 interest-free installments of $74.75 with Klarna.
+          </div>
+        </div>
+
+        <form id="product-configurator-form">
+
+          <!-- Variant Config: Color Swatches -->
+          <fieldset class="variant-section">
+            <legend class="variant-label">
+              Color: <span id="selected-color-label" class="variant-value-preview">Slate Red</span>
+            </legend>
+            <div class="swatch-group">
+              <label class="swatch-item">
+                <input type="radio" name="color-variant" value="slate-red" checked>
+                <span class="swatch-visual" style="background-color: #be123c;" title="Slate Red"></span>
+                <span class="sr-only">Slate Red</span>
+              </label>
+              <label class="swatch-item">
+                <input type="radio" name="color-variant" value="charcoal-black">
+                <span class="swatch-visual" style="background-color: #1e293b;" title="Charcoal Black"></span>
+                <span class="sr-only">Charcoal Black</span>
+              </label>
+            </div>
+          </fieldset>
+
+          <!-- Variant Config: Size Grid Matrix -->
+          <fieldset class="variant-section">
+            <legend class="variant-label">
+              Size: <span id="selected-size-label" class="variant-value-preview">M</span>
+            </legend>
+            <div class="size-group">
+              <label class="size-item">
+                <input type="radio" name="size-variant" value="s">
+                <span class="size-visual">S</span>
+                <span class="sr-only">Size S</span>
+              </label>
+              <label class="size-item">
+                <input type="radio" name="size-variant" value="m" checked>
+                <span class="size-visual">M</span>
+                <span class="sr-only">Size M</span>
+              </label>
+              <label class="size-item">
+                <input type="radio" name="size-variant" value="l">
+                <span class="size-visual">L</span>
+                <span class="sr-only">Size L</span>
+              </label>
+              <!-- Out of stock variant styled cleanly with a linear diagonal backslash -->
+              <label class="size-item disabled">
+                <input type="radio" name="size-variant" value="xl" disabled>
+                <span class="size-visual">XL</span>
+                <span class="sr-only">Size XL - Out of Stock</span>
+              </label>
+            </div>
+          </fieldset>
+
+          <!-- Actions Row: Qty + Primary CTA -->
+          <div class="purchase-actions-row">
+            <div class="qty-selector">
+              <button type="button" class="qty-btn" id="qty-decrement" aria-label="Decrease quantity by 1">-</button>
+              <input type="number" id="qty-value" class="qty-input" value="1" min="1" max="10" readonly aria-label="Product quantity count">
+              <button type="button" class="qty-btn" id="qty-increment" aria-label="Increase quantity by 1">+</button>
+            </div>
+            <button type="submit" class="pdp-cta-button">
+              Add to Cart
+            </button>
+          </div>
+
+        </form>
+
+        <!-- Trust Signals and Policies -->
+        <ul class="reassurance-list" aria-label="Purchase guarantees">
+          <li class="reassurance-item">
+            <span>✓</span> Free shipping on orders over $150
+          </li>
+          <li class="reassurance-item">
+            <span>✓</span> 30-Day satisfaction return policy
+          </li>
+        </ul>
+
+        <!-- Specifications Drawer / Accordion -->
+        <div class="specs-accordion">
+          <button class="accordion-trigger" aria-expanded="false" aria-controls="specs-panel">
+            <span>Product Specifications</span>
+            <span class="accordion-icon" aria-hidden="true">+</span>
+          </button>
+          <div id="specs-panel" style="display: none; padding-bottom: var(--space-m);">
+            <p>Built using ultra-resilient 3-layer GoreTex fabric designed to sustain extreme sub-zero weather conditions. Formulated for direct sub-zero isolation and wind prevention.</p>
+          </div>
+        </div>
+
+      </section>
+
+    </div>
+
+  </main>
+
+  <!-- Mobile Sticky Bottom Buy Drawer -->
+  <div class="mobile-sticky-buy-drawer" id="mobile-checkout-drawer">
+    <div class="drawer-product-info">
+      <img src="https://images.unsplash.com/photo-1544022613-e87ca75a784a?w=100&auto=format&fit=crop&q=80" alt="" class="drawer-thumb">
+      <div class="drawer-text">
+        <p class="drawer-title">Vanguard Parka</p>
+        <span class="drawer-price">$299.00</span>
+      </div>
+    </div>
+    <button class="drawer-cta" id="drawer-cta-trigger">Add to Cart</button>
+  </div>
+
+  <!-- Client-side script demonstrating reactive UI and scroll metrics -->
+  <script>
+    // --- VARIANT CONFIG REACTIVITY ---
+    const colorInputs = document.querySelectorAll('input[name="color-variant"]');
+    const colorLabel = document.getElementById('selected-color-label');
+    const mainImg = document.getElementById('main-product-image');
+    const liveAnnouncer = document.getElementById('pdp-live-announcer');
+
+    colorInputs.forEach(input => {
+      input.addEventListener('change', (e) => {
+        const val = e.target.value;
+        let formattedColor = '';
+        if (val === 'slate-red') {
+          formattedColor = 'Slate Red';
+          mainImg.src = 'https://images.unsplash.com/photo-1544022613-e87ca75a784a?w=600&auto=format&fit=crop&q=80';
+        } else if (val === 'charcoal-black') {
+          formattedColor = 'Charcoal Black';
+          mainImg.src = 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=600&auto=format&fit=crop&q=80';
+        }
+        colorLabel.textContent = formattedColor;
+
+        // Announce color shift to assistive tech
+        liveAnnouncer.textContent = `Color updated to ${formattedColor}. Price is two hundred ninety-nine dollars.`;
+      });
+    });
+
+    const sizeInputs = document.querySelectorAll('input[name="size-variant"]');
+    const sizeLabel = document.getElementById('selected-size-label');
+
+    sizeInputs.forEach(input => {
+      input.addEventListener('change', (e) => {
+        const sizeVal = e.target.value.toUpperCase();
+        sizeLabel.textContent = sizeVal;
+        liveAnnouncer.textContent = `Selected Size changed to ${sizeVal}`;
+      });
+    });
+
+    // --- QUANTITY CONTROLLER ---
+    const qtyInput = document.getElementById('qty-value');
+    const incrementBtn = document.getElementById('qty-increment');
+    const decrementBtn = document.getElementById('qty-decrement');
+
+    incrementBtn.addEventListener('click', () => {
+      let currentVal = parseInt(qtyInput.value, 10);
+      if (currentVal < 10) {
+        qtyInput.value = currentVal + 1;
+        liveAnnouncer.textContent = `Quantity updated to ${qtyInput.value}`;
+      }
+    });
+
+    decrementBtn.addEventListener('click', () => {
+      let currentVal = parseInt(qtyInput.value, 10);
+      if (currentVal > 1) {
+        qtyInput.value = currentVal - 1;
+        liveAnnouncer.textContent = `Quantity updated to ${qtyInput.value}`;
+      }
+    });
+
+    // --- SCROLL ENGINE (STICKY BOTTOM DRAWER reveal) ---
+    const drawer = document.getElementById('mobile-checkout-drawer');
+    const configForm = document.getElementById('product-configurator-form');
+
+    window.addEventListener('scroll', () => {
+      const formPosition = configForm.getBoundingClientRect().bottom;
+
+      // On mobile viewports, show drawer only after passing form buying actions
+      if (window.innerWidth <= 768) {
+        if (formPosition < 0) {
+          drawer.classList.add('active');
+        } else {
+          drawer.classList.remove('active');
+        }
+      } else {
+        drawer.classList.remove('active');
+      }
+    });
+
+    // --- SIMPLE ACCORDION DISCLOSURE ---
+    const accordionTrigger = document.querySelector('.accordion-trigger');
+    const accordionPanel = document.getElementById('specs-panel');
+    const accordionIcon = document.querySelector('.accordion-icon');
+
+    accordionTrigger.addEventListener('click', () => {
+      const isExpanded = accordionTrigger.getAttribute('aria-expanded') === 'true';
+      accordionTrigger.setAttribute('aria-expanded', !isExpanded);
+      accordionPanel.style.display = isExpanded ? 'none' : 'block';
+      accordionIcon.textContent = isExpanded ? '+' : '−';
+    });
+  </script>
+</body>
+</html>
