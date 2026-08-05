@@ -1,0 +1,216 @@
+/**
+ * Accessible Bottom Sheet - Core Style Boilerplate
+ */
+
+:root {
+  --sheet-bg: #ffffff;
+  --sheet-border-radius: 16px;
+  --sheet-max-width: 500px;
+  --sheet-overlay-bg: rgba(15, 23, 42, 0.6);
+  --sheet-drag-bar-color: #cbd5e1;
+  --sheet-drag-bar-color-hover: #94a3b8;
+  --sheet-transition-duration: 0.35s;
+  --sheet-transition-easing: cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* ==========================================================================
+   Scroll Lock Class (Placed on body during activation)
+   ========================================================================== */
+body.is-scroll-locked {
+  overflow: hidden;
+  touch-action: none; /* Block iOS overscroll bounce leak */
+  /* Prevent horizontal text shifting if paired with scrollbar-gutter */
+  scrollbar-gutter: stable;
+}
+
+/* ==========================================================================
+   Backdrop Overlay Container
+   ========================================================================== */
+.sheet-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--sheet-overlay-bg);
+  z-index: 1000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--sheet-transition-duration) ease;
+  backdrop-filter: blur(1.5px);
+  will-change: opacity;
+}
+
+/* Open State */
+.sheet-overlay.is-active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ==========================================================================
+   Main Bottom Sheet Panel
+   ========================================================================== */
+.sheet-panel {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  max-height: 90dvh; /* Use Dynamic Viewport Height to account for mobile address bars */
+  min-height: 200px;
+  background-color: var(--sheet-bg);
+  border-top-left-radius: var(--sheet-border-radius);
+  border-top-right-radius: var(--sheet-border-radius);
+  box-shadow: 0 -10px 25px -5px rgba(0, 0, 0, 0.1), 0 -8px 10px -6px rgba(0, 0, 0, 0.1);
+  z-index: 1001;
+  display: flex;
+  flex-direction: column;
+  transform: translateY(100%);
+  transition: transform var(--sheet-transition-duration) var(--sheet-transition-easing);
+  will-change: transform;
+  outline: none;
+}
+
+/* Open Transition */
+.sheet-overlay.is-active .sheet-panel {
+  transform: translateY(0%);
+}
+
+/* ==========================================================================
+   Gesture Drag Handle Structure
+   ========================================================================== */
+.sheet-drag-handle {
+  width: 100%;
+  height: 36px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: grab;
+  touch-action: none; /* Prevents default browser swipe-to-scroll conflicts */
+  user-select: none;
+  -webkit-user-select: none;
+  /* Invisible padding to enlarge the interactive tap target to WCAG minimums */
+  padding: 12px 0;
+}
+
+.sheet-drag-handle:active {
+  cursor: grabbing;
+}
+
+.sheet-drag-bar {
+  width: 44px;
+  height: 4px;
+  background-color: var(--sheet-drag-bar-color);
+  border-radius: 9999px;
+  transition: background-color 0.2s ease;
+}
+
+.sheet-drag-handle:hover .sheet-drag-bar {
+  background-color: var(--sheet-drag-bar-color-hover);
+}
+
+/* ==========================================================================
+   Header, Inner Content, and Footer Slabs
+   ========================================================================== */
+.sheet-header {
+  padding: 0 20px 12px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.sheet-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.sheet-close-btn {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 1.5rem;
+  padding: 4px;
+  color: #64748b;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s ease;
+}
+
+.sheet-close-btn:hover {
+  color: #1e293b;
+}
+
+.sheet-close-btn:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+/* Scrollable Main Contents */
+.sheet-content {
+  flex-grow: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain; /* Traps native scroll chain boundaries */
+  -webkit-overflow-scrolling: touch; /* Enable momentum scrolling on iOS Safari */
+  padding: 20px;
+}
+
+/* Fixed Footer Section */
+.sheet-footer {
+  padding: 16px 20px;
+  border-top: 1px solid #f1f5f9;
+  background-color: var(--sheet-bg);
+}
+
+/* ==========================================================================
+   Tablet and Desktop Layout Adaptations (Responsive Refactoring)
+   ========================================================================== */
+@media (min-width: 768px) {
+  /* Transform the drawer into a clean centered modal on wider displays */
+  .sheet-panel {
+    max-width: var(--sheet-max-width);
+    min-height: auto;
+    border-radius: 12px;
+    bottom: auto;
+    top: 50%;
+    left: 50%;
+    right: auto;
+    /* Precise horizontal/vertical dialog centration */
+    margin-left: calc(var(--sheet-max-width) / -2);
+    margin-top: -250px;
+    opacity: 0;
+    transform: translateY(60px) scale(0.95);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
+  }
+
+  .sheet-overlay.is-active .sheet-panel {
+    transform: translateY(-50%) scale(1);
+    opacity: 1;
+  }
+
+  /* Hide the swipe drag handle on desktop layout */
+  .sheet-drag-handle {
+    display: none;
+  }
+
+  .sheet-header {
+    padding-top: 20px;
+  }
+}
+
+/* ==========================================================================
+   Forced System Contrast Mode (Windows High Contrast Support)
+   ========================================================================== */
+@media (forced-colors: active) {
+  .sheet-panel {
+    border: 2px solid ButtonText;
+  }
+  .sheet-drag-bar {
+    background-color: ButtonText;
+  }
+  .sheet-close-btn {
+    border: 1px solid ButtonText;
+  }
+}
