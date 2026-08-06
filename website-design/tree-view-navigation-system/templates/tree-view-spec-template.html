@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tree View Navigation System Spec Template</title>
+  <style>
+    /* -------------------------------------------------------------------------
+       DESIGN SYSTEM TOKENS (CSS Variables)
+       ------------------------------------------------------------------------- */
+    :root {
+      /* Typography */
+      --tree-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --tree-font-size: 14px;
+      --tree-line-height: 1.5;
+
+      /* Colors (WCAG AA Compliant Contrast) */
+      --tree-color-bg: #ffffff;
+      --tree-color-text: #374151;         /* AA: 6.8:1 against white */
+      --tree-color-text-hover: #111827;   /* AAA: 9.4:1 against white */
+      --tree-color-text-muted: #6b7280;   /* AA: 4.5:1 against white */
+      --tree-color-primary: #1d4ed8;      /* AA: 5.6:1 against white, brand highlight */
+      --tree-color-primary-bg: #eff6ff;   /* Muted selection background */
+      --tree-color-border: #e5e7eb;       /* Divider color */
+      --tree-color-hover-bg: #f9fafb;     /* Inactive hover state */
+      --tree-color-focus-ring: #2563eb;   /* Keyboard focus outline color */
+
+      /* Spacing & Sizes */
+      --tree-item-padding-x: 12px;
+      --tree-item-padding-y: 8px;
+      --tree-indent: 16px;                /* Indentation step size */
+      --tree-chevron-size: 16px;
+      --tree-icon-size: 18px;
+      --tree-border-radius: 6px;
+
+      /* Animation */
+      --tree-transition-speed: 0.15s;
+    }
+
+    /* Reset / Scope Styling */
+    .tree-system-container {
+      font-family: var(--tree-font-family);
+      font-size: var(--tree-font-size);
+      line-height: var(--tree-line-height);
+      color: var(--tree-color-text);
+      background-color: var(--tree-color-bg);
+      max-width: 320px;
+      padding: 16px;
+      border: 1px solid var(--tree-color-border);
+      border-radius: var(--tree-border-radius);
+    }
+
+    /* Title Block */
+    .tree-system-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--tree-color-text-hover);
+      margin: 0 0 12px 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--tree-color-border);
+    }
+
+    /* -------------------------------------------------------------------------
+       TREE VIEW STRUCTURAL PATTERN
+       ------------------------------------------------------------------------- */
+    .tree-root {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      role: tree; /* Programmatic identification */
+    }
+
+    /* Group wrap resets */
+    .tree-group {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: none; /* Collapsed by default */
+    }
+
+    .tree-group.expanded {
+      display: block; /* Shown when parent has aria-expanded="true" */
+    }
+
+    /* Individual wrapper lists */
+    .tree-root li {
+      margin: 0;
+      padding: 0;
+    }
+
+    /* -------------------------------------------------------------------------
+       THE TREE NODE COMPONENT (Branch & Leaf)
+       ------------------------------------------------------------------------- */
+    .tree-node {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      color: var(--tree-color-text);
+      padding: var(--tree-item-padding-y) var(--tree-item-padding-x);
+      margin: 2px 0;
+      border-radius: var(--tree-border-radius);
+      cursor: pointer;
+      user-select: none;
+      transition: background-color var(--tree-transition-speed) ease, color var(--tree-transition-speed) ease;
+      border-left: 3px solid transparent;
+      outline: none; /* Override browser outline for custom focus-visible ring */
+
+      /* INDENTATION MATH FORMULA
+         Paddings are computed by multiplying the depth variable.
+         Inline style style="--tree-depth: 1" governs the nesting shift. */
+      padding-left: calc(
+        (var(--tree-depth, 0) * var(--tree-indent)) + var(--tree-item-padding-x)
+      );
+    }
+
+    /* Interactive Hover State */
+    .tree-node:hover {
+      background-color: var(--tree-color-hover-bg);
+      color: var(--tree-color-text-hover);
+    }
+
+    /* Keyboard Focus-Visible Ring (WCAG 2.2 Standard: Clear outline, no clip) */
+    .tree-node:focus-visible {
+      box-shadow: 0 0 0 2px var(--tree-color-focus-ring);
+      background-color: var(--tree-color-hover-bg);
+      z-index: 1; /* Keep outline on top of sibling elements */
+    }
+
+    /* Selected/Active Page Highlight */
+    .tree-node.active-selected {
+      background-color: var(--tree-color-primary-bg);
+      color: var(--tree-color-primary);
+      font-weight: 500;
+      border-left-color: var(--tree-color-primary);
+    }
+
+    /* -------------------------------------------------------------------------
+       TOGGLE CHEVRONS AND SEMANTIC ICONS
+       ------------------------------------------------------------------------- */
+    /* Chevron area serves as the toggle trigger zone */
+    .tree-chevron {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: var(--tree-chevron-size);
+      height: var(--tree-chevron-size);
+      color: var(--tree-color-text-muted);
+      flex-shrink: 0;
+      transition: transform var(--tree-transition-speed) ease;
+    }
+
+    /* Rotates downward when parent is open */
+    .tree-chevron.expanded {
+      transform: rotate(90deg);
+      color: var(--tree-color-text);
+    }
+
+    /* Keeps spacing consistent for leaf nodes (files) that have no children */
+    .tree-chevron-spacer {
+      width: var(--tree-chevron-size);
+      height: var(--tree-chevron-size);
+      flex-shrink: 0;
+    }
+
+    /* Standardised Node Icons */
+    .tree-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: var(--tree-icon-size);
+      height: var(--tree-icon-size);
+      flex-shrink: 0;
+      font-size: 16px;
+    }
+
+    /* Truncation system for labels to protect horizontal boundaries */
+    .tree-label {
+      flex-grow: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* Node Badge count */
+    .tree-badge {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--tree-color-text-muted);
+      background-color: var(--tree-color-hover-bg);
+      padding: 2px 6px;
+      border-radius: 10px;
+      flex-shrink: 0;
+      border: 1px solid var(--tree-color-border);
+    }
+
+    /* Node Actions menu trigger (e.g. contextual menu) */
+    .tree-action-trigger {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      border: none;
+      background: transparent;
+      color: var(--tree-color-text-muted);
+      border-radius: 4px;
+      cursor: pointer;
+      opacity: 0; /* Hidden by default until hovered */
+      transition: opacity var(--tree-transition-speed) ease, color var(--tree-transition-speed) ease;
+    }
+
+    .tree-node:hover .tree-action-trigger,
+    .tree-node:focus-within .tree-action-trigger {
+      opacity: 1;
+    }
+
+    .tree-action-trigger:hover {
+      color: var(--tree-color-text-hover);
+      background-color: var(--tree-color-border);
+    }
+
+    /* -------------------------------------------------------------------------
+       DEVELOPER NOTE: ANNOTATION SYSTEM
+       ------------------------------------------------------------------------- */
+    .tree-annotate-badge {
+      border: 1px dashed #ef4444 !important;
+      background-color: #fee2e2 !important;
+      color: #991b1b !important;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="tree-system-container">
+    <div class="tree-system-title">Workspace Index</div>
+
+    <!-- MASTER CONTAINER [role="tree"] -->
+    <ul class="tree-root" role="tree" aria-label="Project Workspace Directory">
+
+      <!-- BRANCH LEVEL 0 (Expanded) -->
+      <li role="none">
+        <div class="tree-node"
+             role="treeitem"
+             aria-expanded="true"
+             aria-selected="false"
+             tabindex="0"
+             style="--tree-depth: 0;">
+          <!-- Chevron rotating Downward because it is expanded -->
+          <span class="tree-chevron expanded" aria-hidden="true">▸</span>
+          <!-- Semantic Category Icon -->
+          <span class="tree-icon" aria-hidden="true">📁</span>
+          <!-- Truncated Text label -->
+          <span class="tree-label">src_codebase</span>
+          <!-- Folder Badge item count -->
+          <span class="tree-badge">12</span>
+        </div>
+
+        <!-- CHILD CONTAINER [role="group"] -->
+        <ul class="tree-group expanded" role="group" aria-label="src_codebase subfolders">
+
+          <!-- BRANCH LEVEL 1 (Expanded) -->
+          <li role="none">
+            <div class="tree-node"
+                 role="treeitem"
+                 aria-expanded="true"
+                 aria-selected="false"
+                 tabindex="-1"
+                 style="--tree-depth: 1;">
+              <span class="tree-chevron expanded" aria-hidden="true">▸</span>
+              <span class="tree-icon" aria-hidden="true">📁</span>
+              <span class="tree-label">components</span>
+            </div>
+
+            <ul class="tree-group expanded" role="group" aria-label="components subfolders">
+
+              <!-- LEAF LEVEL 2 (Active/Selected Node) -->
+              <li role="none">
+                <!-- Using an anchor tag for link context while preserving treeitem role -->
+                <a class="tree-node active-selected"
+                   href="#sidebar"
+                   role="treeitem"
+                   aria-current="page"
+                   aria-selected="true"
+                   tabindex="-1"
+                   style="--tree-depth: 2;">
+                  <!-- Spacing placeholder for files that have no children -->
+                  <span class="tree-chevron-spacer" aria-hidden="true"></span>
+                  <span class="tree-icon" aria-hidden="true">📄</span>
+                  <span class="tree-label">SidebarTree.js</span>
+
+                  <!-- Secondary contextual action (dots trigger) -->
+                  <button class="tree-action-trigger"
+                          type="button"
+                          aria-label="Actions for SidebarTree.js"
+                          tabindex="-1">
+                    ⋮
+                  </button>
+                </a>
+              </li>
+
+              <!-- LEAF LEVEL 2 (Inactive Node) -->
+              <li role="none">
+                <a class="tree-node"
+                   href="#button"
+                   role="treeitem"
+                   aria-selected="false"
+                   tabindex="-1"
+                   style="--tree-depth: 2;">
+                  <span class="tree-chevron-spacer" aria-hidden="true"></span>
+                  <span class="tree-icon" aria-hidden="true">📄</span>
+                  <span class="tree-label">ActionBtn.js</span>
+                </a>
+              </li>
+
+            </ul>
+          </li>
+
+          <!-- BRANCH LEVEL 1 (Collapsed) -->
+          <li role="none">
+            <div class="tree-node"
+                 role="treeitem"
+                 aria-expanded="false"
+                 aria-selected="false"
+                 tabindex="-1"
+                 style="--tree-depth: 1;">
+              <!-- Chevron pointing right (inactive collapsed) -->
+              <span class="tree-chevron" aria-hidden="true">▸</span>
+              <span class="tree-icon" aria-hidden="true">📁</span>
+              <span class="tree-label">utilities_helpers_and_libraries</span>
+              <span class="tree-badge">4</span>
+            </div>
+
+            <!-- Collapsed list container remains hidden in DOM -->
+            <ul class="tree-group" role="group" aria-label="utilities subfolders">
+              <li role="none">
+                <a class="tree-node"
+                   href="#math"
+                   role="treeitem"
+                   aria-selected="false"
+                   tabindex="-1"
+                   style="--tree-depth: 2;">
+                  <span class="tree-chevron-spacer" aria-hidden="true"></span>
+                  <span class="tree-icon" aria-hidden="true">📄</span>
+                  <span class="tree-label">MathUtils.js</span>
+                </a>
+              </li>
+            </ul>
+          </li>
+
+        </ul>
+      </li>
+
+      <!-- LEAF LEVEL 0 (Root level leaf) -->
+      <li role="none">
+        <a class="tree-node"
+           href="#config"
+           role="treeitem"
+           aria-selected="false"
+           tabindex="-1"
+           style="--tree-depth: 0;">
+          <span class="tree-chevron-spacer" aria-hidden="true"></span>
+          <span class="tree-icon" aria-hidden="true">⚙️</span>
+          <span class="tree-label">package.json</span>
+        </a>
+      </li>
+
+    </ul>
+  </div>
+
+  <script>
+    /* -------------------------------------------------------------------------
+       MINIMAL INTERACTION DEMO SCRIPT
+       Provides essential toggle animation and focus rotation to test.
+       ------------------------------------------------------------------------- */
+    document.addEventListener('DOMContentLoaded', () => {
+      const tree = document.querySelector('.tree-root');
+      if (!tree) return;
+
+      // Handle click events
+      tree.addEventListener('click', (e) => {
+        const node = e.target.closest('.tree-node');
+        if (!node) return;
+
+        // Toggles expansion only if it is a branch (contains a chevron)
+        const chevron = node.querySelector('.tree-chevron');
+        if (chevron) {
+          const isExpanded = node.getAttribute('aria-expanded') === 'true';
+          node.setAttribute('aria-expanded', !isExpanded);
+          chevron.classList.toggle('expanded', !isExpanded);
+
+          const siblingGroup = node.nextElementSibling;
+          if (siblingGroup && siblingGroup.classList.contains('tree-group')) {
+            siblingGroup.classList.toggle('expanded', !isExpanded);
+          }
+        }
+      });
+
+      // Roving Tabindex Keydown Framework
+      const nodes = Array.from(tree.querySelectorAll('.tree-node'));
+
+      tree.addEventListener('keydown', (e) => {
+        const activeElement = document.activeElement;
+        if (!activeElement || !activeElement.classList.contains('tree-node')) return;
+
+        const currentIndex = nodes.indexOf(activeElement);
+        let nextIndex = currentIndex;
+
+        switch (e.key) {
+          case 'ArrowDown':
+            e.preventDefault();
+            // Finds the next visible node
+            do {
+              nextIndex = (nextIndex + 1) % nodes.length;
+            } while (nodes[nextIndex].offsetHeight === 0 && nextIndex !== currentIndex);
+            nodes[nextIndex].focus();
+            updateTabindex(nodes[nextIndex]);
+            break;
+
+          case 'ArrowUp':
+            e.preventDefault();
+            // Finds the previous visible node
+            do {
+              nextIndex = (nextIndex - 1 + nodes.length) % nodes.length;
+            } while (nodes[nextIndex].offsetHeight === 0 && nextIndex !== currentIndex);
+            nodes[nextIndex].focus();
+            updateTabindex(nodes[nextIndex]);
+            break;
+
+          case 'ArrowRight':
+            const hasChevronRight = activeElement.querySelector('.tree-chevron');
+            if (hasChevronRight) {
+              const isExpanded = activeElement.getAttribute('aria-expanded') === 'true';
+              if (!isExpanded) {
+                activeElement.click(); // Expand
+              } else {
+                // Move focus to first visible child
+                const subGroup = activeElement.nextElementSibling;
+                if (subGroup) {
+                  const firstChild = subGroup.querySelector('.tree-node');
+                  if (firstChild) firstChild.focus();
+                }
+              }
+            }
+            break;
+
+          case 'ArrowLeft':
+            const hasChevronLeft = activeElement.querySelector('.tree-chevron');
+            const isExpanded = activeElement.getAttribute('aria-expanded') === 'true';
+
+            if (hasChevronLeft && isExpanded) {
+              activeElement.click(); // Collapse
+            } else {
+              // Move focus to parent item
+              const parentGroup = activeElement.closest('.tree-group');
+              if (parentGroup) {
+                const parentNode = parentGroup.previousElementSibling;
+                if (parentNode) parentNode.focus();
+              }
+            }
+            break;
+        }
+      });
+
+      function updateTabindex(focusedNode) {
+        nodes.forEach(n => n.setAttribute('tabindex', '-1'));
+        focusedNode.setAttribute('tabindex', '0');
+      }
+    });
+  </script>
+</body>
+</html>
