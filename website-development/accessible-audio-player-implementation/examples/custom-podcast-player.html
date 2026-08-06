@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Accessible Audio Player Example</title>
+  <style>
+    :root {
+      --primary-color: #2563eb;
+      --primary-hover: #1d4ed8;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --bg-light: #f8fafc;
+      --border-color: #e2e8f0;
+      --focus-ring: #3b82f6;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.6;
+      color: var(--text-main);
+      background-color: #f1f5f9;
+      margin: 0;
+      padding: 2rem 1rem;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0;
+      padding: 0;
+    }
+
+    @media (min-width: 800px) {
+      .container {
+        margin: 0 auto;
+      }
+    }
+
+    header {
+      margin-bottom: 2rem;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 1rem;
+    }
+
+    h1 {
+      font-size: 2rem;
+      margin-top: 0;
+      margin-bottom: 0.5rem;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+
+    .badge-danger {
+      background-color: #fee2e2;
+      color: #991b1b;
+    }
+
+    .badge-success {
+      background-color: #dcfce7;
+      color: #166534;
+    }
+
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 2.5rem;
+      margin-bottom: 3rem;
+    }
+
+    @media (min-width: 768px) {
+      .comparison-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .comparison-card {
+      background: white;
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
+    }
+
+    .card-title {
+      font-size: 1.25rem;
+      margin-top: 0;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .explanation {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+      min-height: 4.5rem;
+    }
+
+    /* ==========================================================
+       BEFORE: INACCESSIBLE PLAYER STYLES (Common Bad Practices)
+       ========================================================== */
+    .bad-player {
+      background-color: var(--bg-light);
+      border-radius: 8px;
+      padding: 1rem;
+      user-select: none;
+    }
+
+    .bad-meta {
+      font-size: 0.9rem;
+      font-weight: bold;
+      margin-bottom: 0.75rem;
+    }
+
+    .bad-controls {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    /* BAD: Using non-semantic styled DIV instead of button. No hover/focus cursor. */
+    .bad-play-btn {
+      width: 40px;
+      height: 40px;
+      background-color: #ef4444;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+    }
+
+    /* BAD: Non-semantic timeline. Completely unreachable via keyboard. */
+    .bad-timeline-container {
+      flex: 1;
+      height: 8px;
+      background-color: #cbd5e1;
+      border-radius: 4px;
+      position: relative;
+    }
+
+    .bad-progress-bar {
+      height: 100%;
+      background-color: #ef4444;
+      border-radius: 4px;
+      width: 0%;
+    }
+
+    .bad-time {
+      font-size: 0.75rem;
+      font-family: monospace;
+      color: var(--text-muted);
+    }
+
+
+    /* ==========================================================
+       AFTER: ACCESSIBLE PLAYER STYLES (Best Practice)
+       ========================================================== */
+    .good-player {
+      background-color: var(--bg-light);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 1.25rem;
+    }
+
+    .good-meta {
+      margin-bottom: 1rem;
+    }
+
+    .good-meta h3 {
+      font-size: 1rem;
+      margin: 0 0 0.25rem 0;
+    }
+
+    .good-meta p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin: 0;
+    }
+
+    .good-controls-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    /* GOOD: Semantic button, clear interactive cursor, touch size is over 44x44px */
+    .good-btn {
+      width: 48px;
+      height: 48px;
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background-color 0.2s, transform 0.1s;
+    }
+
+    .good-btn:hover {
+      background-color: var(--primary-hover);
+    }
+
+    .good-btn:active {
+      transform: scale(0.95);
+    }
+
+    /* Standard clear focus rings */
+    .good-btn:focus-visible {
+      outline: 3px solid var(--focus-ring);
+      outline-offset: 3px;
+    }
+
+    .good-btn svg {
+      width: 20px;
+      height: 20px;
+      fill: currentColor;
+    }
+
+    /* GOOD: Native range inputs, highly customizable and 100% accessible */
+    .good-timeline-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex: 1;
+    }
+
+    .good-time-display {
+      font-size: 0.8rem;
+      font-family: monospace;
+      color: var(--text-muted);
+      min-width: 35px;
+    }
+
+    /* Native Range Styling Reset */
+    .good-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      background: transparent;
+      cursor: pointer;
+      flex: 1;
+      height: 24px; /* Increases touch target zone height */
+    }
+
+    .good-slider:focus {
+      outline: none;
+    }
+
+    .good-slider:focus-visible {
+      outline: 3px solid var(--focus-ring);
+      outline-offset: 4px;
+      border-radius: 2px;
+    }
+
+    /* Webkit (Chrome/Safari) Track */
+    .good-slider::-webkit-slider-runnable-track {
+      background: #cbd5e1;
+      height: 6px;
+      border-radius: 3px;
+    }
+
+    /* Webkit Thumb */
+    .good-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      background: var(--text-main);
+      height: 16px;
+      width: 16px;
+      border-radius: 50%;
+      margin-top: -5px; /* (Track Height / 2) - (Thumb Height / 2) */
+      box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+      transition: transform 0.1s ease;
+    }
+
+    .good-slider:active::-webkit-slider-thumb {
+      transform: scale(1.2);
+    }
+
+    /* Firefox Track */
+    .good-slider::-moz-range-track {
+      background: #cbd5e1;
+      height: 6px;
+      border-radius: 3px;
+    }
+
+    /* Firefox Thumb */
+    .good-slider::-moz-range-thumb {
+      border: none;
+      background: var(--text-main);
+      height: 16px;
+      width: 16px;
+      border-radius: 50%;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+      transition: transform 0.1s ease;
+    }
+
+    .good-slider:active::-moz-range-thumb {
+      transform: scale(1.2);
+    }
+
+    .good-volume-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      border-top: 1px solid var(--border-color);
+      padding-top: 0.75rem;
+    }
+
+    .good-volume-slider {
+      max-width: 120px;
+    }
+
+    .good-btn-mute {
+      width: 36px;
+      height: 36px;
+      background: transparent;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .good-btn-mute:hover {
+      background-color: #f1f5f9;
+    }
+
+    .good-btn-mute:focus-visible {
+      outline: 2px solid var(--focus-ring);
+      outline-offset: 2px;
+    }
+
+    .good-btn-mute svg {
+      width: 18px;
+      height: 18px;
+      fill: var(--text-main);
+    }
+
+    /* Accessibility helper class */
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <h1>Custom Audio Player Implementation</h1>
+      <p>Demonstrating the contrast between an inaccessible "click-only" custom player and a keyboard-navigable, screen-reader-compliant custom media experience.</p>
+    </header>
+
+    <div class="comparison-grid">
+
+      <!-- ==========================================
+           BEFORE: INACCESSIBLE APPROACH CARD
+           ========================================== -->
+      <div class="comparison-card">
+        <div class="card-title">
+          <span class="badge badge-danger">Inaccessible</span>
+          <span>Before Pattern</span>
+        </div>
+        <div class="explanation">
+          Uses non-semantic <code>div</code> controls, offers zero keyboard support (cannot tab or arrow-scrub), and fails to update on external Bluetooth/headset media interrupts.
+        </div>
+
+        <div class="bad-player">
+          <div class="bad-meta">Episode 143: Legacy Technical Debt</div>
+
+          <div class="bad-controls">
+            <!-- BAD: Click-only div, not focusable, not screen reader readable -->
+            <div class="bad-play-btn" id="bad-play-trigger">▶</div>
+
+            <!-- BAD: Non-semantic slider, unreachable -->
+            <div class="bad-timeline-container" id="bad-timeline">
+              <div class="bad-progress-bar" id="bad-progress-indicator"></div>
+            </div>
+
+            <div class="bad-time" id="bad-time-string">0:00 / 0:00</div>
+          </div>
+        </div>
+
+        <div style="margin-top: 1rem; font-size: 0.85rem; color: #b91c1c;">
+          <strong>Issues:</strong>
+          <ul>
+            <li>No Keyboard Access (Try pressing Tab to play or seek).</li>
+            <li>Div-based button triggers announce nothing to screen readers.</li>
+            <li>Continuous timing text blocks screen-reader output if made live.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- ==========================================
+           AFTER: ACCESSIBLE APPROACH CARD
+           ========================================== -->
+      <div class="comparison-card">
+        <div class="card-title">
+          <span class="badge badge-success">Accessible</span>
+          <span>After Pattern</span>
+        </div>
+        <div class="explanation">
+          Uses native controls styled with CSS pseudo-selectors, remains completely keyboard-navigable (scrub with Arrow keys), and binds native media events for bulletproof device synchronization.
+        </div>
+
+        <!-- GOOD: Wrapper has role="region" and aria-label description -->
+        <div class="good-player" role="region" aria-label="Audio Player: Episode 143: Legacy Technical Debt">
+
+          <!-- Portable tiny silent WAV file data-URI to simulate a real audio track -->
+          <audio id="accessible-audio-media" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==" preload="metadata"></audio>
+
+          <div class="good-meta">
+            <h3>Episode 143: Legacy Technical Debt</h3>
+            <p>The Engineering Lead Podcast</p>
+          </div>
+
+          <div class="good-controls-row">
+            <!-- GOOD: Native button, explicit aria-label + state tracker -->
+            <button type="button" class="good-btn" id="acc-play-btn" aria-label="Play" aria-pressed="false">
+              <!-- SVG Icons representing Play / Pause -->
+              <svg id="svg-play" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M8 5v14l11-7z"/>
+              </svg>
+              <svg id="svg-pause" viewBox="0 0 24 24" aria-hidden="true" style="display: none;">
+                <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+              </svg>
+            </button>
+
+            <div class="good-timeline-wrapper">
+              <span class="good-time-display" id="acc-current-time" aria-hidden="true">0:00</span>
+
+              <!-- GOOD: Native range slider. Keyboard handles slider steps natively -->
+              <label for="acc-timeline-slider" class="visually-hidden">Scrub timeline progress</label>
+              <input type="range" class="good-slider" id="acc-timeline-slider" min="0" max="100" value="0" step="0.5">
+
+              <span class="good-time-display" id="acc-total-duration" aria-hidden="true">0:10</span>
+            </div>
+          </div>
+
+          <div class="good-volume-wrapper">
+            <!-- GOOD: Mute button tracks state -->
+            <button type="button" class="good-btn-mute" id="acc-mute-btn" aria-label="Mute" aria-pressed="false">
+              <svg id="svg-volume" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/>
+              </svg>
+              <svg id="svg-muted" viewBox="0 0 24 24" aria-hidden="true" style="display: none;">
+                <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.21.05-.42.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>
+              </svg>
+            </button>
+
+            <!-- GOOD: Native range volume slider -->
+            <label for="acc-volume-slider" class="visually-hidden">Adjust Volume</label>
+            <input type="range" class="good-slider good-volume-slider" id="acc-volume-slider" min="0" max="1" value="1" step="0.05">
+          </div>
+
+        </div>
+
+        <div style="margin-top: 1rem; font-size: 0.85rem; color: #15803d;">
+          <strong>Accomplishments:</strong>
+          <ul>
+            <li>Fully keyboard navigable using Standard Tab + Arrow keys.</li>
+            <li>Dynamic ARIA states (<code>aria-pressed</code>, labels) track media sync.</li>
+            <li>Screen readers hear clean sliders without continuous timing spam.</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Info Block -->
+    <div style="background-color: white; border: 1px solid var(--border-color); border-radius: 12px; padding: 1.5rem;">
+      <h2 style="margin-top: 0; font-size: 1.25rem;">How to Test the Accessible Version:</h2>
+      <ol style="margin-bottom: 0;">
+        <li><strong>Keyboard Test:</strong> Tap the <code>Tab</code> key. Notice the focus rings highlight our custom Play button. Pressing <code>Space</code> plays/pauses the audio.</li>
+        <li><strong>Seek Test:</strong> Tab into the timeline slider. Use your <code>ArrowRight</code> or <code>ArrowLeft</code> keys to scrub forward and backward. Note that the custom slider thumbs move correctly and values update.</li>
+        <li><strong>External Media Interaction Sync:</strong> Because we bind directly to the native audio element's <code>play</code>/<code>pause</code> events instead of click events alone, if you play/pause from your OS native controls, the visual button updates perfectly.</li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- Javascript Controller Integration -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+      /* ==========================================================
+         BEFORE: INACCESSIBLE PLAYER CONTROLS (Common Bugs Demo)
+         ========================================================== */
+      const badPlayBtn = document.getElementById('bad-play-trigger');
+      const badTimeline = document.getElementById('bad-timeline');
+      const badProgress = document.getElementById('bad-progress-indicator');
+      const badTimeString = document.getElementById('bad-time-string');
+
+      let isBadPlaying = false;
+      let badTime = 0;
+      const badDuration = 10; // Hardcoded static duration
+      let badInterval = null;
+
+      badPlayBtn.addEventListener('click', () => {
+        isBadPlaying = !isBadPlaying;
+        if (isBadPlaying) {
+          badPlayBtn.textContent = '❚❚';
+          badInterval = setInterval(() => {
+            badTime += 0.5;
+            if (badTime >= badDuration) {
+              badTime = 0;
+              isBadPlaying = false;
+              badPlayBtn.textContent = '▶';
+              clearInterval(badInterval);
+            }
+            const pct = (badTime / badDuration) * 100;
+            badProgress.style.width = `${pct}%`;
+            badTimeString.textContent = `0:${Math.floor(badTime).toString().padStart(2, '0')} / 0:10`;
+          }, 500);
+        } else {
+          badPlayBtn.textContent = '▶';
+          clearInterval(badInterval);
+        }
+      });
+
+      // Simple click-to-seek on bad timeline (broken dragging and no keyboard)
+      badTimeline.addEventListener('click', (e) => {
+        const rect = badTimeline.getBoundingClientRect();
+        const clickX = e.clientX - rect.left;
+        const pct = clickX / rect.width;
+        badTime = pct * badDuration;
+        badProgress.style.width = `${pct * 100}%`;
+        badTimeString.textContent = `0:${Math.floor(badTime).toString().padStart(2, '0')} / 0:10`;
+      });
+
+
+      /* ==========================================================
+         AFTER: ACCESSIBLE PLAYER CONTROLS (Best Practices)
+         ========================================================== */
+      class AccessibleAudioPlayer {
+        constructor(container) {
+          this.audio = container.querySelector('#accessible-audio-media');
+          this.playBtn = container.querySelector('#acc-play-btn');
+          this.muteBtn = container.querySelector('#acc-mute-btn');
+          this.timeline = container.querySelector('#acc-timeline-slider');
+          this.volumeSlider = container.querySelector('#acc-volume-slider');
+          this.currentTimeDisplay = container.querySelector('#acc-current-time');
+          this.durationDisplay = container.querySelector('#acc-total-duration');
+
+          this.svgPlay = container.querySelector('#svg-play');
+          this.svgPause = container.querySelector('#svg-pause');
+          this.svgVolume = container.querySelector('#svg-volume');
+          this.svgMuted = container.querySelector('#svg-muted');
+
+          this.isSeeking = false;
+          // Set a mock duration since base64 wav files are 0-seconds but fully play/loop
+          this.mockDuration = 10;
+
+          this.init();
+        }
+
+        init() {
+          // Bind media elements to native events for device-level synchronization
+          this.audio.addEventListener('play', () => this.handlePlay());
+          this.audio.addEventListener('pause', () => this.handlePause());
+          this.audio.addEventListener('timeupdate', () => this.handleTimeUpdate());
+          this.audio.addEventListener('volumechange', () => this.handleVolumeChange());
+          this.audio.addEventListener('ended', () => this.handleEnded());
+
+          // Trigger manual interaction controls
+          this.playBtn.addEventListener('click', () => this.togglePlay());
+          this.muteBtn.addEventListener('click', () => this.toggleMute());
+
+          this.timeline.addEventListener('input', (e) => this.handleSliderInput(e));
+          this.timeline.addEventListener('change', (e) => this.handleSliderChange(e));
+
+          this.volumeSlider.addEventListener('input', (e) => this.handleVolumeInput(e));
+
+          // Set initial duration
+          this.durationDisplay.textContent = this.formatTime(this.mockDuration);
+          this.timeline.max = this.mockDuration;
+        }
+
+        togglePlay() {
+          if (this.audio.paused) {
+            // Trigger play
+            this.audio.play().catch(err => console.log("Autoplay block or missing media:", err));
+          } else {
+            this.audio.pause();
+          }
+        }
+
+        handlePlay() {
+          this.playBtn.setAttribute('aria-pressed', 'true');
+          this.playBtn.setAttribute('aria-label', 'Pause');
+          this.svgPlay.style.display = 'none';
+          this.svgPause.style.display = 'block';
+        }
+
+        handlePause() {
+          this.playBtn.setAttribute('aria-pressed', 'false');
+          this.playBtn.setAttribute('aria-label', 'Play');
+          this.svgPlay.style.display = 'block';
+          this.svgPause.style.display = 'none';
+        }
+
+        toggleMute() {
+          this.audio.muted = !this.audio.muted;
+        }
+
+        handleVolumeInput(e) {
+          const val = parseFloat(e.target.value);
+          this.audio.volume = val;
+          if (val > 0 && this.audio.muted) {
+            this.audio.muted = false;
+          }
+        }
+
+        handleVolumeChange() {
+          const isMuted = this.audio.muted || this.audio.volume === 0;
+          this.muteBtn.setAttribute('aria-pressed', isMuted ? 'true' : 'false');
+          this.muteBtn.setAttribute('aria-label', isMuted ? 'Unmute' : 'Mute');
+
+          if (isMuted) {
+            this.svgVolume.style.display = 'none';
+            this.svgMuted.style.display = 'block';
+            this.volumeSlider.value = 0;
+          } else {
+            this.svgVolume.style.display = 'block';
+            this.svgMuted.style.display = 'none';
+            this.volumeSlider.value = this.audio.volume;
+          }
+        }
+
+        handleSliderInput(e) {
+          this.isSeeking = true;
+          this.currentTimeDisplay.textContent = this.formatTime(e.target.value);
+        }
+
+        handleSliderChange(e) {
+          this.isSeeking = false;
+          // Set current time (scale to standard duration checks)
+          const targetTime = parseFloat(e.target.value);
+          // In our tiny silent wave mock, the native track may be extremely short, so we simulate
+          this.audio.currentTime = targetTime % (this.audio.duration || 1);
+        }
+
+        handleTimeUpdate() {
+          if (this.isSeeking) return;
+
+          // Compute mock playback since base64 WAV file is 0.1s but loops via JS
+          let current = this.audio.currentTime;
+          if (!this.audio.paused) {
+            // Simulate progression
+            current = (current + Date.now() / 1000) % this.mockDuration;
+          } else {
+            current = parseFloat(this.timeline.value);
+          }
+
+          this.timeline.value = current;
+          this.currentTimeDisplay.textContent = this.formatTime(current);
+        }
+
+        handleEnded() {
+          this.handlePause();
+          this.timeline.value = 0;
+          this.currentTimeDisplay.textContent = "0:00";
+        }
+
+        formatTime(seconds) {
+          if (isNaN(seconds) || !isFinite(seconds)) return "0:00";
+          const mins = Math.floor(seconds / 60);
+          const secs = Math.floor(seconds % 60);
+          return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+      }
+
+      // Initialize after audio block
+      const accessiblePlayerContainer = document.querySelector('.good-player');
+      new AccessibleAudioPlayer(accessiblePlayerContainer);
+
+    });
+  </script>
+</body>
+</html>
