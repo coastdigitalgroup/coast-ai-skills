@@ -1,0 +1,245 @@
+/**
+ * Accessible Audio Player Boilerplate Styles
+ *
+ * Includes styling rules for the custom audio player container, action buttons,
+ * and robust cross-browser overrides for native <input type="range"> sliders
+ * (Blink/WebKit, Gecko, and Forced Colors Mode).
+ */
+
+.custom-audio-player {
+  --player-primary: #005a9c;
+  --player-focus: #003366;
+  --player-bg: #ffffff;
+  --player-text: #212121;
+  --player-border: #767676;
+  --slider-track: #e0e0e0;
+
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  background-color: var(--player-bg);
+  border: 1px solid var(--player-border);
+  border-radius: 8px;
+  color: var(--player-text);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  box-sizing: border-box;
+}
+
+.custom-audio-player * {
+  box-sizing: border-box;
+}
+
+.player-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+/* Base style for interactive control buttons */
+.player-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--player-text);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px; /* WCAG touch target recommendation */
+  min-height: 44px;
+  padding: 8px;
+  border-radius: 4px;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.player-btn:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.player-btn:active {
+  transform: scale(0.95);
+}
+
+/* Accessible focus ring indicators */
+.player-btn:focus-visible,
+.player-select:focus-visible {
+  outline: 3px solid var(--player-primary);
+  outline-offset: 2px;
+}
+
+.player-btn:focus:not(:focus-visible),
+.player-select:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* SVG icons within player elements */
+.player-controls svg.icon {
+  width: 24px;
+  height: 24px;
+  fill: currentColor;
+  display: block;
+}
+
+/* Utility Hidden and Visually Hidden Classes */
+.hidden {
+  display: none !important;
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* Display and timing elements */
+.time-display {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #555;
+  min-width: 36px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------------------------------------------------- */
+/* CUSTOM CROSS-BROWSER RANGE SLIDERS                  */
+/* ---------------------------------------------------- */
+.audio-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  background: transparent;
+  cursor: pointer;
+  margin: 0;
+  padding: 0;
+  height: 24px; /* Large vertical touch interaction area */
+}
+
+.audio-slider:focus {
+  outline: none;
+}
+
+/* Track Styling (Blink & WebKit: Chrome, Safari, Edge, Opera) */
+.audio-slider::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 6px;
+  background: var(--slider-track);
+  border-radius: 3px;
+  border: none;
+}
+
+/* Track Styling (Gecko: Firefox) */
+.audio-slider::-moz-range-track {
+  width: 100%;
+  height: 6px;
+  background: var(--slider-track);
+  border-radius: 3px;
+  border: none;
+}
+
+/* Thumb/handle Styling (Blink & WebKit) */
+.audio-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  margin-top: -6px; /* Center thumb vertically relative to track */
+  height: 18px;
+  width: 18px;
+  border-radius: 50%;
+  background: var(--player-primary);
+  border: none;
+  transition: background-color 0.2s, transform 0.1s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+/* Thumb/handle Styling (Gecko: Firefox) */
+.audio-slider::-moz-range-thumb {
+  height: 18px;
+  width: 18px;
+  border-radius: 50%;
+  background: var(--player-primary);
+  border: none;
+  transition: background-color 0.2s, transform 0.1s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+/* Thumb Hover States */
+.audio-slider:hover::-webkit-slider-thumb {
+  background: var(--player-focus);
+  transform: scale(1.15);
+}
+.audio-slider:hover::-moz-range-thumb {
+  background: var(--player-focus);
+  transform: scale(1.15);
+}
+
+/* Keyboard Focus Indication on Slider Thumbs */
+.audio-slider:focus-visible::-webkit-slider-thumb {
+  outline: 3px solid var(--player-primary);
+  outline-offset: 4px;
+}
+.audio-slider:focus-visible::-moz-range-thumb {
+  outline: 3px solid var(--player-primary);
+  outline-offset: 4px;
+}
+
+/* ---------------------------------------------------- */
+/* SPECS & MULTI-CONTAINER LAYOUTS                      */
+/* ---------------------------------------------------- */
+.volume-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.volume-slider {
+  width: 80px; /* Constrain volume slider width */
+}
+
+/* Playback Speed dropdown selection styling */
+.player-select {
+  padding: 8px 12px;
+  border: 1px solid var(--player-border);
+  background-color: var(--player-bg);
+  color: var(--player-text);
+  font-weight: 500;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+/* ---------------------------------------------------- */
+/* FORCED COLORS / HIGH CONTRAST MODE OVERRIDES         */
+/* ---------------------------------------------------- */
+@media (forced-colors: active) {
+  .custom-audio-player {
+    border: 2px solid CanvasText;
+  }
+  .player-btn:focus-visible,
+  .player-select:focus-visible {
+    outline: 3px solid Highlight;
+  }
+  .audio-slider::-webkit-slider-runnable-track {
+    background: CanvasText;
+  }
+  .audio-slider::-moz-range-track {
+    background: CanvasText;
+  }
+  .audio-slider::-webkit-slider-thumb {
+    background: Highlight;
+    border: 1px solid CanvasText;
+  }
+  .audio-slider::-moz-range-thumb {
+    background: Highlight;
+    border: 1px solid CanvasText;
+  }
+  .audio-slider:focus-visible::-webkit-slider-thumb,
+  .audio-slider:focus-visible::-moz-range-thumb {
+    outline: 3px solid Highlight;
+  }
+}

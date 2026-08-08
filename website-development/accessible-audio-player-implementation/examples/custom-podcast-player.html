@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Accessible Custom Podcast Player Example</title>
+  <!-- Link to the standard CSS boilerplate -->
+  <link rel="stylesheet" href="../templates/audio-player-boilerplate.css">
+  <style>
+    /* Custom presentation styling for the example page */
+    body {
+      background-color: #f7f9fa;
+      color: #1a1a1a;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.5;
+      margin: 0;
+      padding: 40px 24px;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    header {
+      margin-bottom: 32px;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 2rem;
+      color: #003366;
+      margin: 0 0 8px 0;
+    }
+
+    .subtitle {
+      font-size: 1.1rem;
+      color: #555;
+      margin: 0;
+    }
+
+    /* Podcast Card Design containing our custom-audio-player */
+    .podcast-card {
+      background-color: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+      border: 1px solid #e1e4e6;
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+
+    .podcast-header {
+      display: flex;
+      padding: 24px;
+      gap: 20px;
+      border-bottom: 1px solid #f0f2f4;
+    }
+
+    .podcast-cover {
+      width: 100px;
+      height: 100px;
+      border-radius: 8px;
+      object-fit: cover;
+      background-color: #005a9c;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 1.5rem;
+    }
+
+    .podcast-details {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .podcast-meta {
+      font-size: 0.85rem;
+      color: #005a9c;
+      font-weight: 600;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .podcast-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin: 0 0 4px 0;
+      color: #1a1a1a;
+    }
+
+    .podcast-host {
+      font-size: 0.9rem;
+      color: #666;
+      margin: 0;
+    }
+
+    /* Wrap our boilerplate layout nicely inside the card body */
+    .podcast-player-body {
+      padding: 24px;
+    }
+
+    .episode-description {
+      margin-top: 24px;
+      background-color: #ffffff;
+      padding: 24px;
+      border-radius: 12px;
+      border: 1px solid #e1e4e6;
+    }
+
+    .episode-description h2 {
+      font-size: 1.2rem;
+      color: #003366;
+      margin-top: 0;
+    }
+
+    .accessibility-notes {
+      margin-top: 32px;
+      padding: 20px;
+      background-color: #e6f2fc;
+      border-left: 4px solid #005a9c;
+      border-radius: 0 8px 8px 0;
+      font-size: 0.95rem;
+    }
+
+    .accessibility-notes h3 {
+      margin: 0 0 8px 0;
+      color: #003366;
+    }
+
+    .accessibility-notes ul {
+      margin: 0;
+      padding-left: 20px;
+    }
+
+    .accessibility-notes li {
+      margin-bottom: 6px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>CoastAI Tech Podcast</h1>
+    <p class="subtitle">Season 4, Episode 12</p>
+  </header>
+
+  <main>
+    <article class="podcast-card">
+      <div class="podcast-header">
+        <!-- Visual anchor podcast cover art -->
+        <div class="podcast-cover" aria-hidden="true">
+          JS
+        </div>
+        <div class="podcast-details">
+          <span class="podcast-meta">Engineering & Architecture</span>
+          <h2 class="podcast-title">Deep Dive into Frontend Performance</h2>
+          <p class="podcast-host">Hosted by Bradley Potts & Claude</p>
+        </div>
+      </div>
+
+      <div class="podcast-player-body">
+
+        <!-- Boilerplate custom player component -->
+        <div class="custom-audio-player" aria-label="Audio player for: Season 4, Episode 12 - Deep Dive into Frontend Performance">
+          <!-- Live region for announcing play/pause, volume, seek, and rate changes politely -->
+          <div id="audio-live-status" class="visually-hidden" role="status" aria-live="polite"></div>
+
+          <div class="player-controls">
+
+            <!-- Play/Pause toggle -->
+            <button type="button" class="player-btn btn-play-pause" id="audio-play-pause" aria-label="Play">
+              <svg class="icon icon-play" aria-hidden="true" viewBox="0 0 24 24" width="24" height="24">
+                <polygon points="5 3 19 12 5 21 5 3" fill="currentColor"></polygon>
+              </svg>
+              <svg class="icon icon-pause hidden" aria-hidden="true" viewBox="0 0 24 24" width="24" height="24">
+                <rect x="6" y="4" width="4" height="16" fill="currentColor"></rect>
+                <rect x="14" y="4" width="4" height="16" fill="currentColor"></rect>
+              </svg>
+            </button>
+
+            <!-- Seek Slider & Timestamps -->
+            <div class="progress-container" style="display: flex; align-items: center; gap: 8px; flex-grow: 1;">
+              <span class="time-display" id="audio-current-time" style="font-variant-numeric: tabular-nums;">0:00</span>
+
+              <div class="slider-wrapper" style="flex-grow: 1; display: flex; align-items: center;">
+                <label for="audio-seek-slider" class="visually-hidden">Seek progress bar</label>
+                <input type="range"
+                       id="audio-seek-slider"
+                       class="audio-slider progress-slider"
+                       min="0"
+                       max="100"
+                       value="0"
+                       step="0.1"
+                       style="width: 100%;"
+                       aria-valuemin="0"
+                       aria-valuemax="100"
+                       aria-valuenow="0"
+                       aria-valuetext="0 minutes, 0 seconds elapsed">
+              </div>
+
+              <span class="time-display" id="audio-duration-display" style="font-variant-numeric: tabular-nums;">--:--</span>
+            </div>
+
+            <!-- Skip Back -->
+            <button type="button" class="player-btn btn-skip" id="audio-skip-back" aria-label="Rewind 10 seconds">
+              <svg class="icon" aria-hidden="true" viewBox="0 0 24 24" width="20" height="20">
+                <path d="M12.5 8c-2.65 0-5.05.99-6.9 2.6L2 7v9h9l-3.62-3.62c1.39-1.16 3.16-1.88 5.12-1.88 3.54 0 6.55 2.31 7.6 5.5l2.37-.78C21.08 11.03 17.15 8 12.5 8z" fill="currentColor"/>
+              </svg>
+            </button>
+
+            <!-- Skip Forward -->
+            <button type="button" class="player-btn btn-skip" id="audio-skip-forward" aria-label="Fast forward 10 seconds">
+              <svg class="icon" aria-hidden="true" viewBox="0 0 24 24" width="20" height="20">
+                <path d="M12 8c-4.65 0-8.58 3.03-9.96 7.22L4.41 16c1.05-3.19 4.05-5.5 7.59-5.5 1.95 0 3.73.72 5.12 1.88L13 16h9V7l-3.6 3.6C16.55 8.99 14.15 8 12 8z" fill="currentColor"/>
+              </svg>
+            </button>
+
+            <!-- Mute / Volume Slider Wrapper -->
+            <div class="volume-container" style="display: flex; align-items: center; gap: 8px;">
+              <button type="button" class="player-btn btn-volume" id="audio-mute-toggle" aria-label="Mute volume">
+                <svg class="icon icon-volume-high" aria-hidden="true" viewBox="0 0 24 24" width="20" height="20">
+                  <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" fill="currentColor"/>
+                </svg>
+                <svg class="icon icon-volume-muted hidden" aria-hidden="true" viewBox="0 0 24 24" width="20" height="20">
+                  <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.21.05-.42.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z" fill="currentColor"/>
+                </svg>
+              </button>
+
+              <div class="slider-wrapper">
+                <label for="audio-volume-slider" class="visually-hidden">Volume slider</label>
+                <input type="range"
+                       id="audio-volume-slider"
+                       class="audio-slider volume-slider"
+                       min="0"
+                       max="1"
+                       step="0.05"
+                       value="0.8"
+                       aria-valuemin="0"
+                       aria-valuemax="100"
+                       aria-valuenow="80"
+                       aria-valuetext="Volume 80 percent">
+              </div>
+            </div>
+
+            <!-- Playback Speed -->
+            <div class="speed-container" style="display: flex; align-items: center;">
+              <label for="audio-speed-selector" class="visually-hidden">Playback speed</label>
+              <select id="audio-speed-selector" class="player-select" style="padding: 8px; border-radius: 4px; border: 1px solid var(--player-border); background-color: var(--player-bg); font-weight: 500;">
+                <option value="0.5">0.5x</option>
+                <option value="1.0" selected>Normal</option>
+                <option value="1.25">1.25x</option>
+                <option value="1.5">1.5x</option>
+                <option value="2.0">2.0x</option>
+              </select>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </article>
+
+    <div class="episode-description">
+      <h2>Episode Description</h2>
+      <p>In this episode, Bradley Potts & Claude unpack what it takes to build a high-performance web experience. We walk through common performance bottlenecks, visual rendering pipelines, layout thrashing, and how to successfully audit your user interfaces to reduce core web vitals and optimize responsiveness.</p>
+    </div>
+
+    <section class="accessibility-notes" aria-labelledby="accessibility-features-heading">
+      <h3 id="accessibility-features-heading">Key Accessibility Features Tested:</h3>
+      <ul>
+        <li><strong>Full Keyboard Access:</strong> Use <code>Tab</code> to focus controls. The <code>Spacebar</code> toggles playback, and <code>M</code> toggles mute.</li>
+        <li><strong>Native Slider Controls:</strong> Seek and volume bars leverage native <code>&lt;input type="range"&gt;</code> controls so screen readers automatically announce range roles and coordinates.</li>
+        <li><strong>Real-time ARIA-Live status:</strong> Playback state changes (e.g., "Playing", "Paused", "Seeking", "Volume set to...") are announced politely through an invisible status live region.</li>
+        <li><strong>Tab Order Independence:</strong> Hidden layout elements are correctly marked with <code>aria-hidden="true"</code>, and SVG structures do not capture stray focus.</li>
+      </ul>
+    </section>
+  </main>
+</div>
+
+<!-- Load modular JavaScript -->
+<script type="module">
+  import { AccessibleAudioPlayer } from '../templates/audio-player-boilerplate.js';
+
+  // Instantiate the custom player with a sample royalty-free mp3 track
+  document.addEventListener('DOMContentLoaded', () => {
+    const playerContainer = document.querySelector('.custom-audio-player');
+    const sampleAudioUrl = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
+
+    const player = new AccessibleAudioPlayer(playerContainer, sampleAudioUrl);
+
+    // Optional: Log errors if the remote helix asset is blocked by network limits
+    player.audio.addEventListener('error', (e) => {
+      console.warn("External sound sample failed to load (expected in offline/sandboxed environments). Fallback loading complete.", e);
+    });
+  });
+</script>
+
+</body>
+</html>
