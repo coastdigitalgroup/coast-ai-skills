@@ -1,0 +1,144 @@
+/*
+  Accessible Split Pane Layout Boilerplate
+  Customize dimensions, offsets, and colors via local custom properties.
+*/
+
+/* 1. Layout Container Configs */
+.split-pane-container {
+  display: flex;
+  overflow: hidden;
+  position: relative;
+
+  /* Layout Variables: Override these locally or inline on the container */
+  --splitter-thickness: 8px;
+  --first-pane-size: 50%; /* Synchronized directly with JS */
+  --splitter-bg: #e2e8f0;
+  --splitter-bg-hover: #3b82f6;
+  --splitter-bg-active: #2563eb;
+  --splitter-focus-ring: #bfdbfe;
+}
+
+/* Vertical Split - Left/Right Columns */
+.split-pane-container.is-vertical {
+  flex-direction: row;
+}
+
+/* Horizontal Split - Top/Bottom Rows */
+.split-pane-container.is-horizontal {
+  flex-direction: column;
+}
+
+/* 2. Pane Container Rules */
+.split-pane-pane {
+  overflow: auto;
+  min-width: 0;  /* Essential Flexbox override to prevent content from expanding columns */
+  min-height: 0; /* Essential Flexbox override to prevent content from expanding rows */
+  position: relative;
+}
+
+/* Left or Top pane relies on the dynamic CSS custom property size */
+.split-pane-pane-first {
+  flex: 0 0 var(--first-pane-size);
+}
+
+/* Right or Bottom pane expands dynamically to fill remaining workspace space */
+.split-pane-pane-second {
+  flex: 1 1 0%;
+}
+
+/* 3. Draggable Splitter Line */
+.split-pane-splitter {
+  flex: 0 0 var(--splitter-thickness);
+  background-color: var(--splitter-bg);
+  position: relative;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none; /* Prevents mobile page-scrolling behaviors during splitter drag gestures */
+  z-index: 10;
+  transition: background-color 0.15s ease-in-out;
+}
+
+.split-pane-container.is-vertical > .split-pane-splitter {
+  cursor: col-resize;
+  width: var(--splitter-thickness);
+}
+
+.split-pane-container.is-horizontal > .split-pane-splitter {
+  cursor: row-resize;
+  height: var(--splitter-thickness);
+}
+
+/* Hover & dragging feedback highlights */
+.split-pane-splitter:hover,
+.split-pane-splitter.is-dragging {
+  background-color: var(--splitter-bg-hover);
+}
+
+/* 4. Focus Ring Styling (Essential WCAG AA Compliance) */
+.split-pane-splitter:focus-visible {
+  outline: none;
+  background-color: var(--splitter-bg-active);
+  box-shadow: 0 0 0 3px var(--splitter-focus-ring);
+  z-index: 20;
+}
+
+/* 5. Dragging Isolation Safeguard */
+/* If either pane contains an <iframe>, add this class to the container during drag
+   to overlay a transparent mask, preventing the iframe from capturing pointer events */
+.split-pane-pane-mask {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 50;
+  background-color: transparent;
+}
+
+.split-pane-container.is-dragging-layout .split-pane-pane-mask {
+  display: block;
+}
+
+/* During drag, temporarily deactivate pointer events on normal panes to improve speed */
+.split-pane-container.is-dragging-layout .split-pane-pane {
+  pointer-events: none;
+}
+
+/* 6. Visual Grip indicators inside the separator line (Optional decorative) */
+.split-pane-splitter::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #94a3b8;
+  border-radius: 4px;
+  transition: background-color 0.15s ease-in-out;
+}
+
+.split-pane-container.is-vertical > .split-pane-splitter::after {
+  width: 2px;
+  height: 24px;
+}
+
+.split-pane-container.is-horizontal > .split-pane-splitter::after {
+  width: 24px;
+  height: 2px;
+}
+
+.split-pane-splitter:hover::after,
+.split-pane-splitter.is-dragging::after {
+  background-color: #ffffff;
+}
+
+/* 7. Forced Contrast Theme overrides (Windows High Contrast support) */
+@media (forced-colors: active) {
+  .split-pane-splitter {
+    border: 1px solid ButtonText;
+  }
+  .split-pane-splitter:focus-visible {
+    outline: 2px dashed SelectedText;
+    outline-offset: 2px;
+  }
+}
