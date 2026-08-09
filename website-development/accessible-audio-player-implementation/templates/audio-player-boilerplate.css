@@ -1,0 +1,191 @@
+/**
+ * Custom Audio Player Styling Boilerplate
+ * Implements reset configurations, container alignments, and crucial
+ * cross-browser CSS pseudo-element rules for stylized range inputs.
+ */
+
+:root {
+  --player-focus-ring: #3b82f6;
+  --player-track-bg: #e2e8f0;
+  --player-track-filled: #1e293b;
+  --player-thumb-bg: #1e293b;
+  --player-text: #0f172a;
+  --player-text-muted: #64748b;
+  --player-border: #cbd5e1;
+}
+
+/* ==========================================================
+   Outer Layout Container
+   ========================================================== */
+.custom-player-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.5rem;
+  background-color: #ffffff;
+  border: 1px solid var(--player-border);
+  border-radius: 12px;
+  width: 100%;
+  max-width: 480px;
+  box-sizing: border-box;
+}
+
+.player-header {
+  margin: 0;
+}
+
+.player-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--player-text);
+  margin: 0 0 0.25rem 0;
+}
+
+.player-artist {
+  font-size: 0.875rem;
+  color: var(--player-text-muted);
+  margin: 0;
+}
+
+.player-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* ==========================================================
+   Interactive Buttons & Touch Targets
+   ========================================================== */
+.player-control-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;  /* Meets WCAG 2.1 AAA 44x44px target sizes */
+  height: 48px;
+  background-color: var(--player-thumb-bg);
+  color: #ffffff;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform 0.1s ease, background-color 0.2s ease;
+  padding: 0;
+}
+
+.player-control-button:hover {
+  background-color: #334155;
+}
+
+.player-control-button:active {
+  transform: scale(0.95);
+}
+
+.player-control-button:focus {
+  outline: none;
+}
+
+/* High Contrast Focus Visibility style ring */
+.player-control-button:focus-visible {
+  outline: 3px solid var(--player-focus-ring);
+  outline-offset: 3px;
+}
+
+.player-control-button svg {
+  width: 24px;
+  height: 24px;
+  fill: currentColor;
+}
+
+/* ==========================================================
+   Interactive Native Range Inputs (Cross-Browser Rules)
+   ========================================================== */
+.custom-range-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+  height: 32px; /* Large clickable hitting zone surrounding thin line track */
+  margin: 0;
+  padding: 0;
+  width: 100%;
+}
+
+.custom-range-slider:focus {
+  outline: none;
+}
+
+/* Keyboard focus rings */
+.custom-range-slider:focus-visible {
+  outline: 3px solid var(--player-focus-ring);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
+/* Webkit (Safari/Chrome/Opera/Edge Chromium) Track Rules */
+.custom-range-slider::-webkit-slider-runnable-track {
+  background: var(--player-track-bg);
+  height: 6px;
+  border-radius: 3px;
+}
+
+/* Webkit Thumb Rules */
+.custom-range-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  background: var(--player-thumb-bg);
+  height: 16px;
+  width: 16px;
+  border-radius: 50%;
+  margin-top: -5px; /* Alignment offset calculation: (Track Height / 2) - (Thumb Height / 2) */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  transition: transform 0.1s ease;
+}
+
+.custom-range-slider:active::-webkit-slider-thumb {
+  transform: scale(1.25);
+}
+
+/* Firefox (Gecko) Track Rules */
+.custom-range-slider::-moz-range-track {
+  background: var(--player-track-bg);
+  height: 6px;
+  border-radius: 3px;
+}
+
+/* Firefox Thumb Rules */
+.custom-range-slider::-moz-range-thumb {
+  border: none;
+  background: var(--player-thumb-bg);
+  height: 16px;
+  width: 16px;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  transition: transform 0.1s ease;
+}
+
+.custom-range-slider:active::-moz-range-thumb {
+  transform: scale(1.25);
+}
+
+/* ==========================================================
+   Progress/Timing display labels
+   ========================================================== */
+.time-label-block {
+  font-size: 0.8125rem;
+  font-family: monospace;
+  color: var(--player-text-muted);
+  min-width: 38px;
+  user-select: none;
+}
+
+/* Utility to support screen reader layout concealment */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
