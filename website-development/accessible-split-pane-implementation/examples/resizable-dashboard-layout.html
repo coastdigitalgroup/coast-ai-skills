@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Accessible Resizable Workspace - Split Pane Example</title>
+  <style>
+    /* Reset and System Typography */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: #f8fafc;
+      color: #0f172a;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Header styling */
+    .app-header {
+      background-color: #ffffff;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 1rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .app-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #1e293b;
+    }
+
+    .instructions-badge {
+      background-color: #eff6ff;
+      color: #1d4ed8;
+      font-size: 0.875rem;
+      padding: 0.375rem 0.75rem;
+      border-radius: 9999px;
+      font-weight: 500;
+      border: 1px solid #bfdbfe;
+    }
+
+    /* Main Resizable Workspace Container */
+    .workspace {
+      display: flex;
+      flex: 1;
+      width: 100%;
+      height: calc(100vh - 65px);
+      overflow: hidden;
+      position: relative;
+      /* Custom CSS Properties bound directly to resizable states */
+      --sidebar-width: 25%;
+      --preview-height: 40%;
+    }
+
+    /* Base panel styles */
+    .pane {
+      background-color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Panel headers */
+    .pane-header {
+      background-color: #f1f5f9;
+      padding: 0.75rem 1rem;
+      font-weight: 600;
+      font-size: 0.875rem;
+      color: #475569;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      user-select: none;
+    }
+
+    .pane-content {
+      flex: 1;
+      padding: 1.25rem;
+      overflow-y: auto;
+    }
+
+    /* Side navigation pane */
+    .sidebar-pane {
+      flex: 0 0 var(--sidebar-width);
+      border-right: none; /* Splitter will act as visual separator */
+    }
+
+    .file-tree {
+      list-style-type: none;
+    }
+
+    .file-tree-item {
+      display: flex;
+      align-items: center;
+      padding: 0.5rem 0.75rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.875rem;
+      color: #334155;
+      text-decoration: none;
+      transition: background-color 0.15s ease;
+      margin-bottom: 0.25rem;
+    }
+
+    .file-tree-item:hover {
+      background-color: #f1f5f9;
+    }
+
+    .file-tree-item:focus-visible {
+      outline: 2px solid #3b82f6;
+      outline-offset: -2px;
+    }
+
+    .file-tree-item.is-active {
+      background-color: #e0f2fe;
+      color: #0369a1;
+      font-weight: 500;
+    }
+
+    .file-tree-item svg {
+      margin-right: 0.5rem;
+      flex-shrink: 0;
+    }
+
+    /* Splitter (Vertical column resize) */
+    .splitter-vertical {
+      flex: 0 0 10px;
+      background-color: #e2e8f0;
+      position: relative;
+      cursor: col-resize;
+      user-select: none;
+      -webkit-user-select: none;
+      z-index: 10;
+      transition: background-color 0.15s ease;
+    }
+
+    .splitter-vertical:hover,
+    .splitter-vertical.is-dragging {
+      background-color: #3b82f6;
+    }
+
+    /* Grabber line indicator */
+    .splitter-vertical::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 2px;
+      height: 30px;
+      background-color: #94a3b8;
+      border-radius: 1px;
+      transition: background-color 0.15s ease;
+    }
+
+    .splitter-vertical:hover::after,
+    .splitter-vertical.is-dragging::after {
+      background-color: #ffffff;
+    }
+
+    /* Splitter Focus State (Essential for accessibility) */
+    .splitter-vertical:focus-visible,
+    .splitter-horizontal:focus-visible {
+      outline: none;
+      background-color: #2563eb;
+      box-shadow: 0 0 0 3px #bfdbfe, inset 0 0 0 1px #1d4ed8;
+      z-index: 20;
+    }
+
+    /* Main right content area container (stacked vertically) */
+    .main-content-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      height: 100%;
+    }
+
+    /* Top editor pane */
+    .editor-pane {
+      flex: 1;
+    }
+
+    .editor-textarea {
+      width: 100%;
+      height: 100%;
+      border: none;
+      resize: none;
+      padding: 1.25rem;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: #1e293b;
+      outline: none;
+    }
+
+    /* Splitter (Horizontal row resize) */
+    .splitter-horizontal {
+      flex: 0 0 10px;
+      background-color: #e2e8f0;
+      position: relative;
+      cursor: row-resize;
+      user-select: none;
+      -webkit-user-select: none;
+      z-index: 10;
+      transition: background-color 0.15s ease;
+    }
+
+    .splitter-horizontal:hover,
+    .splitter-horizontal.is-dragging {
+      background-color: #3b82f6;
+    }
+
+    .splitter-horizontal::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 30px;
+      height: 2px;
+      background-color: #94a3b8;
+      border-radius: 1px;
+      transition: background-color 0.15s ease;
+    }
+
+    .splitter-horizontal:hover::after,
+    .splitter-horizontal.is-dragging::after {
+      background-color: #ffffff;
+    }
+
+    /* Bottom preview pane */
+    .preview-pane {
+      flex: 0 0 var(--preview-height);
+    }
+
+    /* Overlay mask during dragging to prevent iframes from stealing pointer events */
+    .resize-iframe-mask {
+      display: none;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 50;
+      background: transparent;
+    }
+
+    .is-dragging-global .resize-iframe-mask {
+      display: block;
+    }
+
+    /* Preview Iframe simulation container */
+    .preview-placeholder {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      padding: 1.5rem;
+      background-color: #fafafa;
+    }
+
+    .rendered-html {
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      background-color: #ffffff;
+      padding: 1rem;
+      flex: 1;
+      overflow-y: auto;
+      font-size: 0.95rem;
+    }
+
+    /* Screen reader announcements helper */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    /* Accessibility feedback banner */
+    .announcement-banner {
+      background-color: #f0fdf4;
+      border-bottom: 1px solid #bbf7d0;
+      padding: 0.75rem 1.5rem;
+      font-size: 0.875rem;
+      color: #166534;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+  </style>
+</head>
+<body class="is-vertical">
+
+  <!-- Application Header -->
+  <header class="app-header">
+    <h1 class="app-title">Accessible Layout Workspace</h1>
+    <div class="instructions-badge">
+      Interactive Split Pane Layout (WCAG Compliant)
+    </div>
+  </header>
+
+  <!-- Accessibility Announcement Banner -->
+  <div class="announcement-banner" id="a11y-banner" role="status" aria-live="polite">
+    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+    </svg>
+    <span>Use mouse, touch drag, or use <strong>Tab</strong> then arrow keys (<strong>&larr; &uarr; &rarr; &darr;</strong>), <strong>Home</strong>, and <strong>End</strong> to resize columns.</span>
+  </div>
+
+  <!-- Main Resizable Workspace -->
+  <main class="workspace" id="workspace-container">
+
+    <!-- PANE A: SIDEBAR -->
+    <div class="pane sidebar-pane" id="sidebar-panel">
+      <div class="pane-header">
+        <span>PROJECT EXPLORER</span>
+        <button type="button" id="collapse-sidebar-btn" aria-label="Collapse sidebar panel" style="background: none; border: none; cursor: pointer; color: #64748b;" title="Press Enter to collapse">
+          &larr;
+        </button>
+      </div>
+      <div class="pane-content">
+        <nav aria-label="Project files">
+          <ul class="file-tree">
+            <li>
+              <a href="#index.html" class="file-tree-item is-active">
+                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                index.html
+              </a>
+            </li>
+            <li>
+              <a href="#styles.css" class="file-tree-item">
+                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path>
+                </svg>
+                styles.css
+              </a>
+            </li>
+            <li>
+              <a href="#app.js" class="file-tree-item">
+                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+                app.js
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+
+    <!-- PRIMARY SPLITTER (Vertical Line - dividing Column Widths) -->
+    <div class="splitter-vertical"
+         role="separator"
+         tabindex="0"
+         id="splitter-main"
+         aria-label="Workspace horizontal column resizer"
+         aria-controls="sidebar-panel"
+         aria-orientation="vertical"
+         aria-valuenow="25"
+         aria-valuemin="10"
+         aria-valuemax="50">
+      <span class="sr-only">Ressizer handle. Press arrow keys to resize. Home to minimize, End to maximize, Enter to collapse sidebar.</span>
+    </div>
+
+    <!-- MAIN STACKED CONTENT AREA -->
+    <div class="main-content-area">
+
+      <!-- PANE B1: CODE EDITOR -->
+      <div class="pane editor-pane" id="editor-panel">
+        <div class="pane-header">
+          <span>CODE EDITOR (index.html)</span>
+        </div>
+        <textarea class="editor-textarea" id="editor" aria-label="HTML Code Input">&lt;h1&gt;Hello World!&lt;/h1&gt;
+&lt;p&gt;This is an interactive preview. Try editing this text or dragging the handles to see immediate layout recalculation!&lt;/p&gt;
+&lt;button style="padding: 6px 12px; background: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer;"&gt;Click Me&lt;/button&gt;</textarea>
+      </div>
+
+      <!-- SECONDARY SPLITTER (Horizontal Line - dividing Row Heights) -->
+      <div class="splitter-horizontal"
+           role="separator"
+           tabindex="0"
+           id="splitter-sub"
+           aria-label="Editor vertical row height resizer"
+           aria-controls="preview-panel"
+           aria-orientation="horizontal"
+           aria-valuenow="40"
+           aria-valuemin="15"
+           aria-valuemax="75">
+        <span class="sr-only">Row height resizer handle. Press arrow keys to resize. Home to minimize, End to maximize, Enter to collapse preview pane.</span>
+      </div>
+
+      <!-- PANE B2: INTERACTIVE PREVIEW -->
+      <div class="pane preview-pane" id="preview-panel">
+        <!-- Overlay mask to prevent pointer capture loss inside frames -->
+        <div class="resize-iframe-mask"></div>
+        <div class="pane-header">
+          <span>LIVE PREVIEW WORKSPACE</span>
+        </div>
+        <div class="pane-content" style="background-color: #f1f5f9; padding: 1rem;">
+          <div class="preview-placeholder">
+            <!-- Simulated secure iframe container -->
+            <div class="rendered-html" id="rendered-preview"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <script>
+    class ResponsiveSplitter {
+      constructor(container, splitter, firstPane, orientation, key) {
+        this.container = container;
+        this.splitter = splitter;
+        this.firstPane = firstPane;
+        this.orientation = orientation; // 'vertical' (column) or 'horizontal' (row)
+        this.key = key; // CSS Variable key
+
+        this.minVal = parseFloat(this.splitter.getAttribute('aria-valuemin'));
+        this.maxVal = parseFloat(this.splitter.getAttribute('aria-valuemax'));
+        this.currentVal = parseFloat(this.splitter.getAttribute('aria-valuenow'));
+
+        this.isDragging = false;
+        this.previousVal = this.currentVal;
+
+        this.init();
+      }
+
+      init() {
+        // Pointer Handlers for Universal mouse/touch support
+        this.splitter.addEventListener('pointerdown', this.onPointerDown.bind(this));
+        this.splitter.addEventListener('pointermove', this.onPointerMove.bind(this));
+        this.splitter.addEventListener('pointerup', this.onPointerUp.bind(this));
+        this.splitter.addEventListener('pointercancel', this.onPointerUp.bind(this));
+
+        // Keyboard navigation handlers
+        this.splitter.addEventListener('keydown', this.onKeyDown.bind(this));
+
+        // Initial setup
+        this.updateSize(this.currentVal);
+      }
+
+      onPointerDown(e) {
+        if (e.button !== 0 && e.pointerType === 'mouse') return;
+
+        this.isDragging = true;
+        this.splitter.classList.add('is-dragging');
+        document.body.classList.add('is-dragging-global');
+
+        // Dynamic feedback cursor
+        document.body.style.cursor = this.orientation === 'vertical' ? 'col-resize' : 'row-resize';
+        document.body.style.userSelect = 'none';
+
+        // Capture touch/mouse events cleanly
+        this.splitter.setPointerCapture(e.pointerId);
+        e.preventDefault();
+      }
+
+      onPointerMove(e) {
+        if (!this.isDragging) return;
+
+        const rect = this.container.getBoundingClientRect();
+        let percentage;
+
+        if (this.orientation === 'vertical') {
+          const relativeX = e.clientX - rect.left;
+          percentage = (relativeX / rect.width) * 100;
+        } else {
+          const relativeY = e.clientY - rect.top;
+          percentage = (relativeY / rect.height) * 100;
+        }
+
+        this.updateSize(percentage);
+      }
+
+      onPointerUp(e) {
+        if (!this.isDragging) return;
+
+        this.isDragging = false;
+        this.splitter.classList.remove('is-dragging');
+        document.body.classList.remove('is-dragging-global');
+
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+
+        this.splitter.releasePointerCapture(e.pointerId);
+      }
+
+      onKeyDown(e) {
+        let step = e.shiftKey ? 10 : 2;
+        let handled = false;
+        let targetSize = this.currentVal;
+
+        switch (e.key) {
+          case 'ArrowLeft':
+            if (this.orientation === 'vertical') {
+              targetSize -= step;
+              handled = true;
+            }
+            break;
+          case 'ArrowUp':
+            if (this.orientation === 'horizontal') {
+              targetSize -= step;
+              handled = true;
+            }
+            break;
+          case 'ArrowRight':
+            if (this.orientation === 'vertical') {
+              targetSize += step;
+              handled = true;
+            }
+            break;
+          case 'ArrowDown':
+            if (this.orientation === 'horizontal') {
+              targetSize += step;
+              handled = true;
+            }
+            break;
+          case 'Home':
+            targetSize = this.minVal;
+            handled = true;
+            break;
+          case 'End':
+            targetSize = this.maxVal;
+            handled = true;
+            break;
+          case 'Enter':
+            this.toggleCollapse();
+            handled = true;
+            break;
+        }
+
+        if (handled) {
+          e.preventDefault();
+          this.updateSize(targetSize);
+        }
+      }
+
+      toggleCollapse() {
+        if (this.currentVal > this.minVal) {
+          this.previousVal = this.currentVal;
+          this.updateSize(this.minVal);
+          this.announceState('Collapsed');
+        } else {
+          const restoreVal = this.previousVal || (this.maxVal + this.minVal) / 2;
+          this.updateSize(restoreVal);
+          this.announceState(`Expanded to ${this.currentVal}%`);
+        }
+      }
+
+      updateSize(percentage) {
+        const constrained = Math.max(this.minVal, Math.min(this.maxVal, percentage));
+        this.currentVal = Math.round(constrained * 10) / 10;
+
+        // Apply dynamically to the parent workspace container via CSS variables
+        this.container.style.setProperty(this.key, `${this.currentVal}%`);
+
+        // Synchronize ARIA state for screen readers
+        this.splitter.setAttribute('aria-valuenow', this.currentVal);
+      }
+
+      announceState(actionMessage) {
+        const banner = document.getElementById('a11y-banner');
+        const announcement = `Panel ${this.orientation === 'vertical' ? 'sidebar' : 'preview'} is now ${actionMessage}.`;
+
+        // Standard live announcement
+        const statusEl = document.createElement('div');
+        statusEl.className = 'sr-only';
+        statusEl.setAttribute('role', 'status');
+        statusEl.textContent = announcement;
+        document.body.appendChild(statusEl);
+
+        setTimeout(() => statusEl.remove(), 1000);
+      }
+    }
+
+    // Initialize layout instances
+    const workspaceEl = document.getElementById('workspace-container');
+
+    // 1. Column Splitter between Sidebar and Main workspace area
+    const sidebarSplitter = new ResponsiveSplitter(
+      workspaceEl,
+      document.getElementById('splitter-main'),
+      document.getElementById('sidebar-panel'),
+      'vertical',
+      '--sidebar-width'
+    );
+
+    // 2. Row Splitter between Editor and Live Preview
+    const previewSplitter = new ResponsiveSplitter(
+      document.querySelector('.main-content-area'),
+      document.getElementById('splitter-sub'),
+      document.getElementById('editor-panel'),
+      'horizontal',
+      '--preview-height'
+    );
+
+    // Dynamic Live Preview renderer
+    const editor = document.getElementById('editor');
+    const previewContainer = document.getElementById('rendered-preview');
+
+    function updatePreview() {
+      previewContainer.innerHTML = editor.value;
+    }
+
+    editor.addEventListener('input', updatePreview);
+    updatePreview(); // Initial render
+
+    // Sidebar collapse button handler
+    const collapseSidebarBtn = document.getElementById('collapse-sidebar-btn');
+    collapseSidebarBtn.addEventListener('click', () => {
+      sidebarSplitter.toggleCollapse();
+    });
+  </script>
+</body>
+</html>
