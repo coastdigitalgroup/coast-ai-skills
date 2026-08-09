@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Annotated Tree View Design Spec Template</title>
+  <style>
+    /* ==========================================================================
+       DESIGN SYSTEM TOKENS & VARIABLES
+       ========================================================================== */
+    :root {
+      /* Colors */
+      --color-bg-sidebar: #0f172a;       /* Slate 900 */
+      --color-bg-item-hover: #1e293b;    /* Slate 800 */
+      --color-bg-item-active: #1d4ed81f; /* Blue 700 with opacity */
+      --color-text-primary: #f8fafc;     /* Slate 50 */
+      --color-text-secondary: #94a3b8;   /* Slate 400 */
+      --color-text-active: #60a5fa;      /* Blue 400 */
+      --color-border-item: #334155;      /* Slate 700 */
+      --color-focus-ring: #3b82f6;       /* Blue 500 */
+
+      /* Layout & Indentation Scales */
+      --indent-width: 12px;              /* Cumulative multiplier offset */
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    /* Core Layout Styles for Visual Preservation */
+    body {
+      margin: 0;
+      padding: 40px;
+      background-color: #020617; /* Slate 950 */
+      color: var(--color-text-primary);
+      font-family: var(--font-family);
+    }
+
+    /* ==========================================================================
+       TREE CONTAINER LAYOUT
+       ========================================================================== */
+    .tree-container {
+      width: 280px;
+      background-color: var(--color-bg-sidebar);
+      border: 1px solid var(--color-border-item);
+      border-radius: 8px;
+      padding: 16px 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .tree-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--color-text-secondary);
+      padding: 0 12px 12px 12px;
+      margin: 0;
+      border-bottom: 1px solid var(--color-border-item);
+    }
+
+    /* Tree root container must match role="tree" specifications */
+    .tree-root {
+      list-style: none;
+      padding: 0;
+      margin: 12px 0 0 0;
+    }
+
+    /* ==========================================================================
+       TREE NODE ANATOMY & STATES
+       ========================================================================== */
+    /* Nested node lists must match role="group" specifications */
+    .tree-group {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: none; /* Initially collapsed - toggled via JS */
+    }
+
+    .tree-group.is-expanded {
+      display: block; /* Shown when aria-expanded="true" */
+    }
+
+    /* Tree Items representing individual rows */
+    .tree-item-row {
+      display: flex;
+      align-items: center;
+      min-height: 36px;
+      padding: 6px 12px;
+      /* Dynamic padding offset based on depth variables injected by parent */
+      padding-left: calc(12px + (var(--indent-width) * var(--tree-depth, 0)));
+      margin: 2px 0;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--color-text-secondary);
+      text-decoration: none;
+      transition: background 0.15s ease, color 0.15s ease;
+      position: relative;
+    }
+
+    /* Row Hover State styling */
+    .tree-item-row:hover {
+      background-color: var(--color-bg-item-hover);
+      color: var(--color-text-primary);
+    }
+
+    /* Active / Current Page State styling */
+    .tree-item-row.is-selected {
+      background-color: var(--color-bg-item-active);
+      color: var(--color-text-active);
+      font-weight: 600;
+    }
+
+    /* Left-aligned vertical line accent for Selected Nodes */
+    .tree-item-row.is-selected::before {
+      content: '';
+      position: absolute;
+      left: 3px;
+      top: 6px;
+      bottom: 6px;
+      width: 3px;
+      background-color: var(--color-focus-ring);
+      border-radius: 2px;
+    }
+
+    /* Focus-Visible Indicator (Mandatory WCAG Contrast Spec) */
+    .tree-item-row:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 2px var(--color-focus-ring) inset;
+      color: var(--color-text-primary);
+    }
+
+    /* ==========================================================================
+       INNER GRAPHIC & CHEVRON ELEMENTS
+       ========================================================================== */
+    .tree-chevron {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      margin-right: 4px;
+      color: var(--color-text-secondary);
+      transition: transform 0.2s ease, color 0.15s ease;
+      cursor: pointer;
+    }
+
+    .tree-chevron:hover {
+      color: var(--color-text-primary);
+    }
+
+    /* Chevron rotation reflecting open/close status */
+    .tree-item-row[aria-expanded="true"] .tree-chevron {
+      transform: rotate(90deg);
+    }
+
+    /* Spacer for Leaf Nodes to align icon/text cleanly in columns */
+    .tree-chevron-spacer {
+      width: 20px;
+      height: 20px;
+      margin-right: 4px;
+      display: inline-block;
+    }
+
+    .tree-icon {
+      width: 16px;
+      height: 16px;
+      margin-right: 8px;
+      flex-shrink: 0;
+      color: var(--color-text-secondary);
+      transition: color 0.15s ease;
+    }
+
+    .tree-item-row:hover .tree-icon,
+    .tree-item-row.is-selected .tree-icon {
+      color: inherit;
+    }
+
+    .tree-label {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* ==========================================================================
+       SPEC ANNOTATIONS (DESIGNER REFERENCE)
+       ========================================================================== */
+    .spec-legend {
+      margin-top: 40px;
+      max-width: 600px;
+      background-color: #1e293b;
+      border: 1px solid var(--color-border-item);
+      border-radius: 8px;
+      padding: 20px;
+    }
+
+    .spec-legend h2 {
+      font-size: 16px;
+      margin-top: 0;
+      border-bottom: 1px solid var(--color-border-item);
+      padding-bottom: 8px;
+    }
+
+    .spec-badge {
+      display: inline-block;
+      padding: 2px 6px;
+      background-color: #3b82f633;
+      border: 1px solid #3b82f6;
+      border-radius: 4px;
+      font-size: 11px;
+      font-family: monospace;
+      color: var(--color-text-active);
+    }
+  </style>
+</head>
+<body>
+
+  <!--
+    ==========================================================================
+    ANNOTATED TREE VIEW COMPONENT TEMPLATE
+    ==========================================================================
+  -->
+  <div class="tree-container">
+    <h3 class="tree-title">Documentation Browser</h3>
+
+    <!--
+      DEVELOPER NOTE:
+      1. This <ul> acts as the root node of the tree and must feature [role="tree"].
+      2. It must be accessible-labeled with [aria-label] or [aria-labelledby].
+    -->
+    <ul class="tree-root" role="tree" aria-label="Documentation Directory">
+
+      <!-- ==========================================
+           LEVEL 1 BRANCH (Collapsed Folder)
+           ========================================== -->
+      <!--
+        DEVELOPER NOTE:
+        - Parent nodes feature [aria-expanded="false"] or [aria-expanded="true"]
+        - Ensure [tabindex="0"] is set on the first visible node, and [tabindex="-1"] on all others.
+      -->
+      <li class="tree-item-row"
+          role="treeitem"
+          aria-expanded="false"
+          aria-level="1"
+          aria-setsize="3"
+          aria-posinset="1"
+          tabindex="0"
+          style="--tree-depth: 0;"
+          id="tree-node-1">
+
+        <!-- Rotating Chevron Trigger -->
+        <span class="tree-chevron" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </span>
+
+        <!-- Folder Category Icon (Aria hidden because of text label redundancy) -->
+        <span class="tree-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+          </svg>
+        </span>
+
+        <span class="tree-label">Getting Started</span>
+      </li>
+
+      <!-- Nested list of children under parent "Getting Started" -->
+      <!-- DEVELOPER NOTE: All child groups must have role="group" and be linked to their parent. -->
+      <ul class="tree-group" role="group" aria-labelledby="tree-node-1">
+        <!-- Leaf node (Level 2 Child) -->
+        <li class="tree-item-row"
+            role="treeitem"
+            aria-level="2"
+            aria-setsize="2"
+            aria-posinset="1"
+            tabindex="-1"
+            style="--tree-depth: 1;"
+            id="tree-node-1-1">
+
+          <span class="tree-chevron-spacer"></span> <!-- Left alignment spacer -->
+
+          <span class="tree-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+            </svg>
+          </span>
+
+          <span class="tree-label">Introduction Overview</span>
+        </li>
+      </ul>
+
+      <!-- ==========================================
+           LEVEL 1 BRANCH (Expanded Folder containing nested child branch)
+           ========================================== -->
+      <li class="tree-item-row"
+          role="treeitem"
+          aria-expanded="true"
+          aria-level="1"
+          aria-setsize="3"
+          aria-posinset="2"
+          tabindex="-1"
+          style="--tree-depth: 0;"
+          id="tree-node-2">
+
+        <span class="tree-chevron" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </span>
+
+        <span class="tree-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+          </svg>
+        </span>
+
+        <span class="tree-label">API Configuration</span>
+      </li>
+
+      <!-- Nested group for Level 2 (API Configuration group - is-expanded active) -->
+      <ul class="tree-group is-expanded" role="group" aria-labelledby="tree-node-2">
+
+        <!-- Nested Branch: Endpoint Credentials (Collapsed Level 2 Branch) -->
+        <li class="tree-item-row"
+            role="treeitem"
+            aria-expanded="false"
+            aria-level="2"
+            aria-setsize="2"
+            aria-posinset="1"
+            tabindex="-1"
+            style="--tree-depth: 1;"
+            id="tree-node-2-1">
+
+          <span class="tree-chevron" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </span>
+
+          <span class="tree-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+            </svg>
+          </span>
+
+          <span class="tree-label">Credentials Admin</span>
+        </li>
+
+        <!-- Nested group under Level 2 Credentials Admin -->
+        <ul class="tree-group" role="group" aria-labelledby="tree-node-2-1">
+          <li class="tree-item-row"
+              role="treeitem"
+              aria-level="3"
+              aria-setsize="1"
+              aria-posinset="1"
+              tabindex="-1"
+              style="--tree-depth: 2;">
+            <span class="tree-chevron-spacer"></span>
+            <span class="tree-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+              </svg>
+            </span>
+            <span class="tree-label">Key Management</span>
+          </li>
+        </ul>
+
+        <!-- Selected Active Leaf: Webhook Authentication (Level 2 Child) -->
+        <!-- DEVELOPER NOTE: Set [aria-selected="true"] on the current active navigation item -->
+        <li class="tree-item-row is-selected"
+            role="treeitem"
+            aria-selected="true"
+            aria-level="2"
+            aria-setsize="2"
+            aria-posinset="2"
+            tabindex="-1"
+            style="--tree-depth: 1;"
+            id="tree-node-2-2">
+
+          <span class="tree-chevron-spacer"></span>
+
+          <span class="tree-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+            </svg>
+          </span>
+
+          <span class="tree-label">Webhook Security</span>
+        </li>
+      </ul>
+
+      <!-- ==========================================
+           LEVEL 1 LEAF (Single Terminal Document Link)
+           ========================================== -->
+      <li class="tree-item-row"
+          role="treeitem"
+          aria-level="1"
+          aria-setsize="3"
+          aria-posinset="3"
+          tabindex="-1"
+          style="--tree-depth: 0;">
+
+        <span class="tree-chevron-spacer"></span>
+
+        <span class="tree-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+          </svg>
+        </span>
+
+        <span class="tree-label">Developer Changelog</span>
+      </li>
+
+    </ul>
+  </div>
+
+  <!-- Design Spec Legend Block -->
+  <div class="spec-legend">
+    <h2>Interactive Design Specification Specs</h2>
+    <p>This layout represents a <strong>Tree View System spec template</strong>. It is designed to be easily parsed by developer engineers to write high-fidelity CSS and accessible JavaScript controllers.</p>
+    <ul>
+      <li><span class="spec-badge">role="tree"</span> — Applied on the outermost container list holding the directory.</li>
+      <li><span class="spec-badge">role="treeitem"</span> — Applied on each active row item in the list, providing the keyboard target.</li>
+      <li><span class="spec-badge">role="group"</span> — Applied on child containers, letting screen readers identify nesting bounds.</li>
+      <li><span class="spec-badge">aria-expanded</span> — Applied strictly on folder/parent elements to sync disclosure triangles.</li>
+      <li><span class="spec-badge">style="--tree-depth"</span> — Numeric variable representing tree nesting depth, keeping CSS clean.</li>
+    </ul>
+  </div>
+
+</body>
+</html>
