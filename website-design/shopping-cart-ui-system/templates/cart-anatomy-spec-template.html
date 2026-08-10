@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shopping Cart UI Specification Template</title>
+  <style>
+    /* System Design Tokens & Variables */
+    :root {
+      --space-xxs: 4px;
+      --space-xs: 8px;
+      --space-s: 12px;
+      --space-m: 16px;
+      --space-l: 24px;
+      --space-xl: 32px;
+
+      --brand-color: #0d6efd;
+      --brand-color-tint: rgba(13, 110, 253, 0.08);
+      --text-color-primary: #1a1a1a;
+      --text-color-muted: #666666;
+      --color-background-base: #f8f9fa;
+      --color-background-surface: #ffffff;
+      --color-border-subtle: #e9ecef;
+      --color-border-strong: #ced4da;
+      --color-danger: #dc3545;
+      --color-success: #198754;
+
+      --font-family-base: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-size-sm: 14px;
+      --font-size-base: 16px;
+      --font-size-lg: 18px;
+      --font-size-xl: 24px;
+
+      --radius-sm: 4px;
+      --radius-m: 8px;
+      --radius-l: 16px;
+
+      --z-index-overlay: 1050;
+    }
+
+    body {
+      font-family: var(--font-family-base);
+      font-size: var(--font-size-base);
+      color: var(--text-color-primary);
+      background-color: var(--color-background-base);
+      margin: 0;
+      padding: var(--space-l);
+    }
+
+    /* Screen Reader Only Utility */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    /* Interactive States & Focus Rings */
+    button, input {
+      font-family: inherit;
+    }
+
+    button:focus-visible,
+    input:focus-visible {
+      outline: 2px solid var(--brand-color);
+      outline-offset: 2px;
+    }
+
+    /* Outer Wrapper for Spec Demonstration */
+    .spec-container {
+      max-width: 440px;
+      margin: 0 auto;
+      background-color: var(--color-background-surface);
+      border-radius: var(--radius-l);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+      overflow: hidden;
+      border: 1px solid var(--color-border-subtle);
+    }
+
+    /* Header Component */
+    .cart-header {
+      padding: var(--space-m);
+      border-bottom: 1px solid var(--color-border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .cart-title {
+      margin: 0;
+      font-size: var(--font-size-lg);
+      font-weight: 700;
+    }
+
+    .cart-close-btn {
+      background: none;
+      border: none;
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--text-color-muted);
+      border-radius: 50%;
+      transition: background-color 0.2s;
+    }
+
+    .cart-close-btn:hover {
+      background-color: var(--color-background-base);
+      color: var(--text-color-primary);
+    }
+
+    /* Free Shipping Tracker Banner */
+    .shipping-tracker {
+      background-color: var(--brand-color-tint);
+      padding: var(--space-m);
+      border-bottom: 1px solid var(--color-border-subtle);
+    }
+
+    .tracker-message {
+      margin: 0 0 var(--space-xs) 0;
+      font-size: var(--font-size-sm);
+      font-weight: 600;
+      color: var(--brand-color);
+    }
+
+    .progress-bar-container {
+      background-color: var(--color-border-subtle);
+      height: 8px;
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      background-color: var(--brand-color);
+      height: 100%;
+      width: 75%; /* Managed dynamically by application logic */
+      transition: width 0.3s ease-in-out;
+    }
+
+    /* Shopping Item Rows */
+    .cart-items-list {
+      list-style-type: none;
+      margin: 0;
+      padding: var(--space-m);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-m);
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .cart-item-row {
+      display: grid;
+      grid-template-columns: 80px 1fr;
+      gap: var(--space-m);
+      padding-bottom: var(--space-m);
+      border-bottom: 1px solid var(--color-border-subtle);
+      position: relative;
+    }
+
+    .cart-item-row:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .item-thumbnail {
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      background-color: var(--color-background-base);
+      border-radius: var(--radius-m);
+      border: 1px solid var(--color-border-subtle);
+    }
+
+    .item-details-grid {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .item-header-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: var(--space-xs);
+    }
+
+    .item-title {
+      font-size: var(--font-size-sm);
+      font-weight: 600;
+      margin: 0 0 var(--space-xxs) 0;
+      line-height: 1.4;
+    }
+
+    .item-title-link {
+      text-decoration: none;
+      color: var(--text-color-primary);
+    }
+
+    .item-title-link:hover {
+      color: var(--brand-color);
+    }
+
+    .item-attributes {
+      font-size: var(--font-size-sm);
+      color: var(--text-color-muted);
+      margin: 0;
+    }
+
+    .item-price-col {
+      text-align: right;
+    }
+
+    .price-active {
+      font-weight: 700;
+      font-size: var(--font-size-sm);
+    }
+
+    .price-original {
+      font-size: var(--font-size-sm);
+      color: var(--text-color-muted);
+      text-decoration: line-through;
+      margin-right: var(--space-xxs);
+    }
+
+    /* Counter Controls */
+    .item-controls-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: var(--space-xs);
+    }
+
+    .quantity-counter {
+      display: flex;
+      align-items: center;
+      border: 1px solid var(--color-border-strong);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      background-color: var(--color-background-surface);
+    }
+
+    .counter-btn {
+      background: none;
+      border: none;
+      width: 40px;
+      height: 40px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      font-weight: bold;
+      color: var(--text-color-primary);
+      transition: background-color 0.2s;
+    }
+
+    .counter-btn:hover {
+      background-color: var(--color-background-base);
+    }
+
+    .counter-btn:disabled {
+      color: var(--color-border-strong);
+      cursor: not-allowed;
+    }
+
+    .counter-val {
+      width: 32px;
+      border: none;
+      text-align: center;
+      font-size: var(--font-size-sm);
+      font-weight: 600;
+      background: none;
+      color: var(--text-color-primary);
+    }
+
+    /* Remove Trigger */
+    .item-remove-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: var(--space-xs);
+      color: var(--text-color-muted);
+      display: flex;
+      align-items: center;
+      gap: var(--space-xxs);
+      font-size: var(--font-size-sm);
+      transition: color 0.2s;
+      border-radius: var(--radius-sm);
+    }
+
+    .item-remove-btn:hover {
+      color: var(--color-danger);
+    }
+
+    /* Summary Footer */
+    .cart-summary-footer {
+      border-top: 1px solid var(--color-border-strong);
+      padding: var(--space-m);
+      background-color: var(--color-background-base);
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: var(--space-xs);
+      font-size: var(--font-size-sm);
+    }
+
+    .summary-row.total {
+      font-size: var(--font-size-lg);
+      font-weight: 700;
+      border-top: 1px dashed var(--color-border-strong);
+      padding-top: var(--space-s);
+      margin-top: var(--space-s);
+      margin-bottom: var(--space-m);
+    }
+
+    .discount-badge {
+      background-color: #d1e7dd;
+      color: var(--color-success);
+      padding: 2px 8px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-xxs);
+    }
+
+    .discount-remove {
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      color: var(--color-success);
+      font-weight: bold;
+    }
+
+    /* Proceed CTA Button */
+    .checkout-cta-btn {
+      width: 100%;
+      background-color: var(--brand-color);
+      color: #ffffff;
+      border: none;
+      border-radius: var(--radius-m);
+      padding: var(--space-m);
+      font-size: var(--font-size-base);
+      font-weight: 700;
+      cursor: pointer;
+      transition: background-color 0.2s, transform 0.1s;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 4px 12px rgba(13, 110, 253, 0.2);
+    }
+
+    .checkout-cta-btn:hover {
+      background-color: #0b5ed7;
+    }
+
+    .checkout-cta-btn:active {
+      transform: scale(0.98);
+    }
+
+    .payment-trust-indicators {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: var(--space-xs);
+      margin-top: var(--space-m);
+      font-size: 12px;
+      color: var(--text-color-muted);
+    }
+
+    .trust-icon {
+      width: 24px;
+      height: auto;
+      opacity: 0.6;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Screen Reader Announcements Area -->
+  <div class="sr-only" aria-live="polite" id="cart-live-announcer">
+    Your shopping cart currently has 2 items. Subtotal is $148.00.
+  </div>
+
+  <main>
+    <!-- Template Outer Container -->
+    <div class="spec-container" role="dialog" aria-modal="true" aria-labelledby="main-cart-title">
+
+      <!-- Cart Header -->
+      <header class="cart-header">
+        <h1 id="main-cart-title" class="cart-title">Your Cart (2 items)</h1>
+        <button class="cart-close-btn" aria-label="Close cart drawer" onclick="alert('Cart Close Handled')">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </header>
+
+      <!-- Shipping Progress Banner -->
+      <section class="shipping-tracker" aria-label="Shipping Promotion Status">
+        <p class="tracker-message">🚀 You are $15.00 away from FREE SHIPPING!</p>
+        <div class="progress-bar-container">
+          <div class="progress-bar-fill" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" aria-label="Free shipping eligibility progress"></div>
+        </div>
+      </section>
+
+      <!-- Cart Itemized List -->
+      <ul class="cart-items-list">
+
+        <!-- Cart Item Row 1 -->
+        <li class="cart-item-row">
+          <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'><rect width='80' height='80' fill='%23e9ecef'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='10' fill='%236c757d'>80x80 Photo</text></svg>" alt="SentryFlow Pro Bluetooth Wireless Earbuds in Charcoal Black" class="item-thumbnail">
+
+          <div class="item-details-grid">
+            <div class="item-header-meta">
+              <div>
+                <h2 class="item-title">
+                  <a href="/products/earbuds" class="item-title-link">SentryFlow Pro Earbuds</a>
+                </h2>
+                <p class="item-attributes">Color: Obsidian Black | Size: Default</p>
+              </div>
+              <div class="item-price-col">
+                <span class="price-active">$129.00</span>
+              </div>
+            </div>
+
+            <!-- Item Spacing and Interactive Counter Controls -->
+            <div class="item-controls-row">
+              <div class="quantity-counter">
+                <button class="counter-btn" type="button" aria-label="Decrease quantity by 1" onclick="alert('Decrease Quantity')">&minus;</button>
+                <input class="counter-val" type="text" value="1" readonly aria-label="Product quantity SentryFlow Pro Earbuds">
+                <button class="counter-btn" type="button" aria-label="Increase quantity by 1" onclick="alert('Increase Quantity')">&plus;</button>
+              </div>
+
+              <button class="item-remove-btn" type="button" aria-label="Remove SentryFlow Pro Earbuds from cart" onclick="alert('Remove Item clicked')">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <polyline points="3 6 5 6 21 6"></polyline>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
+                <span>Remove</span>
+              </button>
+            </div>
+          </div>
+        </li>
+
+        <!-- Cart Item Row 2 -->
+        <li class="cart-item-row">
+          <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'><rect width='80' height='80' fill='%23e9ecef'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='10' fill='%236c757d'>80x80 Photo</text></svg>" alt="SentryFlow Hardshell Protective Carry Case with Carabiner" class="item-thumbnail">
+
+          <div class="item-details-grid">
+            <div class="item-header-meta">
+              <div>
+                <h2 class="item-title">
+                  <a href="/products/case" class="item-title-link">SentryFlow Protective Case</a>
+                </h2>
+                <p class="item-attributes">Color: Alpine White | Size: Small</p>
+              </div>
+              <div class="item-price-col">
+                <span class="price-original" aria-hidden="true">$25.00</span>
+                <span class="sr-only">Original price was $25.00. Sale price is </span>
+                <span class="price-active">$19.00</span>
+              </div>
+            </div>
+
+            <!-- Item Spacing and Interactive Counter Controls -->
+            <div class="item-controls-row">
+              <div class="quantity-counter">
+                <button class="counter-btn" type="button" aria-label="Decrease quantity by 1" disabled onclick="alert('Disabled Counter')">&minus;</button>
+                <input class="counter-val" type="text" value="1" readonly aria-label="Product quantity SentryFlow Protective Case">
+                <button class="counter-btn" type="button" aria-label="Increase quantity by 1" onclick="alert('Increase Quantity')">&plus;</button>
+              </div>
+
+              <button class="item-remove-btn" type="button" aria-label="Remove SentryFlow Protective Case from cart" onclick="alert('Remove Item clicked')">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <polyline points="3 6 5 6 21 6"></polyline>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
+                <span>Remove</span>
+              </button>
+            </div>
+          </div>
+        </li>
+
+      </ul>
+
+      <!-- Pricing Summary Footer -->
+      <footer class="cart-summary-footer">
+        <div class="summary-row">
+          <span>Subtotal</span>
+          <span>$148.00</span>
+        </div>
+
+        <div class="summary-row">
+          <span>Discount</span>
+          <span>
+            <span class="discount-badge">
+              WELCOME20
+              <button class="discount-remove" aria-label="Remove coupon WELCOME20" onclick="alert('Remove discount')">&times;</button>
+            </span>
+            <span style="color: var(--color-success); font-weight: 600; margin-left: var(--space-xs);">&minus;$29.60</span>
+          </span>
+        </div>
+
+        <div class="summary-row">
+          <span>Shipping</span>
+          <span style="color: var(--color-success); font-weight: 600;">FREE</span>
+        </div>
+
+        <div class="summary-row">
+          <span>Estimated Tax</span>
+          <span>$9.47</span>
+        </div>
+
+        <div class="summary-row total">
+          <span>Estimated Total</span>
+          <span>$127.87</span>
+        </div>
+
+        <!-- Secure Proceed Checkout Trigger -->
+        <button class="checkout-cta-btn" type="button" onclick="alert('Proceeding to checkout secure funnel...')">
+          PROCEED TO SECURE CHECKOUT
+        </button>
+
+        <div class="payment-trust-indicators">
+          <span>🔒 256-bit Encrypted Connection</span>
+          <span>•</span>
+          <span>Accepted Payment Methods: Visa, MC, ApplePay, PayPal</span>
+        </div>
+      </footer>
+
+    </div>
+  </main>
+
+</body>
+</html>
