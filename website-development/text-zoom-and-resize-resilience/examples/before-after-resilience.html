@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Layout Zoom and Text-Resize Resilience Demo</title>
+  <style>
+    /* Base Global Styles (Fluid Reset) */
+    :root {
+      --color-bg: #f8fafc;
+      --color-card-bg: #ffffff;
+      --color-text-dark: #0f172a;
+      --color-text-muted: #475569;
+      --color-border: #e2e8f0;
+      --color-accent: #2563eb;
+      --color-danger-bg: #fef2f2;
+      --color-danger-border: #fca5a5;
+      --color-danger-text: #991b1b;
+      --color-success-bg: #f0fdf4;
+      --color-success-border: #bbf7d0;
+      --color-success-text: #166534;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: var(--color-bg);
+      color: var(--color-text-dark);
+      line-height: 1.5;
+      padding: 2rem;
+    }
+
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 2px solid var(--color-border);
+      padding-bottom: 1.5rem;
+    }
+
+    h1 {
+      margin: 0 0 0.5rem 0;
+      font-size: 2.25rem;
+    }
+
+    .subtitle {
+      color: var(--color-text-muted);
+      font-size: 1.125rem;
+      margin: 0 0 1.5rem 0;
+    }
+
+    /* Simulation Control Box */
+    .simulation-control {
+      background-color: #f1f5f9;
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      padding: 1.25rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .simulation-control p {
+      margin: 0 0 0.75rem 0;
+      font-weight: 600;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    button {
+      background-color: var(--color-card-bg);
+      border: 1px solid var(--color-border);
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+
+    button:hover, button.active {
+      background-color: var(--color-accent);
+      color: white;
+      border-color: var(--color-accent);
+    }
+
+    /* Layout Columns */
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+      gap: 2.5rem;
+    }
+
+    .column-title {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .badge-error {
+      background-color: var(--color-danger-bg);
+      color: var(--color-danger-text);
+      border: 1px solid var(--color-danger-border);
+      font-size: 0.75rem;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      text-transform: uppercase;
+      font-weight: bold;
+    }
+
+    .badge-success {
+      background-color: var(--color-success-bg);
+      color: var(--color-success-text);
+      border: 1px solid var(--color-success-border);
+      font-size: 0.75rem;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      text-transform: uppercase;
+      font-weight: bold;
+    }
+
+    /* ========================================== */
+    /* BEFORE: Fragile Pixel-Fixed & Rigid Layout */
+    /* ========================================== */
+
+    .fragile-container {
+      background-color: var(--color-card-bg);
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    /* Fragile Fixed Height Header */
+    .fragile-header {
+      height: 60px; /* CRITICAL FAILURE: Fixed height will clip text if resized */
+      border-bottom: 1px solid var(--color-border);
+      margin-bottom: 15px;
+      overflow: hidden; /* CRITICAL FAILURE: Hides overflowing text completely */
+    }
+
+    .fragile-header h3 {
+      margin: 0;
+      font-size: 18px;
+    }
+
+    .fragile-header p {
+      margin: 5px 0 0 0;
+      font-size: 12px;
+      color: var(--color-text-muted);
+    }
+
+    /* Fragile Squeezed Navbar (Horizontal list without wrap) */
+    .fragile-nav {
+      display: flex;
+      flex-direction: row; /* CRITICAL FAILURE: Lacks flex-wrap */
+      border: 1px solid var(--color-border);
+      background-color: #f8fafc;
+      margin-bottom: 20px;
+    }
+
+    .fragile-nav a {
+      flex: 1;
+      text-align: center;
+      padding: 10px 5px;
+      font-size: 14px;
+      text-decoration: none;
+      color: var(--color-text-dark);
+      white-space: nowrap; /* CRITICAL FAILURE: Forces items onto single line, pushing others out of viewport */
+      border-right: 1px solid var(--color-border);
+    }
+
+    /* Fragile Content Row with absolute positioning overlap */
+    .fragile-item-card {
+      position: relative;
+      height: 180px; /* CRITICAL FAILURE: Fixed card height */
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      padding: 15px;
+      margin-bottom: 15px;
+    }
+
+    .fragile-item-card .icon-badge {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      width: 40px;
+      height: 40px;
+      background-color: #eff6ff;
+      border-radius: 50%;
+      text-align: center;
+      line-height: 40px;
+      font-weight: bold;
+    }
+
+    .fragile-item-card h4 {
+      margin: 0 0 10px 0;
+      font-size: 16px;
+      padding-right: 50px; /* Prevent text over badge */
+    }
+
+    .fragile-item-card p {
+      margin: 0;
+      font-size: 13px;
+      line-height: 18px;
+      color: var(--color-text-muted);
+      /* CRITICAL FAILURE: Content will overflow bottom card boundary because card is locked to height 180px */
+    }
+
+    /* Fragile tag list (no wrap) */
+    .fragile-tags {
+      display: flex;
+      margin-top: 15px;
+      /* CRITICAL FAILURE: Lacks wrapping, causes overflow */
+    }
+
+    .fragile-tag {
+      background-color: #e2e8f0;
+      padding: 4px 8px;
+      font-size: 11px;
+      border-radius: 4px;
+      margin-right: 5px;
+      white-space: nowrap;
+    }
+
+    /* Mismatched Pixel Media Query */
+    @media (max-width: 600px) {
+      /* This is fragile! If default font size is doubled,
+         the screen needs single-column mode at much higher pixel widths. */
+      .fragile-container {
+        border-color: #f43f5e;
+      }
+    }
+
+
+    /* ========================================== */
+    /* AFTER: Highly Resilient Relative-Unit Layout */
+    /* ========================================== */
+
+    .resilient-container {
+      background-color: var(--color-card-bg);
+      border: 1px solid var(--color-border);
+      border-radius: 0.5rem; /* rem relative sizing */
+      padding: 1.25rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    /* Resilient Fluid Height Header */
+    .resilient-header {
+      min-height: 3.75rem; /* SOLUTION: min-height allows the container to stretch vertically as text size increases */
+      padding-bottom: 1rem;
+      margin-bottom: 1rem;
+      border-bottom: 1px solid var(--color-border);
+      /* No overflow: hidden; allows expanded text flow */
+    }
+
+    .resilient-header h3 {
+      margin: 0;
+      font-size: 1.125rem; /* rem relative typography */
+      line-height: 1.3;
+    }
+
+    .resilient-header p {
+      margin: 0.35rem 0 0 0;
+      font-size: 0.75rem;
+      color: var(--color-text-muted);
+    }
+
+    /* Resilient wrapping navbar */
+    .resilient-nav {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap; /* SOLUTION: flex-wrap allows nav links to stack cleanly if text is too wide */
+      border: 1px solid var(--color-border);
+      background-color: #f8fafc;
+      margin-bottom: 1.25rem;
+      border-radius: 4px;
+    }
+
+    .resilient-nav a {
+      flex: 1 1 auto; /* Flex basis auto allows buttons to shrink/expand */
+      min-width: 80px; /* Minimum width threshold */
+      text-align: center;
+      padding: 0.6em 0.8em; /* local em-based padding scales gracefully in lockstep with nav font-size */
+      font-size: 0.875rem;
+      text-decoration: none;
+      color: var(--color-text-dark);
+      border-right: 1px solid var(--color-border);
+      border-bottom: 1px solid transparent;
+    }
+
+    /* Standard border cleanup on wrap */
+    .resilient-nav a:last-child {
+      border-right: none;
+    }
+
+    /* Resilient Content Row (Relying on Flex Flow, no absolute overlays for text) */
+    .resilient-item-card {
+      border: 1px solid var(--color-border);
+      border-radius: 0.375rem;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      display: flex;
+      flex-direction: column; /* Flow layouts prevent overlap */
+      min-height: auto; /* SOLUTION: Never hardcode fixed card height. Let content drive height. */
+      gap: 0.75rem;
+    }
+
+    .resilient-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+
+    .resilient-card-header h4 {
+      margin: 0;
+      font-size: 1rem;
+      line-height: 1.4;
+    }
+
+    .resilient-item-card .icon-badge {
+      flex-shrink: 0;
+      width: 2.5rem;
+      height: 2.5rem;
+      background-color: #eff6ff;
+      border-radius: 50%;
+      text-align: center;
+      line-height: 2.5rem;
+      font-weight: bold;
+      font-size: 1rem;
+    }
+
+    .resilient-item-card p {
+      margin: 0;
+      font-size: 0.8125rem; /* rem-based body */
+      line-height: 1.5; /* Unitless line-height scaling */
+      color: var(--color-text-muted);
+    }
+
+    /* Resilient tags with wrap support */
+    .resilient-tags {
+      display: flex;
+      flex-wrap: wrap; /* SOLUTION: Wrap tags if text overflows */
+      gap: 0.375rem;
+      margin-top: 0.5rem;
+    }
+
+    .resilient-tag {
+      background-color: #e2e8f0;
+      padding: 0.25em 0.5em; /* em padding matches tag text scale */
+      font-size: 0.6875rem;
+      border-radius: 0.25rem;
+    }
+
+    /* SOLUTION: em-Based Media Query Breakpoint
+       768px / 16 = 48em.
+       If root font size is increased (e.g. 2x), this breakpoint triggers
+       at 1536px, forcing a single column layout on desktop. This perfectly
+       creates spacing for the oversized text! */
+    @media (max-width: 48em) {
+      .comparison-grid {
+        grid-template-columns: 1fr;
+      }
+      .resilient-container {
+        background-color: #eff6ff; /* visual helper to show responsive layout shifted */
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Layout Zoom and Text-Resize Resilience Demo</h1>
+    <p class="subtitle">An side-by-side comparison illustrating WCAG 2.1 AA Success Criteria 1.4.4 (Resize Text) and 1.4.10 (Reflow).</p>
+  </header>
+
+  <!-- Interactive Simulator Controller -->
+  <section class="simulation-control" aria-label="Text Scaling Controls">
+    <p>Simulate User Setting Adjustments (Default Root Font Size):</p>
+    <div class="btn-group">
+      <button onclick="setScale(16, this)" class="active">Normal (16px / 100%)</button>
+      <button onclick="setScale(20, this)">Enlarged (20px / 125%)</button>
+      <button onclick="setScale(24, this)">Large (24px / 150%)</button>
+      <button onclick="setScale(32, this)">Extreme Accessibility (32px / 200%)</button>
+    </div>
+  </section>
+
+  <main class="comparison-grid">
+
+    <!-- LEFT COLUMN: THE FRAGILE IMPLEMENTATION -->
+    <section aria-labelledby="fragile-title">
+      <h2 id="fragile-title" class="column-title">
+        Fragile Layout <span class="badge-error">Before (px-based)</span>
+      </h2>
+
+      <div class="fragile-container">
+        <!-- Rigid Header -->
+        <div class="fragile-header">
+          <h3>E-Commerce Dashboard Area</h3>
+          <p>Real-time analytics and store status logs</p>
+        </div>
+
+        <!-- Squeezed Navigation Link bar -->
+        <nav class="fragile-nav" aria-label="Fragile navigation">
+          <a href="#dashboard">Dashboard</a>
+          <a href="#orders">Active Orders</a>
+          <a href="#inventory">Stock Management</a>
+          <a href="#settings">System Settings</a>
+        </nav>
+
+        <!-- Fixed Height Card 1 -->
+        <div class="fragile-item-card">
+          <span class="icon-badge" aria-hidden="true">📈</span>
+          <h4>Critical Analytics Report Overview</h4>
+          <p>
+            This paragraph has serious problems when the text is resized. Because the card has a fixed height of 180px, the scaled text breaks out of the card borders and overflows, overlapping cards underneath.
+          </p>
+          <div class="fragile-tags">
+            <span class="fragile-tag">Analytics</span>
+            <span class="fragile-tag">Finance</span>
+            <span class="fragile-tag">Real-Time</span>
+          </div>
+        </div>
+
+        <!-- Fixed Height Card 2 -->
+        <div class="fragile-item-card">
+          <span class="icon-badge" aria-hidden="true">📦</span>
+          <h4>Inventory & Order Processing Node</h4>
+          <p>
+            When text size increases, inline items push others out. Without flexible dimensions, labels collide, content overlaps, and critical action buttons are rendered completely unreachable.
+          </p>
+          <div class="fragile-tags">
+            <span class="fragile-tag">Inventory</span>
+            <span class="fragile-tag">Fullfillment</span>
+            <span class="fragile-tag">Database</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- RIGHT COLUMN: THE RESILIENT IMPLEMENTATION -->
+    <section aria-labelledby="resilient-title">
+      <h2 id="resilient-title" class="column-title">
+        Resilient Layout <span class="badge-success">After (rem/em-based)</span>
+      </h2>
+
+      <div class="resilient-container">
+        <!-- Proportional Fluid Header -->
+        <div class="resilient-header">
+          <h3>E-Commerce Dashboard Area</h3>
+          <p>Real-time analytics and store status logs</p>
+        </div>
+
+        <!-- Dynamically wrapping Nav links -->
+        <nav class="resilient-nav" aria-label="Resilient navigation">
+          <a href="#dashboard">Dashboard</a>
+          <a href="#orders">Active Orders</a>
+          <a href="#inventory">Stock Management</a>
+          <a href="#settings">System Settings</a>
+        </nav>
+
+        <!-- Fluid height Card 1 -->
+        <div class="resilient-item-card">
+          <div class="resilient-card-header">
+            <h4>Critical Analytics Report Overview</h4>
+            <span class="icon-badge" aria-hidden="true">📈</span>
+          </div>
+          <p>
+            This card survives extreme text-only resizing and zooming easily! It has no hardcoded height and utilizes Flexbox flow. As the text scales, the card naturally stretches vertically, keeping the design beautiful.
+          </p>
+          <div class="resilient-tags">
+            <span class="resilient-tag">Analytics</span>
+            <span class="resilient-tag">Finance</span>
+            <span class="resilient-tag">Real-Time</span>
+          </div>
+        </div>
+
+        <!-- Fluid height Card 2 -->
+        <div class="resilient-item-card">
+          <div class="resilient-card-header">
+            <h4>Inventory & Order Processing Node</h4>
+            <span class="icon-badge" aria-hidden="true">📦</span>
+          </div>
+          <p>
+            All container padding and margins use rem, while interactive element spacing uses em. The media queries use em breakpoints, so when text scales, layout transitions trigger early to preserve reading comfort!
+          </p>
+          <div class="resilient-tags">
+            <span class="resilient-tag">Inventory</span>
+            <span class="resilient-tag">Fullfillment</span>
+            <span class="resilient-tag">Database</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // Simulate Browser Default Font Size settings
+    function setScale(pixels, buttonElement) {
+      // Apply pixel size to html font-size
+      document.documentElement.style.fontSize = pixels + 'px';
+
+      // Update active button state
+      const buttons = document.querySelectorAll('.simulation-control button');
+      buttons.forEach(btn => btn.classList.remove('active'));
+      buttonElement.classList.add('active');
+    }
+  </script>
+</body>
+</html>
