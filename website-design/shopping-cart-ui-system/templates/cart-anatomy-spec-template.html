@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shopping Cart Anatomy Spec Template</title>
+  <style>
+    /* Design Tokens Boilerplate */
+    :root {
+      --font-family-base: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --space-xs: 4px;
+      --space-s: 8px;
+      --space-m: 16px;
+      --space-l: 24px;
+      --space-xl: 32px;
+      --radius-s: 4px;
+      --radius-m: 8px;
+      --radius-l: 12px;
+
+      --color-neutral-dark: #121212;
+      --color-neutral-light: #f8f9fa;
+      --color-border: #dee2e6;
+      --color-text-primary: #212529;
+      --color-text-secondary: #6c757d;
+      --color-brand-primary: #0d6efd;
+      --color-brand-hover: #0b5ed7;
+      --color-accent-success: #198754;
+      --color-accent-error: #dc3545;
+
+      --shadow-elevation: 0 4px 12px rgba(0, 0, 0, 0.08);
+      --transition-base: 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    body {
+      font-family: var(--font-family-base);
+      color: var(--color-text-primary);
+      background-color: var(--color-neutral-light);
+      margin: 0;
+      padding: var(--space-m);
+      line-height: 1.5;
+    }
+
+    /* Accessibility Focus Styling (WCAG SC 2.4.7 / SC 2.4.11) */
+    a:focus-visible,
+    button:focus-visible,
+    input:focus-visible {
+      outline: 3px solid var(--color-brand-primary);
+      outline-offset: 2px;
+    }
+
+    /* Screen Reader Only Utility */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    /* Layout Wrapper */
+    .cart-page-wrapper {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: var(--space-xl);
+      padding: var(--space-l) 0;
+    }
+
+    @media (min-width: 1024px) {
+      .cart-page-wrapper {
+        grid-template-columns: 2fr 1fr;
+      }
+    }
+
+    /* Cart Header */
+    .cart-header {
+      grid-column: 1 / -1;
+      border-bottom: 2px solid var(--color-border);
+      padding-bottom: var(--space-m);
+    }
+
+    .cart-title {
+      margin: 0;
+      font-size: clamp(1.75rem, 3.5vw, 2.25rem);
+      font-weight: 800;
+    }
+
+    /* Shipping Progress Bar (Friction Reduction) */
+    .shipping-threshold-card {
+      background-color: #fff;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-m);
+      padding: var(--space-m);
+      margin-bottom: var(--space-l);
+    }
+
+    .shipping-threshold-text {
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin: 0 0 var(--space-s) 0;
+    }
+
+    .shipping-threshold-text span {
+      color: var(--color-accent-success);
+    }
+
+    .progress-track {
+      background-color: #e9ecef;
+      height: 8px;
+      border-radius: var(--radius-s);
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      background-color: var(--color-accent-success);
+      height: 100%;
+      width: 70%; /* Dynamic width based on cart total */
+      border-radius: var(--radius-s);
+      transition: width 0.4s ease;
+    }
+
+    /* Cart Items list (Semantic <ul>) */
+    .cart-items-list {
+      list-style-type: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-m);
+    }
+
+    /* Individual Cart Item Row */
+    .cart-item-row {
+      display: grid;
+      grid-template-columns: 80px 1fr;
+      gap: var(--space-m);
+      background-color: #fff;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-m);
+      padding: var(--space-m);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+      align-items: center;
+      position: relative;
+    }
+
+    @media (min-width: 640px) {
+      .cart-item-row {
+        grid-template-columns: 100px 2fr 1fr;
+      }
+    }
+
+    .item-thumbnail-container {
+      width: 80px;
+      height: 80px;
+      border-radius: var(--radius-s);
+      overflow: hidden;
+      border: 1px solid var(--color-border);
+    }
+
+    @media (min-width: 640px) {
+      .item-thumbnail-container {
+        width: 100px;
+        height: 100px;
+      }
+    }
+
+    .item-thumbnail-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .item-details {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs);
+    }
+
+    .item-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin: 0;
+      color: var(--color-neutral-dark);
+      text-decoration: none;
+    }
+
+    .item-title:hover {
+      color: var(--color-brand-primary);
+    }
+
+    .item-variants {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-s);
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      font-size: 0.85rem;
+      color: var(--color-text-secondary);
+    }
+
+    .item-variants li::after {
+      content: "•";
+      margin-left: var(--space-s);
+    }
+
+    .item-variants li:last-child::after {
+      content: "";
+    }
+
+    .item-price-wrapper {
+      margin-top: var(--space-xs);
+    }
+
+    .item-price {
+      font-weight: 700;
+      font-size: 1.1rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .item-original-price {
+      text-decoration: line-through;
+      color: var(--color-text-secondary);
+      font-size: 0.9rem;
+      margin-left: var(--space-s);
+    }
+
+    /* Interactive Quantity Control Pill */
+    .item-actions-wrapper {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-m);
+    }
+
+    @media (min-width: 640px) {
+      .item-actions-wrapper {
+        flex-direction: column;
+        align-items: flex-end;
+        justify-content: center;
+      }
+    }
+
+    .quantity-selector {
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-s);
+      background-color: var(--color-neutral-light);
+      overflow: hidden;
+    }
+
+    .qty-btn {
+      background: none;
+      border: none;
+      width: 40px; /* WCAG 2.2 Target Size Minimum */
+      height: 40px;
+      cursor: pointer;
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: var(--color-neutral-dark);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color var(--transition-base);
+    }
+
+    .qty-btn:hover {
+      background-color: var(--color-border);
+    }
+
+    .qty-input {
+      border: none;
+      background: none;
+      width: 40px;
+      height: 40px;
+      text-align: center;
+      font-size: 1rem;
+      font-weight: bold;
+      font-variant-numeric: tabular-nums;
+      color: var(--color-neutral-dark);
+      -moz-appearance: textfield;
+    }
+
+    .qty-input::-webkit-outer-spin-button,
+    .qty-input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    .remove-item-btn {
+      background: none;
+      border: none;
+      color: var(--color-accent-error);
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      padding: var(--space-s) var(--space-m);
+      border-radius: var(--radius-s);
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-xs);
+      transition: background-color var(--transition-base);
+    }
+
+    .remove-item-btn:hover {
+      background-color: #fce8e6;
+    }
+
+    /* Order Summary Card (Sticky Right Sidebar) */
+    .order-summary-card {
+      background-color: #fff;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-m);
+      padding: var(--space-l);
+      box-shadow: var(--shadow-elevation);
+      position: sticky;
+      top: var(--space-l);
+      align-self: start;
+    }
+
+    .summary-title {
+      margin: 0 0 var(--space-m) 0;
+      font-size: 1.25rem;
+      font-weight: 800;
+      border-bottom: 1px solid var(--color-border);
+      padding-bottom: var(--space-m);
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: var(--space-m);
+      font-size: 0.95rem;
+    }
+
+    .summary-row.total-row {
+      font-size: 1.25rem;
+      font-weight: 800;
+      border-top: 1px solid var(--color-border);
+      padding-top: var(--space-m);
+      margin-top: var(--space-m);
+    }
+
+    .summary-val {
+      font-variant-numeric: tabular-nums;
+      font-weight: 700;
+    }
+
+    .promo-input-group {
+      display: flex;
+      gap: var(--space-s);
+      margin: var(--space-m) 0;
+    }
+
+    .promo-field {
+      flex: 1;
+      padding: var(--space-s) var(--space-m);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-s);
+      font-size: 0.95rem;
+    }
+
+    .promo-apply-btn {
+      background-color: var(--color-neutral-dark);
+      color: #fff;
+      border: none;
+      padding: 0 var(--space-m);
+      border-radius: var(--radius-s);
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color var(--transition-base);
+    }
+
+    .promo-apply-btn:hover {
+      background-color: #333;
+    }
+
+    .checkout-btn {
+      width: 100%;
+      background-color: var(--color-brand-primary);
+      color: #fff;
+      border: none;
+      padding: var(--space-m);
+      font-size: 1.1rem;
+      font-weight: 700;
+      border-radius: var(--radius-m);
+      cursor: pointer;
+      transition: background-color var(--transition-base);
+    }
+
+    .checkout-btn:hover {
+      background-color: var(--color-brand-hover);
+    }
+
+    /* Status Spinner Overlay (Anti-recrudescence of interactions) */
+    .cart-item-row.is-loading::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-color: rgba(255, 255, 255, 0.7);
+      z-index: 10;
+      border-radius: var(--radius-m);
+    }
+
+    .cart-item-row.is-loading::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 24px;
+      height: 24px;
+      margin: -12px 0 0 -12px;
+      border: 3px solid var(--color-border);
+      border-top-color: var(--color-brand-primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      z-index: 11;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Screen Reader Live Region for Recalculation Announcements -->
+  <div id="cart-accessibility-announcer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+  <div class="cart-page-wrapper">
+
+    <!-- Cart Header -->
+    <header class="cart-header">
+      <h1 class="cart-title">Your Shopping Bag</h1>
+    </header>
+
+    <!-- Main Content: Cart Items Section -->
+    <main class="cart-items-column">
+
+      <!-- Dynamic Free Shipping Indicator (Friction Reducer) -->
+      <section class="shipping-threshold-card" aria-label="Shipping Promotion">
+        <h2 class="shipping-threshold-text">
+          You are only <span>$15.00</span> away from <strong>Free Shipping</strong>!
+        </h2>
+        <div class="progress-track" aria-hidden="true">
+          <div class="progress-fill"></div>
+        </div>
+      </section>
+
+      <!-- Cart Item List (Semantically grouped <ul>) -->
+      <ul class="cart-items-list" role="list">
+
+        <!-- Cart Line Item Row (1) -->
+        <li class="cart-item-row" id="item-001" aria-busy="false">
+
+          <div class="item-thumbnail-container">
+            <img src="https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=200&auto=format&fit=crop&q=80" alt="Organic Cotton Crewneck Tee in Sage Green">
+          </div>
+
+          <div class="item-details">
+            <a href="/products/cotton-tee" class="item-title">Organic Cotton Crewneck Tee</a>
+            <ul class="item-variants" aria-label="Product options selected">
+              <li>Color: Sage Green</li>
+              <li>Size: Medium</li>
+              <li>SKU: OCT-SAGE-M</li>
+            </ul>
+            <div class="item-price-wrapper">
+              <span class="item-price">$45.00</span>
+              <span class="sr-only">Original Price:</span>
+              <span class="item-original-price">$55.00</span>
+            </div>
+          </div>
+
+          <div class="item-actions-wrapper">
+            <!-- Accessible Custom Quantity Modifier -->
+            <div class="quantity-selector">
+              <button type="button" class="qty-btn" aria-label="Decrease quantity of Organic Cotton Crewneck Tee" onclick="adjustQuantity('item-001', -1)">-</button>
+              <input type="text" class="qty-input" value="1" readonly aria-label="Quantity of Organic Cotton Crewneck Tee">
+              <button type="button" class="qty-btn" aria-label="Increase quantity of Organic Cotton Crewneck Tee" onclick="adjustQuantity('item-001', 1)">+</button>
+            </div>
+
+            <!-- Descriptive Removal Button -->
+            <button type="button" class="remove-item-btn" aria-label="Remove Organic Cotton Crewneck Tee from your shopping bag" onclick="removeItem('item-001')">
+              <svg width="14" height="16" viewBox="0 0 14 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M1 3.8H2.4M2.4 3.8H13M2.4 3.8V13.6C2.4 13.9713 2.5475 14.3274 2.81005 14.5899C3.0726 14.8525 3.4287 15 3.8 15H10.2C10.5713 15 10.9274 14.8525 11.19 14.5899C11.4525 14.3274 11.6 13.9713 11.6 13.6V3.8H2.4ZM4.5 3.8V2.4C4.5 2.0287 4.6475 1.6726 4.91005 1.41005C5.1726 1.1475 5.5287 1 5.9 1H8.1C8.4713 1 8.8274 1.1475 9.08995 1.41005C9.3525 1.6726 9.5 2.0287 9.5 2.4V3.8M5.9 7.3V11.5M8.1 7.3V11.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Remove
+            </button>
+          </div>
+
+        </li>
+
+        <!-- Cart Line Item Row (2) -->
+        <li class="cart-item-row" id="item-002" aria-busy="false">
+
+          <div class="item-thumbnail-container">
+            <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=200&auto=format&fit=crop&q=80" alt="Trailblazer Waterproof Hiking Boot in Tan Leather">
+          </div>
+
+          <div class="item-details">
+            <a href="/products/trailblazer-boot" class="item-title">Trailblazer Waterproof Hiking Boot</a>
+            <ul class="item-variants" aria-label="Product options selected">
+              <li>Color: Tan Leather</li>
+              <li>Size: 10.5</li>
+              <li>SKU: TBH-TAN-105</li>
+            </ul>
+            <div class="item-price-wrapper">
+              <span class="item-price">$140.00</span>
+            </div>
+          </div>
+
+          <div class="item-actions-wrapper">
+            <div class="quantity-selector">
+              <button type="button" class="qty-btn" aria-label="Decrease quantity of Trailblazer Waterproof Hiking Boot" onclick="adjustQuantity('item-002', -1)">-</button>
+              <input type="text" class="qty-input" value="1" readonly aria-label="Quantity of Trailblazer Waterproof Hiking Boot">
+              <button type="button" class="qty-btn" aria-label="Increase quantity of Trailblazer Waterproof Hiking Boot" onclick="adjustQuantity('item-002', 1)">+</button>
+            </div>
+
+            <button type="button" class="remove-item-btn" aria-label="Remove Trailblazer Waterproof Hiking Boot from your shopping bag" onclick="removeItem('item-002')">
+              <svg width="14" height="16" viewBox="0 0 14 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M1 3.8H2.4M2.4 3.8H13M2.4 3.8V13.6C2.4 13.9713 2.5475 14.3274 2.81005 14.5899C3.0726 14.8525 3.4287 15 3.8 15H10.2C10.5713 15 10.9274 14.8525 11.19 14.5899C11.4525 14.3274 11.6 13.9713 11.6 13.6V3.8H2.4ZM4.5 3.8V2.4C4.5 2.0287 4.6475 1.6726 4.91005 1.41005C5.1726 1.1475 5.5287 1 5.9 1H8.1C8.4713 1 8.8274 1.1475 9.08995 1.41005C9.3525 1.6726 9.5 2.0287 9.5 2.4V3.8M5.9 7.3V11.5M8.1 7.3V11.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Remove
+            </button>
+          </div>
+
+        </li>
+
+      </ul>
+    </main>
+
+    <!-- Sidebar Sticky Summary (Role Aside) -->
+    <aside class="order-summary-sidebar" aria-labelledby="summary-heading">
+      <div class="order-summary-card">
+        <h2 id="summary-heading" class="summary-title">Order Summary</h2>
+
+        <div class="summary-row">
+          <span>Subtotal (2 items)</span>
+          <span class="summary-val" id="summary-subtotal">$185.00</span>
+        </div>
+
+        <div class="summary-row">
+          <span>Shipping</span>
+          <span class="summary-val" style="color: var(--color-accent-success);">FREE</span>
+        </div>
+
+        <div class="summary-row">
+          <span>Est. Taxes & Fees</span>
+          <span class="summary-val">$12.50</span>
+        </div>
+
+        <!-- Promo Code Input (Optimized UX Layout) -->
+        <div class="promo-container">
+          <label for="promo-field" style="font-size: 0.85rem; font-weight:600; color:var(--color-text-secondary);">Promo Code</label>
+          <div class="promo-input-group">
+            <input type="text" id="promo-field" class="promo-field" placeholder="Enter code (e.g. COZY10)">
+            <button type="button" class="promo-apply-btn">Apply</button>
+          </div>
+        </div>
+
+        <div class="summary-row total-row">
+          <span>Total</span>
+          <span class="summary-val" id="summary-total">$197.50</span>
+        </div>
+
+        <!-- Checkout Button with high visual emphasis -->
+        <button type="button" class="checkout-btn">Proceed to Checkout</button>
+      </div>
+    </aside>
+
+  </div>
+
+  <script>
+    /* Mimic Interactive Behavior & ARIA Updates */
+    function adjustQuantity(rowId, change) {
+      const row = document.getElementById(rowId);
+      const input = row.querySelector('.qty-input');
+      const announcer = document.getElementById('cart-accessibility-announcer');
+      const itemTitle = row.querySelector('.item-title').innerText;
+
+      let val = parseInt(input.value) + change;
+      if (val < 1) return; // Must have at least 1 item. Use 'Remove' to delete.
+
+      // Simulate programmatic loading state to prevent multi-tap race conditions
+      row.classList.add('is-loading');
+      row.setAttribute('aria-busy', 'true');
+
+      setTimeout(() => {
+        input.value = val;
+        row.classList.remove('is-loading');
+        row.setAttribute('aria-busy', 'false');
+
+        // Announce change to Screen Readers using the ARIA Live Region
+        announcer.innerText = `Quantity updated to ${val} for ${itemTitle}.`;
+      }, 500);
+    }
+
+    function removeItem(rowId) {
+      const row = document.getElementById(rowId);
+      const announcer = document.getElementById('cart-accessibility-announcer');
+      const itemTitle = row.querySelector('.item-title').innerText;
+
+      row.classList.add('is-loading');
+      row.setAttribute('aria-busy', 'true');
+
+      setTimeout(() => {
+        row.style.opacity = '0';
+        row.style.transform = 'scale(0.95)';
+        row.style.transition = '0.3s ease';
+
+        setTimeout(() => {
+          row.remove();
+          announcer.innerText = `${itemTitle} was removed from your shopping bag.`;
+        }, 300);
+      }, 400);
+    }
+  </script>
+</body>
+</html>
