@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Offline-First App Shell Example</title>
+  <style>
+    :root {
+      --color-primary: #2563eb;
+      --color-primary-hover: #1d4ed8;
+      --color-bg: #f8fafc;
+      --color-card: #ffffff;
+      --color-text: #0f172a;
+      --color-text-muted: #475569;
+      --color-alert-bg: #1e293b;
+      --color-alert-text: #ffffff;
+      --focus-ring: 2px solid var(--color-primary);
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--color-bg);
+      color: var(--color-text);
+      margin: 0;
+      padding: 2rem;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 4rem auto;
+      background: var(--color-card);
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      margin-top: 0;
+      color: var(--color-text);
+      font-size: 1.875rem;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      margin-bottom: 1.5rem;
+    }
+
+    .status-online {
+      background-color: #dcfce7;
+      color: #166534;
+    }
+
+    .status-offline {
+      background-color: #fee2e2;
+      color: #991b1b;
+    }
+
+    .indicator-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: currentColor;
+    }
+
+    button {
+      background-color: var(--color-primary);
+      color: #ffffff;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      font-weight: 500;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.15s ease;
+    }
+
+    button:hover {
+      background-color: var(--color-primary-hover);
+    }
+
+    button:focus-visible {
+      outline: var(--focus-ring);
+      outline-offset: 2px;
+    }
+
+    /* Update Notification Banner - Fixed Bottom, Screen Reader Alert */
+    .update-banner {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(150%);
+      background-color: var(--color-alert-bg);
+      color: var(--color-alert-text);
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -4px rgba(0, 0, 0, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 2rem;
+      width: calc(100% - 4rem);
+      max-width: 500px;
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 9999;
+    }
+
+    .update-banner.is-visible {
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .update-banner-text {
+      font-size: 0.937rem;
+      font-weight: 500;
+    }
+
+    .update-banner-actions {
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    .btn-update {
+      background-color: #ffffff;
+      color: var(--color-alert-bg);
+      font-weight: 600;
+      font-size: 0.875rem;
+      padding: 0.5rem 1rem;
+    }
+
+    .btn-update:hover {
+      background-color: #f1f5f9;
+    }
+
+    .btn-update:focus-visible {
+      outline: 2px solid #ffffff;
+      outline-offset: 2px;
+    }
+
+    .btn-dismiss {
+      background-color: transparent;
+      color: #94a3b8;
+      border: 1px solid #475569;
+      font-size: 0.875rem;
+      padding: 0.5rem 1rem;
+    }
+
+    .btn-dismiss:hover {
+      color: #ffffff;
+      border-color: #94a3b8;
+    }
+
+    .btn-dismiss:focus-visible {
+      outline: 2px solid #94a3b8;
+      outline-offset: 2px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div id="connection-badge" class="status-badge status-online">
+      <span class="indicator-dot"></span>
+      <span id="connection-text">Online</span>
+    </div>
+
+    <h1>PWA Offline-First App Shell</h1>
+    <p>This demonstration webpage registers a Service Worker, intercepts network requests to cache critical assets, detects online/offline status, and handles app updates gracefully with screen reader alerts and keyboard-focus locking.</p>
+
+    <div style="margin-top: 2rem;">
+      <button type="button" id="fetch-data-btn">Request Dynamic Data</button>
+      <div id="data-result" style="margin-top: 1rem; font-family: monospace; font-size: 0.875rem; color: var(--color-text-muted);"></div>
+    </div>
+  </div>
+
+  <!-- Update Alert Notification Banner -->
+  <!-- Note: role="alert" guarantees immediate screen reader announcement -->
+  <div id="update-notification" class="update-banner" role="alert" aria-hidden="true">
+    <div class="update-banner-text">A new version of this website is available.</div>
+    <div class="update-banner-actions">
+      <button type="button" class="btn-update" id="btn-update-reload">Update & Reload</button>
+      <button type="button" class="btn-dismiss" id="btn-update-dismiss">Dismiss</button>
+    </div>
+  </div>
+
+  <script>
+    // 1. Connection Monitoring
+    const connectionBadge = document.getElementById('connection-badge');
+    const connectionText = document.getElementById('connection-text');
+
+    function updateConnectionStatus() {
+      if (navigator.onLine) {
+        connectionBadge.className = 'status-badge status-online';
+        connectionText.textContent = 'Online';
+      } else {
+        connectionBadge.className = 'status-badge status-offline';
+        connectionText.textContent = 'Offline (Loaded from Cache)';
+      }
+    }
+
+    window.addEventListener('online', updateConnectionStatus);
+    window.addEventListener('offline', updateConnectionStatus);
+    updateConnectionStatus(); // Run initial check
+
+    // 2. Dynamic Fetch (Demonstrating Stale-While-Revalidate vs Network-Only handling)
+    const fetchDataBtn = document.getElementById('fetch-data-btn');
+    const dataResult = document.getElementById('data-result');
+
+    fetchDataBtn.addEventListener('click', () => {
+      dataResult.textContent = 'Fetching...';
+      fetch('/api/dynamic-content')
+        .then(response => response.json())
+        .then(data => {
+          dataResult.textContent = `Success: ${JSON.stringify(data)}`;
+        })
+        .catch(error => {
+          dataResult.textContent = `Offline Error: Dynamic network request failed.`;
+        });
+    });
+
+    // 3. Service Worker Registration & Lifecycle Update Flow
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw-example.js')
+          .then(registration => {
+            console.log('Service Worker registered successfully with scope:', registration.scope);
+
+            // A. Check if there's already a waiting service worker (e.g., user opened in new tab but old is still waiting)
+            if (registration.waiting) {
+              triggerUpdateBanner(registration.waiting);
+              return;
+            }
+
+            // B. Listen for an active install state moving into the waiting state
+            registration.addEventListener('updatefound', () => {
+              const installingWorker = registration.installing;
+              installingWorker.addEventListener('statechange', () => {
+                if (installingWorker.state === 'installed') {
+                  if (navigator.serviceWorker.controller) {
+                    // There's an active controller, meaning this is a real update, not the very first load
+                    triggerUpdateBanner(installingWorker);
+                  }
+                }
+              });
+            });
+          })
+          .catch(error => {
+            console.error('Service Worker registration failed:', error);
+          });
+
+        // C. Refresh current tab once the newly activated worker takes control (via skipWaiting)
+        let isRefreshing = false;
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          if (isRefreshing) return;
+          isRefreshing = true;
+          window.location.reload();
+        });
+      });
+    }
+
+    // 4. Update Banner UI Management
+    const updateNotification = document.getElementById('update-notification');
+    const btnUpdateReload = document.getElementById('btn-update-reload');
+    const btnUpdateDismiss = document.getElementById('btn-update-dismiss');
+    let previousActiveElement = null;
+
+    function triggerUpdateBanner(waitingWorker) {
+      // Save previously focused element to return focus on dismissal
+      previousActiveElement = document.activeElement;
+
+      // Reveal the banner visually and semantically
+      updateNotification.classList.add('is-visible');
+      updateNotification.removeAttribute('aria-hidden');
+
+      // Move focus programmatically to the main action button
+      btnUpdateReload.focus();
+
+      // Keyboard Trap: Ensure users tabbing cannot escape the update notification bar while visible
+      updateNotification.addEventListener('keydown', trapFocus);
+
+      btnUpdateReload.addEventListener('click', () => {
+        // Send skipWaiting command to waiting Service Worker
+        waitingWorker.postMessage({ type: 'SKIP_WAITING' });
+      });
+
+      btnUpdateDismiss.addEventListener('click', () => {
+        hideUpdateBanner();
+      });
+    }
+
+    function hideUpdateBanner() {
+      updateNotification.classList.remove('is-visible');
+      updateNotification.setAttribute('aria-hidden', 'true');
+      updateNotification.removeEventListener('keydown', trapFocus);
+
+      // Restore focus to original trigger element to prevent keyboard navigation disruption
+      if (previousActiveElement && typeof previousActiveElement.focus === 'function') {
+        previousActiveElement.focus();
+      }
+    }
+
+    function trapFocus(event) {
+      if (event.key !== 'Tab') return;
+
+      const focusableElements = updateNotification.querySelectorAll('button');
+      const firstElement = focusableElements[0];
+      const lastElement = focusableElements[focusableElements.length - 1];
+
+      if (event.shiftKey) { // Back tab
+        if (document.activeElement === firstElement) {
+          lastElement.focus();
+          event.preventDefault();
+        }
+      } else { // Forward tab
+        if (document.activeElement === lastElement) {
+          firstElement.focus();
+          event.preventDefault();
+        }
+      }
+    }
+  </script>
+</body>
+</html>
