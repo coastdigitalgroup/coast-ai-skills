@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Offline-First PWA Dashboard Example</title>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --bg: #f3f4f6;
+      --card-bg: #ffffff;
+      --text: #1f2937;
+      --text-muted: #4b5563;
+      --border: #e5e7eb;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+
+    .card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 2rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+
+    h1 {
+      margin-top: 0;
+      font-size: 1.75rem;
+      color: var(--primary);
+    }
+
+    p {
+      color: var(--text-muted);
+    }
+
+    /* Connection Status Toast */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 9999px;
+      font-weight: 600;
+      font-size: 0.875rem;
+      margin-bottom: 1.5rem;
+      transition: all 0.3s ease;
+    }
+
+    .status-badge.online {
+      background-color: #d1fae5;
+      color: #065f46;
+    }
+
+    .status-badge.offline {
+      background-color: #fee2e2;
+      color: #991b1b;
+    }
+
+    /* Update Prompt Banner */
+    #update-banner {
+      display: none;
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background-color: #1e293b;
+      color: #ffffff;
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+      z-index: 9999;
+      align-items: center;
+      gap: 1rem;
+      animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    #update-banner.visible {
+      display: flex;
+    }
+
+    #update-banner button {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      font-weight: 600;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    #update-banner button:hover {
+      background-color: var(--primary-hover);
+    }
+
+    /* Grid Layout */
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .feature-box {
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1rem;
+      background-color: #fafafa;
+    }
+
+    .feature-box h3 {
+      margin-top: 0;
+      color: var(--text);
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(100px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+      #update-banner {
+        left: 1rem;
+        right: 1rem;
+        bottom: 1rem;
+        flex-direction: column;
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <!-- Dynamic Online/Offline Badge -->
+      <div id="connection-status" class="status-badge online">
+        <span class="indicator-dot">●</span>
+        <span class="status-text">Online</span>
+      </div>
+
+      <h1>Productive Offline Workspace</h1>
+      <p>This is a live example demonstrating a complete, production-grade Service Worker registration and offline lifecycle management system. When online, the page caches dynamic parts. When offline, this dashboard remains fully visible, responsive, and functional.</p>
+
+      <div class="grid">
+        <div class="feature-box">
+          <h3>Pre-cached Shell</h3>
+          <p>Styles, structure, and scripts load in 0ms directly from cache, avoiding slow cell towers.</p>
+        </div>
+        <div class="feature-box">
+          <h3>Background Updates</h3>
+          <p>New versions are detected automatically in the background. The user is prompted before active assets are swapped.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Update Pending Toast Banner -->
+  <div id="update-banner">
+    <span>An updated version of this website is available!</span>
+    <button id="update-btn">Reload & Update</button>
+  </div>
+
+  <!-- Service Worker Registration Logic -->
+  <script>
+    let activeRegistration = null;
+
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw-example.js')
+          .then((registration) => {
+            console.log('[App] Service Worker registered with scope:', registration.scope);
+            activeRegistration = registration;
+
+            // 1. Check if there is already a worker waiting to activate on page load
+            if (registration.waiting) {
+              showUpdateBanner();
+            }
+
+            // 2. Listen for future updates being installed
+            registration.addEventListener('updatefound', () => {
+              const installingWorker = registration.installing;
+              if (!installingWorker) return;
+
+              installingWorker.addEventListener('statechange', () => {
+                if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                  // A fresh Service worker was installed, and there was already a previous active controller
+                  showUpdateBanner();
+                }
+              });
+            });
+          })
+          .catch((error) => {
+            console.error('[App] Service Worker registration failed:', error);
+          });
+      });
+
+      // 3. Listen for controlling worker change to trigger reload
+      let isRefreshing = false;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (isRefreshing) return;
+        isRefreshing = true;
+        console.log('[App] New Service Worker took control. Refreshing...');
+        window.location.reload();
+      });
+    }
+
+    // Banner Interactivity
+    const updateBanner = document.getElementById('update-banner');
+    const updateBtn = document.getElementById('update-btn');
+
+    function showUpdateBanner() {
+      updateBanner.classList.add('visible');
+    }
+
+    updateBtn.addEventListener('click', () => {
+      // Send the skip waiting signal directly to the waiting worker
+      if (activeRegistration && activeRegistration.waiting) {
+        activeRegistration.waiting.postMessage({ action: 'skipWaiting' });
+      }
+      updateBanner.classList.remove('visible');
+    });
+
+    // 4. Online/Offline Dynamic State Handling
+    const statusBadge = document.getElementById('connection-status');
+    const statusText = statusBadge.querySelector('.status-text');
+
+    function updateNetworkStatus() {
+      if (navigator.onLine) {
+        statusBadge.className = 'status-badge online';
+        statusText.textContent = 'Online';
+      } else {
+        statusBadge.className = 'status-badge offline';
+        statusText.textContent = 'Offline Mode';
+      }
+    }
+
+    window.addEventListener('online', updateNetworkStatus);
+    window.addEventListener('offline', updateNetworkStatus);
+
+    // Run once at startup
+    updateNetworkStatus();
+  </script>
+</body>
+</html>

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Offline | Connection Lost</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: #f3f4f6;
+      color: #1f2937;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      text-align: center;
+      padding: 1rem;
+    }
+
+    .container {
+      max-width: 480px;
+      background-color: #ffffff;
+      padding: 3rem 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      border: 1px solid #e5e7eb;
+    }
+
+    .icon {
+      font-size: 4rem;
+      margin-bottom: 1.5rem;
+      color: #9ca3af;
+      display: inline-block;
+      animation: pulse 2s infinite ease-in-out;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      margin: 0 0 1rem 0;
+      color: #111827;
+    }
+
+    p {
+      color: #4b5563;
+      font-size: 0.95rem;
+      margin: 0 0 2rem 0;
+      line-height: 1.6;
+    }
+
+    button {
+      background-color: #2563eb;
+      color: #ffffff;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      font-weight: 600;
+      font-size: 0.95rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.2s ease, transform 0.1s ease;
+      width: 100%;
+    }
+
+    button:hover {
+      background-color: #1d4ed8;
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+      50% {
+        transform: scale(1.05);
+        opacity: 0.8;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="icon">📶❌</div>
+    <h1>You are currently offline</h1>
+    <p>We're having trouble reaching our servers. Some contents might be unavailable. Please check your internet connection and try reloading the page.</p>
+    <button onclick="window.location.reload()">Retry Connection</button>
+  </div>
+</body>
+</html>
