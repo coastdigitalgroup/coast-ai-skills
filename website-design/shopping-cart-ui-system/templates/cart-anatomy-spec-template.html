@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shopping Cart UI System Anatomy & Markup Spec</title>
+  <style>
+    :root {
+      /* Fluid Spacing Scale */
+      --space-xs: 0.5rem;   /* 8px */
+      --space-s: 0.75rem;   /* 12px */
+      --space-m: 1rem;      /* 16px */
+      --space-l: 1.5rem;    /* 24px */
+      --space-xl: 2rem;     /* 32px */
+
+      /* Typography Scale */
+      --text-xs: 0.75rem;
+      --text-sm: 0.875rem;
+      --text-base: 1rem;
+      --text-lg: 1.125rem;
+      --text-xl: 1.25rem;
+      --text-2xl: 1.5rem;
+
+      /* Color Tokens (WCAG AAA Contrast Compliant) */
+      --color-neutral-dark: #111827;
+      --color-neutral-light: #f9fafb;
+      --color-neutral-muted: #4b5563;
+      --color-border-muted: #e5e7eb;
+      --color-primary-cta: #0f172a;
+      --color-primary-cta-hover: #1e293b;
+      --color-focus: #2563eb;
+      --color-success: #15803d;
+      --color-success-bg: #f0fdf4;
+      --color-sale: #b91c1c;
+
+      /* Radii */
+      --radius-sm: 4px;
+      --radius-md: 8px;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      color: var(--color-neutral-dark);
+      margin: 0;
+      padding: var(--space-xl);
+      background-color: #f3f4f6;
+    }
+
+    /* Template Annotation Guide */
+    .annotation-box {
+      background-color: #fffbeb;
+      border-left: 4px solid #f59e0b;
+      padding: var(--space-m);
+      margin-bottom: var(--space-l);
+      border-radius: var(--radius-sm);
+      font-size: var(--text-sm);
+    }
+
+    /* Backdrop Overlay */
+    .cart-backdrop {
+      position: fixed;
+      inset: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+      opacity: 1;
+      transition: opacity 0.2s ease-out;
+    }
+
+    /* Mini-Cart Drawer (Slide-Out Side Panel) */
+    .cart-drawer {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 100%;
+      max-width: 440px;
+      height: 100vh;
+      background-color: #ffffff;
+      box-shadow: -4px 0 24px rgba(0, 0, 0, 0.15);
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Drawer Header */
+    .cart-header {
+      padding: var(--space-m) var(--space-l);
+      border-bottom: 1px solid var(--color-border-muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .cart-title {
+      font-size: var(--text-lg);
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .cart-close-btn {
+      background: none;
+      border: 1px solid transparent;
+      padding: var(--space-xs);
+      cursor: pointer;
+      font-size: var(--text-xl);
+      color: var(--color-neutral-muted);
+      border-radius: var(--radius-sm);
+      min-width: 44px; /* WCAG AA Touch Target */
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .cart-close-btn:focus-visible {
+      outline: 2px solid var(--color-focus);
+      outline-offset: 2px;
+    }
+
+    /* Fulfillment Engine (Free Shipping Progress Bar) */
+    .fulfillment-tracker {
+      background-color: var(--color-neutral-light);
+      padding: var(--space-m) var(--space-l);
+      border-bottom: 1px solid var(--color-border-muted);
+    }
+
+    .fulfillment-msg {
+      font-size: var(--text-sm);
+      margin: 0 0 var(--space-xs) 0;
+      font-weight: 500;
+    }
+
+    .fulfillment-progress-bg {
+      background-color: var(--color-border-muted);
+      height: 8px;
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+    }
+
+    .fulfillment-progress-fill {
+      background-color: var(--color-success);
+      height: 100%;
+      width: 75%; /* Dynamic variable matching subtotal ratio */
+      transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* Line-Items List Stack */
+    .cart-items-list {
+      list-style-type: none;
+      margin: 0;
+      padding: var(--space-m) var(--space-l);
+      flex-grow: 1;
+      overflow-y: auto;
+    }
+
+    .cart-line-item {
+      display: flex;
+      gap: var(--space-m);
+      padding-bottom: var(--space-l);
+      margin-bottom: var(--space-l);
+      border-bottom: 1px solid var(--color-border-muted);
+    }
+
+    .item-thumbnail-link {
+      flex-shrink: 0;
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      border: 1px solid var(--color-border-muted);
+      width: 72px;
+      height: 72px;
+    }
+
+    .item-thumbnail {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .item-details {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs);
+    }
+
+    .item-title {
+      font-size: var(--text-sm);
+      font-weight: 600;
+      margin: 0;
+      color: var(--color-neutral-dark);
+      text-decoration: none;
+    }
+
+    .item-title:hover {
+      text-decoration: underline;
+    }
+
+    .item-title:focus-visible {
+      outline: 2px solid var(--color-focus);
+    }
+
+    .item-variants {
+      font-size: var(--text-xs);
+      color: var(--color-neutral-muted);
+      margin: 0;
+    }
+
+    /* Horizontal controls row (A11y quantity inputs + Price alignment) */
+    .item-controls-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: auto;
+    }
+
+    /* Stepper Container */
+    .quantity-stepper {
+      display: flex;
+      align-items: center;
+      border: 1px solid var(--color-border-muted);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+    }
+
+    .stepper-btn {
+      background-color: var(--color-neutral-light);
+      border: none;
+      color: var(--color-neutral-dark);
+      font-weight: bold;
+      width: 32px;
+      height: 32px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 32px;
+      min-height: 32px;
+    }
+
+    .stepper-btn:hover {
+      background-color: var(--color-border-muted);
+    }
+
+    .stepper-btn:focus-visible {
+      outline: 2px solid var(--color-focus);
+      z-index: 1;
+    }
+
+    .quantity-input {
+      width: 40px;
+      height: 32px;
+      border: none;
+      border-left: 1px solid var(--color-border-muted);
+      border-right: 1px solid var(--color-border-muted);
+      text-align: center;
+      font-size: var(--text-sm);
+      font-weight: 600;
+      color: var(--color-neutral-dark);
+      -moz-appearance: textfield;
+    }
+
+    .quantity-input::-webkit-outer-spin-button,
+    .quantity-input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    /* Pricing Display */
+    .item-price-block {
+      text-align: right;
+    }
+
+    .original-price {
+      font-size: var(--text-xs);
+      color: var(--color-neutral-muted);
+      text-decoration: line-through;
+      margin-right: var(--space-xs);
+    }
+
+    .current-price {
+      font-size: var(--text-sm);
+      font-weight: 700;
+      color: var(--color-neutral-dark);
+    }
+
+    .current-price.on-sale {
+      color: var(--color-sale);
+    }
+
+    /* Delete Button with touch compliance */
+    .delete-item-btn {
+      background: none;
+      border: none;
+      color: var(--color-neutral-muted);
+      cursor: pointer;
+      padding: var(--space-xs);
+      border-radius: var(--radius-sm);
+      min-width: 44px;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      align-self: flex-start;
+      margin-top: -8px;
+    }
+
+    .delete-item-btn:hover {
+      color: var(--color-sale);
+      background-color: var(--color-neutral-light);
+    }
+
+    .delete-item-btn:focus-visible {
+      outline: 2px solid var(--color-focus);
+    }
+
+    /* Drawer Footer Container */
+    .cart-footer {
+      padding: var(--space-l);
+      border-top: 1px solid var(--color-border-muted);
+      background-color: var(--color-neutral-light);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-m);
+    }
+
+    .footer-summary-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: var(--text-sm);
+    }
+
+    .footer-summary-row.total {
+      font-size: var(--text-lg);
+      font-weight: 700;
+      color: var(--color-neutral-dark);
+    }
+
+    .checkout-btn {
+      background-color: var(--color-primary-cta);
+      color: #ffffff;
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: var(--space-m);
+      font-weight: 700;
+      font-size: var(--text-base);
+      cursor: pointer;
+      width: 100%;
+      text-align: center;
+      transition: background-color 0.2s;
+    }
+
+    .checkout-btn:hover {
+      background-color: var(--color-primary-cta-hover);
+    }
+
+    .checkout-btn:focus-visible {
+      outline: 3px solid var(--color-focus);
+      outline-offset: 2px;
+    }
+
+    /* Screen Reader Announcements (Invisible Area) */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Screen Reader Live Announcements Block (Crucial for AA dynamic accessibility) -->
+  <div class="sr-only" aria-live="polite" id="cart-live-announcements">
+    Shopping cart updated. Subtotal is two hundred and twenty-two dollars.
+  </div>
+
+  <div class="annotation-box">
+    <strong>Implementation Guidelines:</strong>
+    <ul>
+      <li>Use the <code>role="dialog"</code> and <code>aria-modal="true"</code> on the sliding container to declare it as a modal dialog to screen readers.</li>
+      <li>Always associate <code>aria-label</code> or <code>aria-labelledby</code> on interactive elements (especially quantity and delete triggers) to provide proper structural descriptions.</li>
+      <li>Target sizes for close icons and trash buttons inside line items match the 44x44px rule.</li>
+    </ul>
+  </div>
+
+  <!-- Background Dimmer Backdrop Overlay -->
+  <div class="cart-backdrop" id="cart-backdrop" onclick="closeCartDrawer()"></div>
+
+  <!-- Sliding Cart Overlay Component -->
+  <section class="cart-drawer" id="cart-drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-heading-title">
+
+    <!-- 1. Drawer Header -->
+    <header class="cart-header">
+      <h2 class="cart-title" id="drawer-heading-title">Your Cart (3 items)</h2>
+      <button class="cart-close-btn" aria-label="Close Shopping Cart Drawer" onclick="closeCartDrawer()">
+        ✕
+      </button>
+    </header>
+
+    <!-- 2. Dynamic Promotional Fulfillment Metric Indicator -->
+    <div class="fulfillment-tracker">
+      <p class="fulfillment-msg" id="free-shipping-announcement">
+        🎉 You are <strong>$25.00</strong> away from unlocking <strong>Free Shipping!</strong>
+      </p>
+      <div class="fulfillment-progress-bg" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="75" aria-describedby="free-shipping-announcement">
+        <div class="fulfillment-progress-fill"></div>
+      </div>
+    </div>
+
+    <!-- 3. List of Added Product Items -->
+    <ul class="cart-items-list">
+
+      <!-- Line Item Row 1 -->
+      <li class="cart-line-item">
+        <a href="/products/onyx-jacket" class="item-thumbnail-link" tabindex="0">
+          <img src="https://images.unsplash.com/photo-1544022613-e87ca75a784a?q=80&w=120&auto=format&fit=crop" class="item-thumbnail" alt="Onyx athletic jacket in dark carbon fabric">
+        </a>
+
+        <div class="item-details">
+          <a href="/products/onyx-jacket" class="item-title">Onyx Athletic Jacket</a>
+          <p class="item-variants">Color: Slate Black / Size: L</p>
+
+          <div class="item-controls-row">
+            <!-- Stepper controls matching target metrics -->
+            <div class="quantity-stepper">
+              <button class="stepper-btn" aria-label="Decrease quantity of Onyx Athletic Jacket" onclick="adjustQuantity('onyx', -1)">−</button>
+              <input type="number" class="quantity-input" value="2" min="1" max="10" aria-label="Onyx Athletic Jacket quantity text box input">
+              <button class="stepper-btn" aria-label="Increase quantity of Onyx Athletic Jacket" onclick="adjustQuantity('onyx', 1)">+</button>
+            </div>
+
+            <div class="item-price-block">
+              <span class="original-price">$220.00</span>
+              <span class="current-price on-sale">$198.00</span>
+            </div>
+          </div>
+        </div>
+
+        <button class="delete-item-btn" aria-label="Remove Onyx Athletic Jacket from shopping cart" onclick="removeLineItem('onyx')">
+          🗑️
+        </button>
+      </li>
+
+      <!-- Line Item Row 2 -->
+      <li class="cart-line-item">
+        <a href="/products/merino-socks" class="item-thumbnail-link" tabindex="0">
+          <img src="https://images.unsplash.com/photo-1582966772680-860e372bb558?q=80&w=120&auto=format&fit=crop" class="item-thumbnail" alt="Cozy merino wool sock pack in light gray fabric">
+        </a>
+
+        <div class="item-details">
+          <a href="/products/merino-socks" class="item-title">Merino Wool Sock Pack</a>
+          <p class="item-variants">Color: Light Heather Grey / Size: One Size</p>
+
+          <div class="item-controls-row">
+            <div class="quantity-stepper">
+              <button class="stepper-btn" aria-label="Decrease quantity of Merino Wool Sock Pack" onclick="adjustQuantity('socks', -1)">−</button>
+              <input type="number" class="quantity-input" value="1" min="1" max="10" aria-label="Merino Wool Sock Pack quantity text box input">
+              <button class="stepper-btn" aria-label="Increase quantity of Merino Wool Sock Pack" onclick="adjustQuantity('socks', 1)">+</button>
+            </div>
+
+            <div class="item-price-block">
+              <span class="current-price">$24.00</span>
+            </div>
+          </div>
+        </div>
+
+        <button class="delete-item-btn" aria-label="Remove Merino Wool Sock Pack from shopping cart" onclick="removeLineItem('socks')">
+          🗑️
+        </button>
+      </li>
+
+    </ul>
+
+    <!-- 4. Drawer Footer Calculations Section -->
+    <footer class="cart-footer">
+      <div class="footer-summary-row">
+        <span>Subtotal</span>
+        <span>$222.00</span>
+      </div>
+      <div class="footer-summary-row">
+        <span>Shipping</span>
+        <span style="color: var(--color-success); font-weight: bold;">Calculated at checkout</span>
+      </div>
+
+      <hr style="border: none; border-top: 1px solid var(--color-border-muted); margin: 0;">
+
+      <div class="footer-summary-row total">
+        <span>Estimated Total</span>
+        <span>$222.00</span>
+      </div>
+
+      <button class="checkout-btn" id="secure-checkout-trigger" onclick="proceedToCheckout()">
+        SECURE CHECKOUT
+      </button>
+    </footer>
+
+  </section>
+
+  <script>
+    function closeCartDrawer() {
+      document.getElementById('cart-drawer').style.transform = 'translateX(100%)';
+      document.getElementById('cart-backdrop').style.opacity = '0';
+      setTimeout(() => {
+        document.getElementById('cart-backdrop').style.display = 'none';
+      }, 200);
+      announceToScreenReader("Shopping cart drawer closed.");
+    }
+
+    function announceToScreenReader(message) {
+      document.getElementById('cart-live-announcements').innerText = message;
+    }
+
+    function adjustQuantity(itemId, delta) {
+      announceToScreenReader("Updating quantity. Loading calculation...");
+      // Simulate API call and success message callback
+      setTimeout(() => {
+        announceToScreenReader("Quantity modified successfully. Cart totals recalculated.");
+      }, 500);
+    }
+
+    function removeLineItem(itemId) {
+      announceToScreenReader("Removing item from cart...");
+      setTimeout(() => {
+        announceToScreenReader("Product item successfully removed. Total recalculated.");
+      }, 400);
+    }
+
+    function proceedToCheckout() {
+      const btn = document.getElementById('secure-checkout-trigger');
+      btn.innerText = "REDIRECTING...";
+      btn.disabled = true;
+    }
+  </script>
+</body>
+</html>
