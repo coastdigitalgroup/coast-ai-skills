@@ -7,6 +7,7 @@ All notable changes to this project will be documented here. The format follows
 
 ### Added
 
+- `service-worker-offline-and-cache-management` skill to `website-development` category, providing a production-grade frontend protocol and modular Vanilla JavaScript controller class for implementing background network interception, asset persistence (pre-caching and dynamic caching), offline fallback pages, and safe update lifecycles without user lock-in.
 - `image-gallery-and-lightbox-system` skill to `website-design` category, providing a structured, accessible, and highly responsive framework for media gallery layouts and their accompanying fullscreen lightbox overlays with touch gesture support and complete keyboard focus control.
 - `sticky-and-floating-ui-system` skill to `website-design` category, defining a systematic framework for designing, specifying, and auditing persistent, overlaying, and scroll-responsive UI elements (progressive headers, mobile bottom docks, floating action buttons, and sticky sidebars) to maximize utility and conversion without causing visual fatigue or WCAG focus obscuration.
 - `focus-indicator-design-system` skill to `website-design` category, defining a systematic framework for designing, specifying, and auditing keyboard focus indicators across standard and custom interactive elements to ensure compliance with WCAG 2.1/2.2, brand integration, and High Contrast Mode support.
