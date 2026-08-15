@@ -253,7 +253,7 @@ Manual typing must never go out of sync with the visual calendar.
 
 ---
 
-## Validation Steps
+## Validation Criteria
 
 - [ ] **Form Submission Audit:** Insert the date picker inside a `<form>` element. Click the previous/next month buttons and verify that the form is *not* submitted.
 - [ ] **Focus Restoration Test:** Focus the toggle button and hit `Space`. The calendar opens, and focus is trapped inside. Select a date or press `Escape`. Confirm that the dialog closes and focus returns instantly to the toggle button.

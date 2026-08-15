@@ -126,7 +126,7 @@ Maintain precise, succinct live feedback. Ensure announcements are trigger-locke
 
 ---
 
-## Validation Steps
+## Validation Criteria
 
 - [ ] **No-Mouse Keyboard Sweep:** Focus on a list item's handle using `Tab`. Grab it with `Space`. Use `ArrowDown` or `ArrowUp` to swap its position. Ensure focus remains on the handle. Confirm you can drop with `Space` or cancel with `Escape`.
 - [ ] **Screen Reader Live Verification:** Activate a screen reader (VoiceOver, NVDA, or JAWS). Verify that grab, move, cancel, and drop events are announced instantly and clearly. Confirm that structural changes (e.g., "2 of 5" updates) are read out accurately.

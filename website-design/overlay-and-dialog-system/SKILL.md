@@ -2,7 +2,7 @@
 name: overlay-and-dialog-system
 description:
   Design a systematic framework for non-persistent UI layers (Modals, Drawers,
-  Popovers, and Toasts) that balances user focus, context, and interruption
+  and Popovers) that balances user focus, context, and interruption
   levels.
 ---
 
@@ -14,7 +14,7 @@ The Overlay and Dialog System skill provides a methodology for managing
 temporary content layers that sit above the primary interface. It ensures that
 interruptions are proportional to the user's task, context is preserved where
 possible, and the interface remains accessible and responsive when using Modals,
-Drawers, Popovers, or Toasts.
+Drawers, or Popovers.
 
 ## Use Cases
 
@@ -22,7 +22,6 @@ Drawers, Popovers, or Toasts.
 - Creating a secondary workspace for editing complex details without losing page
   context (Drawer).
 - Implementing contextual help or tooltips for specific UI elements (Popover).
-- Providing asynchronous feedback for background processes (Toast).
 - Designing a mobile-specific discovery layer for filters or search (Drawer).
 
 ## When NOT to Use
@@ -33,6 +32,10 @@ Drawers, Popovers, or Toasts.
   all times, it should be part of the base page layout, not an overlay.
 - **Complex Multi-page Flows:** If a task requires more than 2-3 steps, consider
   a dedicated page rather than a modal to prevent user disorientation.
+- **Toast/Snackbar Notifications:** For passive, non-blocking status feedback
+  (e.g., "Saved," "Copied to clipboard"), use `toast-and-snackbar-system`
+  instead — it covers positioning, stacking, duration, and accessibility for
+  that layer in depth.
 
 ## Inputs
 
@@ -45,8 +48,8 @@ Drawers, Popovers, or Toasts.
 
 ## Outputs
 
-1. **Pattern Selection:** A clear choice between Modal, Drawer, Popover, or
-   Toast based on the interruption matrix.
+1. **Pattern Selection:** A clear choice between Modal, Drawer, or Popover
+   based on the interruption matrix.
 2. **Anatomy Specification:** Defined regions (Header, Content, Footer/Actions)
    and their internal hierarchy.
 3. **Behavioral Spec:** Rules for backdrop behavior, closing triggers, and
@@ -65,8 +68,9 @@ Determine the required "gravity" of the overlay:
   sub-tasks that benefit from seeing the parent context.
 - **Level 3 (Low): Popover.** Anchor to a specific element. Use for contextual
   settings or information.
-- **Level 4 (Passive): Toast.** Non-blocking notification. Use for status
-  updates.
+
+For passive, non-blocking status feedback (Level 4), see
+`toast-and-snackbar-system` — it is out of scope here.
 
 ### 2. Define the Internal Hierarchy (Anatomy)
 
@@ -125,8 +129,6 @@ Overlays must transform based on screen size:
   or steps, it likely belongs on its own page.
 - **Backdrop Logic:** Only allow "Click outside to close" for non-destructive
   overlays. Never for forms where data might be lost.
-- **Toast Duration:** Passive notifications should disappear after 3-5 seconds
-  unless they contain a critical error.
 
 ## Constraints
 
@@ -155,7 +157,7 @@ Overlays must transform based on screen size:
 
 ## Validation Criteria
 
-- [ ] The chosen pattern (Modal/Drawer/Popover/Toast) matches the task's
+- [ ] The chosen pattern (Modal/Drawer/Popover) matches the task's
       interruption level.
 - [ ] Internal hierarchy is clear with a distinct Title and Primary Action.
 - [ ] Responsive adaptation (e.g., Popover to Drawer) is defined for mobile.

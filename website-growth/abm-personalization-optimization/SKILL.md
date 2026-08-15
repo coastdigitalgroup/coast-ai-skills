@@ -99,7 +99,7 @@ Always plan for when enrichment data is missing, inaccurate, or restricted.
 - **The Comcast Trap:** Showing "Welcome, Comcast Customer" or "The Leading Software for Verizon Wireless" because residential/mobile network ISPs were not filtered out of the IP lookup.
 - **Outdated Dynamic Proof:** Recommending a case study from a competitor who recently sued or had a public dispute with the target account.
 
-## Validation Methods
+## Validation Criteria
 
 - [ ] **Account-Specific Form Completion Rate (FCR):** Compare the form conversion rate of personalized Target Account visitors against the historical baseline of untargeted or non-personalized visitors.
 - [ ] **Sales Opportunity Velocity:** Measure the average number of days it takes for a target account to move from "First Visit" to "Opportunity Created" before and after ABM personalization.

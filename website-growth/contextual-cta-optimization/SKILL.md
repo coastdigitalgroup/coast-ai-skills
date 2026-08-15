@@ -38,6 +38,9 @@ step in their journey without disrupting the educational experience.
   additional CTAs act as distractions.
 - **Privacy-Sensitive Content:** Where commercial triggers may feel
   inappropriate or "salesy" (e.g., sensitive medical or legal advice).
+- **Single Alternate CTA Near the Primary:** For one lower-commitment CTA
+  placed beside the primary CTA (not multiple in-body links), see
+  `secondary-cta-optimization`.
 
 ## Inputs
 

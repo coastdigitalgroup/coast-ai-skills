@@ -119,7 +119,7 @@ The View Transitions Implementation skill provides a technical protocol for crea
 - **JS Dependency:** Not providing a fallback for browsers that don't support `startViewTransition`, leading to broken state changes.
 - **Heavy Snapshots:** Capturing extremely large or complex DOM trees that lead to stuttering (jank) on low-end devices.
 
-## Validation Steps
+## Validation Criteria
 
 - [ ] **Browser Support Check:** Verify that the transition falls back gracefully to an instant change in browsers like Firefox or Safari (if not yet supported).
 - [ ] **Console Audit:** Check for "Duplicate view-transition-name" errors in the DevTools console.

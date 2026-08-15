@@ -128,7 +128,7 @@ updates dynamically via AJAX.
 - **Keyboard Traps:** Forcing the user to tab through every single page number
   (1 to 50) without truncation.
 
-## Validation Steps
+## Validation Criteria
 
 - [ ] **Keyboard Test:** Navigate the pagination bar using only `Tab` and `Enter/Space`.
 - [ ] **Screen Reader Test:** Verify that `aria-current="page"` is announced and that

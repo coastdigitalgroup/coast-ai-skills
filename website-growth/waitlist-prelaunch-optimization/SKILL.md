@@ -112,6 +112,14 @@ Plan the "Roll-out" to maximize activation.
 - **Data Privacy:** Waitlist signups must comply with GDPR/CCPA, especially
   when using third-party waitlist management tools.
 
+## Non-Goals
+- Does not optimize the post-launch onboarding experience once users gain
+  access — see `user-onboarding-optimization`.
+- Does not cover checkout or immediate-purchase flows — see
+  `checkout-flow-optimization`.
+- Does not address ongoing referral/loyalty programs beyond the pre-launch
+  period — see `referral-loop-optimization`.
+
 ## Common Failure Patterns
 - **The "Void":** Signing up and hearing nothing for months until the product
   finally launches.

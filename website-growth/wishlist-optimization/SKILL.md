@@ -119,6 +119,27 @@ Leverage the data to bring users back.
 - **Proximity of Intent:** On the PDP, the "Save" button should be within 20px
   of the "Add to Cart" button to capture the "not yet" moment.
 
+## Constraints
+
+- **Guest Persistence Limits:** Guest wishlists rely on local storage or
+  cookies; users who clear browser data or switch devices will lose their
+  list unless they create an account.
+- **Real-Time Data Dependency:** Price-drop and back-in-stock alerts require
+  inventory and pricing data to be available in near real time — stale data
+  produces inaccurate or late notifications.
+- **Platform Support:** Multi-list organization ("Living Room Ideas") is
+  only viable on platforms/catalogs large enough to justify the added UI
+  complexity.
+
+## Non-Goals
+
+- Does not cover the cart or checkout experience itself — see
+  `cart-experience-optimization`.
+- Does not design the recommendation logic behind "Recently Viewed" or
+  empty-state suggestions, only where and when to surface them.
+- Does not address gift registries or collaborative/shared list features as
+  a distinct product surface.
+
 ## Common Failure Patterns
 
 - **The "Login Wall":** Requiring an account just to save an item, which kills

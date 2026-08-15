@@ -142,7 +142,7 @@ for readable, maintainable structures.
   which can prevent them from shrinking below their content's size and break
   the layout. Use `min-width: 0` on items to allow them to shrink.
 
-## Validation Steps
+## Validation Criteria
 
 - [ ] **Responsiveness Test:** Shrink the viewport and ensure no horizontal
       overflow occurs and items wrap or stack correctly.

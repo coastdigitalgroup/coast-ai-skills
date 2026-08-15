@@ -130,7 +130,7 @@ providing robust fallbacks for users with JavaScript disabled.
 - **Ignoring Reduced Motion:** Forcing large, sweeping animations on users
   who have requested reduced motion, which can cause physical nausea.
 
-## Validation Steps
+## Validation Criteria
 
 - [ ] **JavaScript-Disabled Test:** Disable JS in browser settings and verify
       all content is immediately visible.

@@ -149,7 +149,7 @@ the data being seen may soon change.
 - **Uncaught AbortError:** Not providing a `catch` block, leading to browser
   console errors every time a user types quickly.
 
-## Validation Steps
+## Validation Criteria
 
 - [ ] **Network Tab Check:** Open the Network tab in DevTools. Type rapidly in
       the search box and verify that previous requests are marked as

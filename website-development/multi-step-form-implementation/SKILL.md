@@ -131,7 +131,7 @@ segments.
 - **Data Erasure:** Clicking "Back" and finding all previously entered data
   cleared.
 
-## Validation Steps
+## Validation Criteria
 
 - [ ] **Step Transition Test:** Verify focus moves to the new step's heading or
       first input upon clicking "Next."

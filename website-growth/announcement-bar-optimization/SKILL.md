@@ -26,6 +26,8 @@ The Announcement Bar Optimization skill provides a framework for maximizing the 
 - **Primary Page Navigation:** Do not use the announcement bar as a replacement for the main nav or search.
 - **Ad-Heavy Sites:** If the page already has multiple display ads or "sticky" overlays, adding an announcement bar can trigger "ad fatigue" and increase bounce rates.
 - **Bottom-of-Funnel Focus:** In the final stages of checkout or on a focused "Contact Sales" form, the bar can be a distraction from the primary conversion goal.
+- **Entry-Triggered Modal Overlays:** For a blocking popup shown on page arrival, see `welcome-popup-optimization`.
+- **Exit-Intent-Triggered Recovery:** For a blocking overlay triggered by exit intent, see `exit-intent-recovery`.
 
 ## Inputs
 

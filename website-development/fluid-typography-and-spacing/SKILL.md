@@ -120,7 +120,7 @@ space" in the design grows proportionally with the text.
 - **Ignoring Line Height:** Scaling font-size without adjusting `line-height`,
   leading to cramped or overly airy text.
 
-## Validation Steps
+## Validation Criteria
 
 - [ ] **Viewport Resize Test:** Use DevTools to slowly drag the viewport width.
       Confirm that the text and spacing scale smoothly without "jumps."

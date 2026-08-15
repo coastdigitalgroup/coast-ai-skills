@@ -123,12 +123,9 @@ team.
 - **Hierarchy:** Larger spacing should always be used to separate larger blocks
   of content (e.g., sections), while smaller spacing is for internal component
   details.
-
-## Non-Goals
-
-- Creating a layout grid (use the `responsive-grid-system` skill for that).
-- Defining typography sizes (use the `fluid-typography-system` skill).
-- Managing z-index or layering.
+- **Scope:** This skill covers spacing values only — it does not create a
+  layout grid (use `responsive-grid-system`), define typography sizes (use
+  `fluid-typography-system`), or manage z-index/layering.
 
 ## Common Failure Patterns
 

@@ -363,7 +363,7 @@ meter {
 
 ---
 
-## Validation Steps
+## Validation Criteria
 
 - [ ] **Keyboard Interaction Test:** Tab into the password field. Type a value. Tab to the "Show" toggle. Press `Space` or `Enter` to reveal. Verify focus remains active on the toggle button and the label shifts from "Show" to "Hide".
 - [ ] **Caret Retention Test:** Click on the password field, type `abcdef`, move your text cursor to sit between `c` and `d`, and hit the Show/Hide toggle. Verify that the visual caret remains positioned exactly between `c` and `d` instead of jumping to the end of the text.

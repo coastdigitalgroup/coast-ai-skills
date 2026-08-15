@@ -150,7 +150,7 @@ degrading the "standard" journey.
 - **Assumed Knowledge:** Using icons without labels or jargon that requires
   high cognitive effort to decode.
 
-## Validation Methods
+## Validation Criteria
 
 - [ ] **Conversion Rate (CVR) Lift:** Measure the increase in overall conversion
   as the reachable market expands.

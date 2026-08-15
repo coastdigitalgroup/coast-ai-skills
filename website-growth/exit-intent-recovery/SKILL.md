@@ -41,6 +41,10 @@ visitor into a lead, subscriber, or customer at the moment of highest friction.
 - **Privacy-Restricted Environments:** Where aggressive tracking of mouse
   movement or behavior might violate strict regional compliance or brand
   integrity.
+- **Entry-Triggered Overlays:** For popups shown on page arrival rather than
+  on exit intent, see `welcome-popup-optimization`.
+- **Persistent, Non-Blocking Messaging:** For an always-visible top-of-page
+  message rather than a triggered overlay, see `announcement-bar-optimization`.
 
 ## Inputs
 

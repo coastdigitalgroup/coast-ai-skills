@@ -173,7 +173,7 @@ animation doesn't run. Use `@supports` or a JS polyfill.
   nearest scroll container, which might be a horizontal gallery instead of
   the main page.
 
-## Validation Steps
+## Validation Criteria
 
 - [ ] **Compositor Check:** Use the "Layers" and "Rendering" tabs in DevTools.
       The animation should NOT trigger "Paint" or "Layout" during scroll.

@@ -129,7 +129,7 @@ announcements.
 - **No Focus Indicators:** Custom drop zones missing clear visual focus
   indicators for keyboard users.
 
-## Validation Steps
+## Validation Criteria
 
 - [ ] **Keyboard Test:** Verify you can trigger the file picker and navigate the
       file list/remove buttons using only `Tab` and `Enter/Space`.

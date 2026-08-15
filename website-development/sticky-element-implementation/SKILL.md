@@ -133,7 +133,7 @@ becomes stuck:
 - **Clipped Focus:** A sticky container with `overflow: hidden` cutting off the
   focus rings of its children.
 
-## Validation Steps
+## Validation Criteria
 
 - [ ] **Stickiness Test:** Scroll the page; verify the element stops at the
       specified offset and stays within its parent.

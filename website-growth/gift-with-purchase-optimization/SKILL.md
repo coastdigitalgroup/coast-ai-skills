@@ -140,7 +140,7 @@ E-commerce users are highly adept at finding loopholes to stack discounts. You m
 
 ---
 
-## Validation Methods
+## Validation Criteria
 
 - [ ] **Average Order Value (AOV) Uplift:** Compare the average order value during the GWP campaign against the historical baseline. Target: **18% to 30%** relative lift.
 - [ ] **Direct-to-Cart Conversion Rate (CVR):** Track the percentage of site visitors who add items to the cart. A high-value GWP should increase the conversion rate of PDP browsers by **5% to 15%**.

@@ -220,7 +220,7 @@ Because we use native `<button>` and `<input type="range">`, keyboard tabbing is
 
 ---
 
-## Validation Steps
+## Validation Criteria
 
 - [ ] **Headset Sync Check:** Play the audio, then pause it using external keyboard media keys or a Bluetooth headset. Confirm the on-screen visual icon changes immediately to the play icon.
 - [ ] **Keyboard Only Test:** Press `Tab` to navigate through the player. Ensure you can focus every button and the range inputs. Use `ArrowLeft` / `ArrowRight` on the timeline input to seek. Use `Space` or `Enter` on buttons to activate them.

@@ -53,6 +53,7 @@ website-development/ Category: implementation skills
 website-growth/      Category: conversion + CRO skills
 AGENT.md             General skill and contribution standards for all agents
 AGENTS.md            Shared agent coordination guide (roles, boundaries, PR rules)
+AUDIT.md             Recurring library-wide audit process (dedup, structure, quality)
 CODEX.md             Codex-specific release readiness and validation guidance
 COPILOT.md           GitHub Copilot support-agent guidance
 JULES.md             Google Jules automated maintenance guidance
@@ -90,6 +91,16 @@ Validation Criteria.
 
 Optional support folders: `examples/`, `templates/`, `references/`, `assets/`,
 `scripts/`. Only create them when they materially improve execution quality.
+
+## Keeping the library clean
+
+As the library grows, structural drift (inconsistent section headings across
+skills) and scope duplication (near-identical skills written independently
+over time) accumulate even when each individual skill passes validation.
+`npm run check:skills` only catches missing/malformed frontmatter — it does
+not catch heading drift, duplicate scope, or thin content. Run the recurring
+audit process in `AUDIT.md` periodically (see that file's "When to Run This")
+rather than relying on validation alone to keep the library non-redundant.
 
 ## Development rules
 

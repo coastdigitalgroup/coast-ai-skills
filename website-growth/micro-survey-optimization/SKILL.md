@@ -146,7 +146,7 @@ Verify that the survey is helpful, not a hurdle.
 - **Overlap Conflict:** Triggering a survey at the same time as a chat widget or
   discount popup, creating a "clutter wall."
 
-## Validation Methods
+## Validation Criteria
 
 - [ ] **Response Rate (RR):** (Surveys Started / Surveys Shown) * 100. Target:
   3–5% for contextual micro-surveys.

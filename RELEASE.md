@@ -25,6 +25,9 @@ For each changed skill:
 - Confirm support files live only in `examples/`, `templates/`, `references/`,
   `assets/`, or `scripts/`.
 - Check for placeholder content, stale references, and duplicate skill scope.
+- If ~20-30 skills have been added since the last full audit, run the
+  `AUDIT.md` process first — this checklist gates the changed skills in this
+  release, not the library's accumulated structural/duplicate drift.
 
 ## 3. Source And Package Checks
 

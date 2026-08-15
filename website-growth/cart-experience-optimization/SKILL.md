@@ -109,6 +109,28 @@ Verify that the cart serves as a facilitator, not a roadblock.
   Slide-out or Drawer cart to keep the user on the current page. For 5+ items,
   a full-page cart is often better for clarity.
 
+## Constraints
+
+- **Data Dependency:** "No Surprises" transparency requires real-time
+  shipping and tax calculation data available before checkout begins. If the
+  platform can only calculate these at checkout, recommendations are limited
+  to estimated ranges.
+- **Template Limits:** Slide-out vs. full-page cart layout is often
+  constrained by the underlying platform's theme architecture (e.g.,
+  Shopify, custom-built carts); some platforms cannot support both.
+- **Express Pay Availability:** Displaying Apple Pay/PayPal/Shop Pay
+  buttons in the cart depends on the payment processor and platform
+  supporting cart-level express checkout.
+
+## Non-Goals
+
+- Does not cover the address, shipping-method, and payment-entry steps
+  after "Begin Checkout" — see `checkout-flow-optimization`.
+- Does not design the recommendation algorithm behind "People Also Bought"
+  modules, only their placement and restraint within the cart.
+- Does not apply to "Buy Now" flows that skip the cart entirely, or to
+  SaaS pricing selection with no cart concept — see When NOT to Use.
+
 ## Common Failure Patterns
 
 - **The "Mystery Total":** Showing a subtotal only, leaving the user to guess

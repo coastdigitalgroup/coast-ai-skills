@@ -34,6 +34,10 @@ reduces friction, builds trust, and directly increases conversion rates.
 - **Low-Stakes Micro-Conversions:** Simple actions like "Read More" or "Scroll
   Down" don't usually require complex objection handling.
 - **Internal Tools:** Where usage is mandatory and "persuasion" is not required.
+- **Pricing/Guarantee-Specific Risk:** For refund, warranty, or "cancel
+  anytime" risk reduction, see `risk-reversal-optimization`.
+- **Testimonial/Review Trust Signals:** For third-party validation (reviews,
+  ratings, logos), see `social-proof-optimization`.
 
 ## Inputs
 

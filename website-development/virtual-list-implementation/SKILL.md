@@ -194,7 +194,7 @@ Virtualization deletes off-screen elements, which breaks standard keyboard `Tab`
 
 ---
 
-## Validation Steps
+## Validation Criteria
 
 ### 1. Performance Profiling
 - Open Chrome DevTools and activate the **Performance** panel.

@@ -139,7 +139,7 @@ assistive technology defaults.
 - **No "Esc" to Cancel:** Forgetting that `Escape` should almost always close
   active overlays or cancel "pending" shortcut sequences.
 
-## Validation Steps
+## Validation Criteria
 
 - [ ] **Input Field Test:** Verify shortcuts don't trigger while typing in
       an `<input>` or `<textarea>`.

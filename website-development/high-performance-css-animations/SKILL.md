@@ -129,7 +129,7 @@ Respect users who have "Reduce Motion" enabled at the OS level.
 - **Ignoring User Preferences:** Forcing bouncy or fast animations on users
   with vestibular disorders or motion sensitivity.
 
-## Validation Steps
+## Validation Criteria
 
 - [ ] **DevTools Rendering Audit:** Open "Rendering" tab in Chrome DevTools and
       enable "Paint flashing". The animated element should NOT flash green

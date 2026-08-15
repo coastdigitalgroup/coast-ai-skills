@@ -101,6 +101,27 @@ Treat FAQ interactions as behavioral analytics.
 
 ---
 
+## Constraints
+
+- **Requires Voice-of-Customer Data:** Objection-driven FAQ copy depends on
+  real support logs, sales feedback, or exit-survey data. Without it, FAQ
+  content risks becoming speculative rather than addressing actual FUDs.
+- **Curated Volume Only:** This skill is bounded to 4-8 high-impact
+  questions per conversion page; it is not a mechanism for exhaustive
+  product documentation.
+- **Requires Finalized Product/Pricing Details:** Precise, direct answers
+  (the "7-Word Rule") cannot be written before pricing, policies, and
+  features are settled.
+
+## Non-Goals
+
+- Does not cover building a searchable knowledge base, help center, or
+  support ticketing system — see When NOT to Use.
+- Does not cover live chat or chatbot implementation, only how FAQ answers
+  link out to such tools contextually.
+- Does not address broader page copy or hero messaging — only the FAQ
+  block and its surrounding CTAs.
+
 ## Common Failure Patterns
 
 - **The "Vanity Dump":** Writing fake questions designed to boast about the product rather than handle real anxieties. Prospects see through this immediately, causing a drop in trust.
@@ -111,7 +132,7 @@ Treat FAQ interactions as behavioral analytics.
 
 ---
 
-## Validation Methods
+## Validation Criteria
 
 - [ ] **Adjacent CTA Conversion Lift:** Measure the increase in clicks and completions of the primary conversion CTA directly following the FAQ section after optimizing the FAQ content.
 - [ ] **Pre-Sales Support Query Reduction:** Track the volume of pre-sales support tickets, emails, or live-chat queries regarding topics answered in the new FAQ. A drop indicates the site is successfully self-serving answers.

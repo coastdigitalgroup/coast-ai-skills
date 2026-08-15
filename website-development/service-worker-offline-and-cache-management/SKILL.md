@@ -274,7 +274,7 @@ Choosing the correct caching strategy is critical to avoiding serving stale, bro
 
 ---
 
-## Validation Steps
+## Validation Criteria
 
 ### 1. DevTools Lifecycle Verification
 - [ ] Open the web application. Open Chrome DevTools, and navigate to **Application -> Service Workers**.

@@ -296,7 +296,7 @@ function announceToScreenReader(message) {
 
 ---
 
-## Validation Steps
+## Validation Criteria
 
 - [ ] **Click-to-Focus Check:** Click on any whitespace inside the fake outer border. Confirm that focus immediately shifts to the inner text `<input>`.
 - [ ] **Roving Keyboard Focus Test:**

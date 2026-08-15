@@ -194,7 +194,7 @@ A sudden, high-contrast visual "pop" of a loaded asset can degrade perceived use
 
 ---
 
-## Validation Steps
+## Validation Criteria
 
 - [ ] **LCP Visual Load Check:** Open the **Network** tab in Chrome DevTools. Filter by "Img" and reload. Ensure that above-the-fold assets are requested immediately (status `200` or `304`) and below-the-fold lazy assets are *not* requested initially.
 - [ ] **On-Scroll Loading Verification:** Scroll the page slowly while keeping the Network panel open. Observe that new image assets are requested sequentially *before* they enter the visible boundary of the viewport.

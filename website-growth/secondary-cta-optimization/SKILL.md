@@ -38,6 +38,8 @@ building the trust necessary for a future primary conversion.
   flow, any secondary action acts as a distraction and should be removed.
 - **Urgency-Driven Pages:** On pages where the offer is extremely time-limited
   (e.g., a Flash Sale), focus 100% of the attention on the primary goal.
+- **Multiple In-Body Contextual Links:** For placing several section-specific
+  CTAs throughout long-form content, see `contextual-cta-optimization`.
 
 ## Inputs
 

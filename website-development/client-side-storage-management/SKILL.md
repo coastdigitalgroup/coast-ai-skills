@@ -146,7 +146,7 @@ you to keep the UI in sync across windows.
 -   **Blocking the Main Thread:** Performing heavy serialization or large reads
     from `localStorage` during critical animations or interactions.
 
-## Validation Steps
+## Validation Criteria
 
 -   **Quota Test:** Attempt to save a very large string to verify that the
     `QuotaExceededError` is caught and handled gracefully.

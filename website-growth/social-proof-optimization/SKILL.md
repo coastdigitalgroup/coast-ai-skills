@@ -34,6 +34,11 @@ directly improves conversion rates and user trust.
   formal social proof might feel "over-marketed."
 - **Early-Stage Alpha Testing:** If you literally have zero users yet, focus on
   "Trust by Design" (UI quality) rather than "Social Proof" (user validation).
+- **Direct Objection Rebuttal:** For answering a specific stated objection
+  rather than surfacing third-party validation, see
+  `objection-handling-optimization`.
+- **Guarantee/Refund-Based Risk Reduction:** For warranty, refund, or "cancel
+  anytime" messaging, see `risk-reversal-optimization`.
 
 ## Inputs
 

@@ -35,6 +35,9 @@ reducing friction, and delivering immediate, specific value.
 - **Low-Trust Environments:** If the brand is entirely unknown and the offer
   is too "heavy" (e.g., a 50-page whitepaper), focus on `social-proof-optimization`
   first.
+- **Hard-Gating Existing Content:** For gating existing premium content
+  behind a paywall/login rather than offering a standalone downloadable
+  magnet, see `gated-content-paywall-optimization`.
 
 ## Inputs
 

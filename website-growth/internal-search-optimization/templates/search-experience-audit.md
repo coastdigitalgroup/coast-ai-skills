@@ -39,9 +39,17 @@ experience. Rate each item on a scale of 1-5 (1 = Poor/Missing, 5 = Excellent).
 ## 4. Recovery (The "Zero Results" UX)
 
 - [ ] **No Dead-Ends:** Is the "No Results" page free of blank spaces?
-- [ ] **Smart Fallback:** Are popular products or categories suggested?
+- [ ] **Query Retention:** Does the search input keep the user's original
+      (uncleared) query so they can edit rather than retype it?
+- [ ] **Smart Fallback:** Are popular products or categories suggested, and
+      are those fallbacks explicitly labeled (e.g., "Our Best Sellers") so
+      users don't mistake them for actual matches?
+- [ ] **Visual Category Bubbles:** Does the page show 3-6 image-led category
+      cards as an alternative discovery path, not just text links?
 - [ ] **Clarity:** Does the page clearly state what was searched for and why it
       might have failed?
+- [ ] **Conversions of Last Resort:** Is there a live chat prompt or a
+      lightweight "Request a Product" form to capture intent before exit?
 - [ ] **Support:** Is there a clear path to contact support or use a different
       discovery method?
 

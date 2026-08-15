@@ -136,7 +136,7 @@ the Back or Forward button.
 - **Missing Defaults:** Not handling the case where the URL is empty, leading
   to `null` or `undefined` states.
 
-## Validation Steps
+## Validation Criteria
 
 - [ ] **Refresh Test:** Apply a filter, refresh the page, and verify the filter
       is still active and the UI matches.

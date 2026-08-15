@@ -160,7 +160,7 @@ html {
 - **Late Application:** Applying the scroll-lock padding *after* the modal
   animation starts, causing a visible "hiccup" during the transition.
 
-## Validation Steps
+## Validation Criteria
 
 - [ ] **Modal Test:** Open a modal on a long page. Verify the background content
       and the header do not shift by even a single pixel.

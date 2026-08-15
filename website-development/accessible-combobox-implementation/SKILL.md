@@ -31,7 +31,7 @@ follow the ARIA 1.2 Combobox pattern, making them usable for everyone.
   acceptable, always use the native element. It is more robust and requires zero
   JavaScript for accessibility.
 - **Navigation Menus:** If the dropdown is for site navigation (links), use a
-  navigation menu pattern (e.g., `accessible-main-navigation`) instead of a
+  navigation menu pattern (e.g., `responsive-navigation-implementation`) instead of a
   combobox.
 - **Large Data Sets without Search:** A combobox with hundreds of items but no
   filtering is a poor user experience.

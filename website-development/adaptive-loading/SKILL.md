@@ -211,7 +211,7 @@ if (conn) {
 
 ---
 
-## Validation Steps
+## Validation Criteria
 
 - [ ] **Existence Checks:** Verify in the console that the application loads perfectly in Safari (where Connection and DeviceMemory APIs are absent) and falls back to a functional, stable state.
 - [ ] **Network Throttling Test:** Open the Chrome DevTools Network panel, set throttling to "Slow 3G," reload, and verify that the video background is bypassed and speculative prefetch calls are correctly skipped.

@@ -118,7 +118,7 @@ Standard radio button behavior handles `Tab` to reach the group and `ArrowKeys` 
 - **Icon-Only Buttons:** Using `<button>` with no label, making it inaccessible to screen readers.
 - **Broken Selectors:** Using selectors that only highlight the *last* clicked star instead of the trail.
 
-## Validation Steps
+## Validation Criteria
 
 - [ ] **Keyboard Test:** Verify `Right Arrow` moves focus and selection to the next star (higher value).
 - [ ] **Screen Reader Test:** Verify that each star is announced with its value and the total count (e.g., "3 of 5").

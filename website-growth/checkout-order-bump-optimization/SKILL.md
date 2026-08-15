@@ -134,7 +134,7 @@ The bump must act as a seamless extension of the form:
 
 ---
 
-## Validation Methods
+## Validation Criteria
 
 ### 1. Primary Metrics (The Growth KPI)
 - **Order Bump Take Rate (%):** Calculate as `(Orders containing checkout bump / Total checkout orders) * 100`. Target benchmark: **10% to 35%** depending on the vertical and pricing.

@@ -121,6 +121,27 @@ Verify that the promotion is profitable, clear, and non-distracting.
   for higher-priced items (over $100), while % often wins for lower-priced
   items.
 
+## Constraints
+
+- **Margin Data Required:** Discount depth and stacking rules cannot be
+  recommended responsibly without floor-price and margin data; guessing at
+  profitability risks negative-margin orders.
+- **Platform Capability:** Auto-apply logic depends on the cart/checkout
+  platform supporting URL-parameter or rule-based discounting. Legacy
+  platforms may force a manual code-entry field.
+- **Brand Positioning:** Discount frequency and depth must stay within
+  limits the brand's premium/luxury positioning can absorb — see When NOT
+  to Use.
+
+## Non-Goals
+
+- Does not design loyalty or points-based retention programs — those are a
+  separate structural mechanic outside this skill's scope.
+- Does not cover subscription tier or SaaS pricing structure — see
+  `pricing-page-optimization`.
+- Does not address backend fraud prevention, discount-code generation, or
+  rule-engine implementation; it covers strategy and on-site UX only.
+
 ## Common Failure Patterns
 
 - **The "Coupon Hunt" Prompt:** A giant, empty box in the checkout that sends

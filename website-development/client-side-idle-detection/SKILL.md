@@ -128,7 +128,7 @@ Ensure absolute compliance with WCAG Success Criterion 2.2.1:
 - **Silent Timeout Warnings:** Displaying a visual modal overlay but failing to alert screen readers, leading to blind/visually impaired users being suddenly logged out without warning.
 - **Tab Desync Logout:** Working actively in Tab A for an hour, while inactive Tab B's local timer triggers a modal and logs the user out globally, interrupting active work on Tab A.
 
-## Validation Steps
+## Validation Criteria
 
 - [ ] **Performance Profile Check:** Run a Performance Panel trace while vigorously moving the mouse and scrolling. Ensure no "Long Tasks" are present and CPU usage from the idle tracking hooks is negligible.
 - [ ] **Background Suspension Simulation:** Set an idle timeout of 5 seconds. Open the tab, background it (switch tabs), wait 10 seconds, and switch back. Verify that the session is instantly recognized as expired on focus without a laggy countdown.

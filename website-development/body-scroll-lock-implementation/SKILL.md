@@ -128,7 +128,7 @@ When the overlay closes, ensure all registered touch event listeners are detache
 
 ---
 
-## Validation Steps
+## Validation Criteria
 
 ### 1. Desktop & Android Audit
 - [ ] Open the overlay. Verify the system scrollbar disappears but page content does not shift horizontally.

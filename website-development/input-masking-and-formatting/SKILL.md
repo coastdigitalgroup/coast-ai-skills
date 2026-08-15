@@ -120,7 +120,7 @@ caused by manual separator entry (like typing dashes in a phone number).
 - **Broken Backspace:** Making it impossible to delete separators, forcing
   the user to select-all and start over.
 
-## Validation Steps
+## Validation Criteria
 
 - [ ] **Cursor Edit Test:** Click in the middle of a formatted value (e.g.,
       between digits 4 and 5 of a credit card) and type/delete. Does the cursor

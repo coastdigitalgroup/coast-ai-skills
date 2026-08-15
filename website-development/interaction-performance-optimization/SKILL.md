@@ -134,7 +134,7 @@ Paint (INP) scores.
 - **Excessive Yielding:** Yielding too frequently (e.g., every 1ms), which can
   add significant overhead and actually slow down the total task time.
 
-## Validation Steps
+## Validation Criteria
 
 - [ ] **Performance Panel Check:** Verify that the interaction in DevTools no
       longer shows a "Long Task" and the INP time is < 200ms.

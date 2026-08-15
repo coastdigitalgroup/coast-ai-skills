@@ -23,3 +23,4 @@ standardization, config cleanup, and review tracking.
 - `JULES.md` - Google Jules automated maintenance guide.
 - `RELEASE.md` - package release checklist.
 - `CLAUDE.md` - Claude Code implementation guide.
+- `AUDIT.md` - recurring library-wide dedup/structure/quality audit process.

@@ -54,7 +54,8 @@ Full validation command: `npm run validate`
 
 Detailed implementation procedure lives in `CLAUDE.md`. Portable skill and
 contribution standards live in `AGENT.md`. Human contribution workflow lives in
-`CONTRIBUTING.md`. Strategic direction lives in `ROADMAP.md`.
+`CONTRIBUTING.md`. Strategic direction lives in `ROADMAP.md`. The recurring
+library-wide dedup/structure/quality audit process lives in `AUDIT.md`.
 
 ## Agent-Specific Guides
 

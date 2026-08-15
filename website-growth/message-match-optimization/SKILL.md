@@ -36,6 +36,10 @@ fails to validate that expectation within 3 seconds, they will leave.
   experience where context is already established.
 - **Brand Awareness Campaigns (No CTA):** Where there is no specific expectation
   of a follow-up action.
+- **Page Section Ordering:** For structuring the sequence of sections beneath
+  the hero, see `landing-page-content-hierarchy`.
+- **Intent Segmentation:** For diagnosing which intent group a visitor
+  belongs to before writing matched copy, see `user-intent-alignment`.
 
 ## Inputs
 

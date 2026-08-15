@@ -35,7 +35,7 @@ traps or leaving assistive technology users in the dark.
   nested list (`<ul>` containing a child `<ul>` or an accordion list) is much simpler
   and requires significantly less keyboard override.
 - **Site-Wide Desktop Header Menus:** Desktop flyout navigation panels should follow
-  the Disclosure or Menu/Menubar pattern (e.g., `accessible-main-navigation`)
+  the Disclosure or Menu/Menubar pattern (e.g., `responsive-navigation-implementation`)
   rather than a Tree View, as search engine crawlers and screen reader users expect
   link-oriented tab navigation in headers.
 - **Multi-select Filtering:** If users are merely filtering a search result with
@@ -187,7 +187,7 @@ to target individual `role="treeitem"` elements):
 - **Visually Hidden but Interactive Descendants:** Using `opacity: 0` or simple scale transitions to hide closed sub-trees instead of `display: none` or `visibility: hidden`. Screen readers and keyboards will still find and focus the hidden elements, causing highly erratic behavior.
 - **No Folder Status Announcement:** Relying entirely on visual folder icons to show nested status. Visually impaired users won't know if a node is a folder/parent or a file/leaf unless `aria-expanded` or nested state is correctly declared.
 
-## Validation Steps
+## Validation Criteria
 
 - [ ] **Roving Tabindex Verification:** Pressing `Tab` should focus the last-focused tree item. Pressing `Tab` again should leave the entire Tree widget instantly.
 - [ ] **Directional Arrow Navigation Test:**

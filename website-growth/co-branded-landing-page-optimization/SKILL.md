@@ -136,7 +136,7 @@ Since social media and influencer traffic is overwhelmingly mobile-first, struct
 
 ---
 
-## Validation Methods
+## Validation Criteria
 
 ### 1. Direct Conversion Metrics
 - **Partner Campaign Conversion Rate (P-CVR):** Measure the percentage of referred users who complete the desired conversion action. Compare this against campaigns using generic landers.

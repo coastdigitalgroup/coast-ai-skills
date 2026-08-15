@@ -199,6 +199,11 @@ When adding or editing a skill:
 If an existing skill can be expanded into a complete solution, do that before
 creating a near-duplicate.
 
+These rules prevent new duplication at write time, but duplication and
+structural drift still accumulate across many independent skill additions
+over time. See `AUDIT.md` for the recurring process that sweeps the whole
+library for that drift rather than relying on per-skill discipline alone.
+
 ---
 
 ## Quality Bar

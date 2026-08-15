@@ -124,7 +124,7 @@ When a size is out of stock, do not let it become an immediate bounce.
 
 ---
 
-## Validation Methods
+## Validation Criteria
 
 - [ ] **PDP-to-Cart Click-Through Rate:** Measure the conversion rate from visiting a PDP to adding a sized item to the cart. Target: **8% to 15%** relative lift.
 - [ ] **Sizing Customer Support Inquiries:** Track the number of support requests containing keywords like "size," "fit," "fits," "measurements." Target: **>30%** reduction.

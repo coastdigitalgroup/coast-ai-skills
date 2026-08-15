@@ -24,6 +24,8 @@ The Risk Reversal Optimization skill provides a systematic framework for identif
 - **Highly Perishable or Single-Use Goods:** Fresh food, custom digital assets (e.g., logo design files that cannot be revoked), or tickets to live events where returns are structurally impossible.
 - **Regulated Financial & Legal Services:** Where statutory refund structures or regulatory limits prevent standard satisfaction guarantees.
 - **Bespoke, Made-to-Order Custom Products:** Where the physical product is personalized with names, photos, or custom dimensions that make resale impossible.
+- **General Objection Rebuttal:** For non-guarantee objections (e.g., "will this integrate with X?"), see `objection-handling-optimization`.
+- **Third-Party Trust Signals:** For reviews, testimonials, or social validation rather than guarantee/refund mechanics, see `social-proof-optimization`.
 
 ## Inputs
 
@@ -129,7 +131,7 @@ Logistical margins must protect against guarantee abuse. Perform this breakeven 
 
 ---
 
-## Validation Methods
+## Validation Criteria
 
 - [ ] **Cart-to-Checkout Transition Rate:** Measure if placing a guarantee in the mini-cart increases the conversion of cart views into checkout starts.
 - [ ] **Checkout Completion Rate (CCR):** Measure checkout completion before and after placing a risk-reversal badge next to the credit card input fields. Target: **5% to 15%** relative lift.

@@ -32,6 +32,12 @@ like demo requests, trial signups, and gated content downloads.
 - **Complex E-commerce Checkouts:** While some principles overlap, checkouts
   involve payment security and shipping complexities that require a dedicated
   checkout optimization skill.
+- **Designing the Offer Itself:** For creating the incentive/content behind
+  the form (not the form's fields and friction), see
+  `lead-magnet-optimization`.
+- **Hard-Gating Existing Content:** For blocking access to full content
+  behind a login/paywall rather than a soft-friction form, see
+  `gated-content-paywall-optimization`.
 
 ## Inputs
 

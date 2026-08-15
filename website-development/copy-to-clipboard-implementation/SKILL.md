@@ -125,7 +125,7 @@ animations.
   causing confusing announcements when the text changes while the user is still
   interacting with it.
 
-## Validation Steps
+## Validation Criteria
 
 - [ ] **Functional Test:** Verify the text is actually in the clipboard after
       clicking (paste it into a notepad).

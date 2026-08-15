@@ -176,16 +176,14 @@ the full execution guidance.
 - `user-avatar-system`
 - `visual-hierarchy-system`
 
-### website-development (47 skills)
+### website-development (45 skills)
 
 - `accessible-accordion-implementation`
 - `accessible-carousel-implementation`
 - `accessible-combobox-implementation`
 - `accessible-file-upload-implementation`
-- `accessible-main-navigation`
 - `accessible-modal-dialog`
 - `accessible-pagination-implementation`
-- `accessible-responsive-navigation`
 - `accessible-tabs-implementation`
 - `accessible-toast-implementation`
 - `accessible-tooltip-implementation`

@@ -122,7 +122,7 @@ Breakpoints written in `px` do not scale with text-only resizing, meaning that a
 
 ---
 
-## Validation Steps
+## Validation Criteria
 
 ### 1. Browser Font Size Scale Test (System Resize)
 - [ ] In Google Chrome, go to **Settings > Appearance > Font Size** and set it to "Very Large" (or customize custom font size to `32px` - equivalent to 200%).

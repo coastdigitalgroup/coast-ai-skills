@@ -136,7 +136,7 @@ Terminate the worker when it's no longer needed to free up system resources.
   steps on the main thread that are heavy enough to cause jank.
 - **Global Context Errors:** Assuming `this` or `self` refers to `window`.
 
-## Validation Steps
+## Validation Criteria
 
 - [ ] **UI Responsiveness Test:** Run the heavy task and verify that animations
       (like a CSS spinner) remain perfectly smooth (60fps).

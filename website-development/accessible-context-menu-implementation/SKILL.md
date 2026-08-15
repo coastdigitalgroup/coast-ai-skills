@@ -24,7 +24,7 @@ While custom context menus are vital for desktop-grade SaaS dashboards, file man
 
 ## When NOT to Use
 
-- **Global Navigation:** For top-level main site navigation, use standard navigation links (see `accessible-main-navigation` and `accessible-responsive-navigation`).
+- **Global Navigation:** For top-level main site navigation, use standard navigation links (see `responsive-navigation-implementation`).
 - **Dropdown / Select Fields:** For standard form fields where a user chooses from options, use standard select elements (`<select>`) or a combobox (see `accessible-combobox-implementation`).
 - **Split Buttons and Accordions:** For general in-page action menus associated with a static button, use standard popover disclosures or custom popover API buttons (see `popover-api-implementation`).
 - **Standard Link Directories:** Avoid replacing browser link context menus (like "Open link in new tab"). Custom context menus must only be applied to custom application objects, not standard anchor links.
@@ -363,7 +363,7 @@ function setupTouchEvents(element) {
 
 ---
 
-## Validation Steps
+## Validation Criteria
 
 - [ ] **Context Menu Suppression Check:** Right-click inside the trigger area. Verify that the native system menu is fully blocked and ONLY the custom context menu is displayed.
 - [ ] **Keyboard Invocation Check:** Select the target element and press `Shift + F10` or the `Context Menu` key. Ensure the context menu opens correctly anchored at the bottom-left corner of the element, not at `(0,0)`.

@@ -34,6 +34,10 @@ scannability to reduce cognitive load and improve conversion rates.
   utility outweighs persuasive flow.
 - **E-commerce Product Detail Pages (PDPs):** Which often follow a rigid,
   template-driven hierarchy better served by PDP-specific optimization.
+- **Headline-to-Source Consistency:** For matching a page's headline to the
+  ad or email that drove the click, see `message-match-optimization`.
+- **Intent Segmentation:** For routing visitors by intent before designing
+  the hierarchy, see `user-intent-alignment`.
 
 ## Inputs
 

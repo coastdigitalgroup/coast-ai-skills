@@ -239,7 +239,7 @@ By default, modern screen readers announce elements with `role="switch"` as "Swi
 - **"On/Off" State in Label:** Changing the text content of the visible label when the switch state changes. This causes the screen reader to double-read or get out of sync (e.g., "Dark mode: dark mode enabled, switch off").
 - **Contrast Failure:** Relying solely on a change from light gray to light green to signal that the switch is on, which is invisible to color-blind users. Include borders, text indicators, or strong 3:1+ high-contrast changes.
 
-## Validation Steps
+## Validation Criteria
 
 - [ ] **Screen Reader Test:** Open a screen reader (e.g., VoiceOver, NVDA) and navigate to the switch. Confirm it announces the switch role and its state (e.g., *"Push Notifications, switch, off"*).
 - [ ] **Keyboard Interaction Test:** Focus the switch using the `Tab` key. Verify that pressing `Space` toggles the state for both implementations, and `Enter` toggles the state for the `<button>` implementation (and `<input>` implementation if keydown triggers are added).

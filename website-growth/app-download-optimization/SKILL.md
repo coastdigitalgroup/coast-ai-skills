@@ -95,6 +95,28 @@ Verify that the app promotion serves as an optimized path, not a barrier to the 
 - **Interstitials Only Post-Value:** Never show a full-screen app-install interstitial on initial page load. Only prompt with high-friction overlays after the user has taken a high-intent action (e.g., after completing a purchase, completing a web task, or clicking "Track Order").
 - **The "No Force" Policy:** Always maintain a fully functional mobile web fallback. Forcing users to download the app to view simple information (like pricing or store locations) destroys traffic and conversion momentum.
 
+## Constraints
+
+- **Technical Prerequisite:** Effective deep linking requires engineering
+  work (Universal Links, App Links, or a deferred deep-linking SDK such as
+  Branch.io or AppsFlyer). Copy and layout changes alone cannot fix a broken
+  or absent linking setup.
+- **Platform Policy Limits:** Smart banners and interstitials must comply
+  with Apple's and Google's mobile guidelines; overly aggressive prompts
+  risk App Store rejection or Google's intrusive-interstitial search penalty.
+- **Requires a Published App:** This skill assumes a live, publicly
+  discoverable app in the App Store and/or Google Play. It cannot optimize
+  for apps still in development or in closed beta.
+
+## Non-Goals
+
+- Does not cover App Store Optimization (ASO) — keyword research, listing
+  screenshots, or in-store conversion rate are a separate discipline.
+- Does not cover in-app onboarding or activation once the user has
+  installed and opened the app — see `user-onboarding-optimization`.
+- Does not address paid app-install advertising, attribution modeling, or
+  CPI bid strategy; it only optimizes the on-site path to install.
+
 ## Common Failure Patterns
 
 - **The Desktop Badges Dead-End:** Displaying "Download on the App Store" badges on desktop that point directly to the app store web pages. This forces the user to manually switch to their mobile device and search from scratch.
@@ -103,7 +125,7 @@ Verify that the app promotion serves as an optimized path, not a barrier to the 
 - **Lost Context (Deep-Link Failure):** Redirecting mobile web users who already have the app installed to the generic App Store page instead of launching the app directly via universal linking.
 - **Post-Install Landing on Home:** Failing to use deferred deep-linking, resulting in newly installed users landing on a blank app home screen and having to find the product again.
 
-## Validation Methods
+## Validation Criteria
 
 - [ ] **Web-to-App Click-Through Rate:** Measure the percentage of web visitors who click the "Install/Get App" CTAs. (Clicks / Web Visitors) * 100. Target: 3-8%.
 - [ ] **App Install Rate (AIR):** The percentage of app-store outbound clicks that result in successful installs. (App Installs / Store-badge Clicks) * 100. Target: >25%.

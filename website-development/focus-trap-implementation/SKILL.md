@@ -126,7 +126,7 @@ Intercept the `keydown` event on the active container. Check if the pressed key 
 
 ---
 
-## Validation Steps
+## Validation Criteria
 
 - [ ] **Tab Order Test:** Tab forwards and backwards repeatedly within the active overlay. Confirm focus wraps seamlessly from the last element to the first, and first element to the last, without ever leaking to the parent page.
 - [ ] **Escape Key Test:** Press `Escape` inside the container. Confirm the overlay closes and immediately returns focus to the button/link that triggered it.

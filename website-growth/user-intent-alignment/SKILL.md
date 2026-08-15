@@ -38,6 +38,10 @@ logical next step, reducing bounce rates and building a high-velocity funnel.
   established; intent is now about utility and retention.
 - **Utility Tools/Dashboards:** Where the user is performing a specific task
   rather than browsing through a journey.
+- **Ad/Source Copy Consistency:** For matching a specific ad or email's
+  headline to the landing page, see `message-match-optimization`.
+- **Section Ordering:** For the structure and sequence of page sections
+  beneath the hero, see `landing-page-content-hierarchy`.
 
 ## Inputs
 
@@ -145,7 +149,7 @@ Verify that the page provides a "Bridge" to the next level of awareness.
 - **Overwhelming Choice:** Offering "Problem Aware" users too many product
   options instead of one clear educational path.
 
-## Validation Methods
+## Validation Criteria
 
 - [ ] **Bounce Rate Reduction:** Measure if users stay longer on the page after
   aligning content with their entry intent.

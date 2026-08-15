@@ -7,6 +7,9 @@ All notable changes to this project will be documented here. The format follows
 
 ### Added
 
+- `AUDIT.md` recurring skill-library audit process covering structural
+  consistency, duplicate/overlap detection with a merge-vs-cross-reference
+  decision framework, and content quality sweeps across all three categories.
 - `service-worker-offline-and-cache-management` skill to `website-development` category, providing a production-grade frontend protocol and modular Vanilla JavaScript controller class for implementing background network interception, asset persistence (pre-caching and dynamic caching), offline fallback pages, and safe update lifecycles without user lock-in.
 - `image-gallery-and-lightbox-system` skill to `website-design` category, providing a structured, accessible, and highly responsive framework for media gallery layouts and their accompanying fullscreen lightbox overlays with touch gesture support and complete keyboard focus control.
 - `sticky-and-floating-ui-system` skill to `website-design` category, defining a systematic framework for designing, specifying, and auditing persistent, overlaying, and scroll-responsive UI elements (progressive headers, mobile bottom docks, floating action buttons, and sticky sidebars) to maximize utility and conversion without causing visual fatigue or WCAG focus obscuration.
@@ -14,6 +17,18 @@ All notable changes to this project will be documented here. The format follows
 - `accessible-range-slider-implementation` skill to `website-development` category, covering standard single and dual-thumb range sliders using native elements, cross-browser vendor styles, and keyboard/touch tracking.
 - `command-palette-system` skill to `website-design` category, defining a systematic framework for accessible, keyboard-first Cmd+K menus.
 - `meeting-scheduling-optimization` skill to `website-growth` category, improving calendar booking rates and show-up rates.
+
+### Changed
+
+- Normalized the `Validation Criteria` section heading across `website-development` and `website-growth` (previously inconsistently titled `Validation Steps` or `Validation Methods`).
+- Added skill-specific `Constraints`/`Non-Goals` content to 9 `website-growth` skills that were missing them.
+- Resolved the toast/overlay scope overlap between `overlay-and-dialog-system` and `toast-and-snackbar-system` (`website-design`); folded a stray `Non-Goals` section into `Constraints` in `fluid-spacing-system`.
+- Added reciprocal "When NOT to Use" cross-references across six adjacent-but-distinct `website-growth` skill groups to disambiguate overlapping intent without merging genuinely different content.
+
+### Removed
+
+- `accessible-responsive-navigation` and `accessible-main-navigation` skills (`website-development`), merged into `responsive-navigation-implementation`.
+- `zero-search-results-optimization` skill (`website-growth`), merged into `internal-search-optimization`.
 
 ## [0.2.0] — 2026-07-05
 

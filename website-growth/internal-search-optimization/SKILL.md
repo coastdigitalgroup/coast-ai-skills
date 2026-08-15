@@ -99,15 +99,43 @@ Reduce the interaction cost of typing.
 
 ### 4. Implement Zero-Results Recovery
 
-Eliminate dead-ends in the user journey.
+Eliminate dead-ends in the user journey. Before designing the recovery
+layout, categorize *why* queries are failing by exporting 30-90 days of
+search analytics into four buckets: **Typo/Misspelling** (e.g., "dumbell"),
+**Synonym/Alternative Vocabulary** (e.g., "sofa" vs. "couch"),
+**Competitor** (e.g., "Yeti cooler" on a Pelican site), and **Genuine
+Catalog Gap** (products you don't carry at all). Each bucket calls for a
+different fix.
 
-- **The "Smart Fallback":** If zero results are found, never show a blank page.
-  Display:
-  - Popular categories or best-sellers.
-  - "Did you mean...?" suggestions.
-  - Contact options for help.
-- **Search Term Normalization:** Strip unnecessary characters or plurals to try
-  and find a partial match.
+- **Auto-Correction & "Did You Mean":** If the search platform is highly
+  confident in a typo correction, auto-apply it with a subtle notice
+  ("Showing results for 'dumbbell'. Search instead for 'dumbell'?"). If
+  confidence is lower, surface a prominent, clickable "Did you mean...?"
+  suggestion at the top of the page instead of auto-redirecting.
+- **Search Term Normalization:** Strip unnecessary characters or plurals to
+  try and find a partial match.
+- **Never Show a Blank Page:** A failed search must render a structured
+  recovery layout, not an error screen:
+  - **Human-centric copy:** Reframe cold error text ("0 results matched")
+    as helpful guidance ("We couldn't find an exact match for '[Query]',
+    but we're here to help you find what you need.").
+  - **Visual category bubbles:** 4-6 clickable, image-led category cards
+    (e.g., "Best Sellers," "New Arrivals," "Clearance") below the search
+    bar — these outperform plain text links, especially on mobile.
+  - **Dynamic fallback recommendations:** Show a "Based on your recently
+    viewed items" carousel if session history exists; otherwise fall back
+    to a static top-sellers grid. If the failed query matches a broader
+    category tag (e.g., "Nike" with zero hits but a "Running Shoes"
+    category exists), pull top sellers from that category instead.
+  - Every fallback grid must carry an explicit label (e.g., "Our Most
+    Popular Items Today") — never present unrelated products without
+    context, which reads as a broken search result rather than a helpful
+    suggestion.
+- **Conversions of Last Resort:** When no fallback content resolves the
+  query, capture intent before the user exits: trigger a contextual live
+  chat prompt referencing their search term, or offer a lightweight
+  "Request a Product" micro-form (email + what they're looking for) —
+  particularly effective for specialized B2B or long-tail catalogs.
 
 ### 5. Review Against Decision Rules
 
@@ -120,15 +148,33 @@ Verify that the search strategy aligns with conversion heuristics.
 - **Speed is a Feature:** Search results and auto-suggestions must appear in
   under 200ms to feel "instant."
 - **Persistent Input:** The search query should remain in the search box on the
-  results page so users can easily refine it.
+  results page so users can easily refine it — never clear it automatically,
+  which forces users to retype a near-miss query from scratch.
 - **The 5-Result Minimum:** On a results page, aim to show at least 5 results
   above the fold on desktop by balancing image size and metadata.
+- **The "Never Blank" Rule:** A zero-results page must display at least 4
+  clickable, product-level or category-level visual links — text-only error
+  states are not acceptable.
+- **No Mystery Matches:** Any fallback products shown on a zero-results page
+  must carry an explicit label (e.g., "Our Most Popular Items"). Never show
+  unlabeled products that a user could mistake for actual search matches.
+- **The 3-Second Threshold:** Typo suggestions and fallback recommendations
+  must render instantly. If a recommendation API call would delay the page
+  by more than 1.5 seconds, fall back immediately to a static category grid
+  rather than block the page.
 
 ## Constraints
 
 - **Platform Dependency:** Synonym mapping, typo tolerance, and ranking tuning require configuration access to the search platform (e.g., Algolia, Elasticsearch, or native CMS search).
 - **Catalog Quality Ceiling:** Search can only surface what exists — poor product titles, missing descriptions, or inconsistent tagging limit result quality regardless of search tuning.
 - **Analytics Prerequisite:** Search query reporting must be enabled before optimization can be data-driven.
+- **Recommendation API Availability:** Dynamic, personalized zero-results
+  fallbacks (recently viewed, catalog proximity) require a recommendation
+  engine (e.g., Algolia, Klevu, Shopify Search & Discovery). Without one,
+  fall back to static trending-category links.
+- **Data Protection Compliance:** Any "Request a Product" or callback form
+  that captures email addresses must comply with GDPR/CCPA — accessible
+  privacy policy, no pre-checked consent boxes.
 
 ## Non-Goals
 
@@ -147,6 +193,18 @@ Verify that the search strategy aligns with conversion heuristics.
   words match).
 - **Mobile Keyboard Conflict:** Not using the correct input type, causing the
   mobile keyboard to block the search results as they appear.
+- **The Input Wipeout:** Automatically clearing the search box on the
+  results page, forcing a user who made a minor typo to retype the entire
+  query.
+- **Deceptive Recommendation Labels:** Showing a grid of random popular
+  items under an unlabeled or "Search Results" heading, leading users to
+  believe the site is broken because the items don't match their query.
+- **The Search Button Loop:** Displaying "no results found" with a search
+  button that redirects to the homepage instead of letting the user refine
+  their query inline.
+- **Heavy Image Blowout:** Loading large, unoptimized images for visual
+  category bubbles on a zero-results page, causing lag that drives an
+  instant mobile exit.
 
 ## Validation Criteria
 
@@ -158,3 +216,14 @@ Verify that the search strategy aligns with conversion heuristics.
   searching. Goal: Decrease.
 - [ ] **Zero-Results Rate:** The percentage of total searches that return no
   results. Goal: Decrease via synonym mapping and typo handling.
+- [ ] **Zero-Results Exit Rate:** (Exits from Zero-Results Pages / Total
+  Views of Zero-Results Pages) * 100. Target: 25-40% relative reduction.
+- [ ] **Search Session Conversion Rate (SSCR):** The conversion rate of
+  users who hit a zero-results page but went on to buy. Target: 10-20%
+  absolute recovery lift.
+- [ ] **Search Refinement Rate:** The percentage of users who hit zero
+  results and immediately search again using the inline search box. Goal:
+  Increase via auto-suggest and persistent input.
+- [ ] **Recovery Lead Volume:** Track qualified leads generated from
+  "Request a Product" forms or live chat prompts triggered on zero-results
+  pages.

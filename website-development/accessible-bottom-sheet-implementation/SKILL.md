@@ -26,7 +26,7 @@ However, implementing a high-fidelity bottom sheet is notoriously difficult. Dev
 ## When NOT to Use
 
 - **Desktop-Only Interfaces:** Bottom sheets are optimized for mobile touch targets. On desktop screens, displaying a wide bar sliding up from the bottom is visually awkward. Use a standard centered modal (see `accessible-modal-dialog`) or a localized popover instead.
-- **Navigation Menus:** For primary header menus, use dedicated responsive mobile navigation structures (see `accessible-responsive-navigation`).
+- **Navigation Menus:** For primary header menus, use dedicated responsive mobile navigation structures (see `responsive-navigation-implementation`).
 - **Heavy Document Editing:** Complex workflows with massive data inputs (like editing a rich-text document or managing full spreadsheets) should occur on dedicated pages, not inside a mobile drawer.
 
 ---
@@ -244,7 +244,7 @@ When a bottom sheet is active, users scrolling the sheet itself must not leak sc
 
 ---
 
-## Validation Steps
+## Validation Criteria
 
 - [ ] **Pointer Drag Test:** On a mobile touch screen (or Chrome Device Emulator), press and drag the drag handle down. Confirm the sheet tracks your finger in real time with absolute fluid responsiveness.
 - [ ] **Dismissal Threshold Check:** Drag the sheet down past 40% height and release. Confirm that it closes completely and fires any registered closing callbacks. Drag it down only 10% and release. Confirm that it springs back to full height gracefully.

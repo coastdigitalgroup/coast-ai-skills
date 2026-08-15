@@ -25,6 +25,8 @@ The Welcome Popup Optimization skill provides a systematic framework for auditin
 - **SaaS Logged-In Interfaces:** Once a user is logged in, use notification centers or in-app guidance rather than global overlays.
 - **B2B High-Ticket Consulting Landing Pages:** Where the brand positioning is highly professional and high-touch, and typical "spin-to-win" or "10% off" overlays damage credibility.
 - **Top-of-Funnel High-Bounce Ad Campaigns:** If paid search ads are targeting hyper-specific long-tail queries (e.g., "how to fix a leaking pipe"), an immediate welcome popup will cause instant exit.
+- **Exit-Triggered Overlays:** For popups triggered by exit intent rather than page arrival, see `exit-intent-recovery`.
+- **Persistent, Non-Blocking Messaging:** For an always-visible top-of-page message rather than a modal overlay, see `announcement-bar-optimization`.
 
 ## Inputs
 

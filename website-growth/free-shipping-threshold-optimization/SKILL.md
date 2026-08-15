@@ -123,7 +123,7 @@ When a shopper is $10 away from free shipping, they will not search the entire s
 
 ---
 
-## Validation Methods
+## Validation Criteria
 
 - [ ] **Average Order Value (AOV) Lift:** Measure the average order value before and after implementation. Target: **15% to 25%** relative lift.
 - [ ] **Gross Profit Margin per Order:** Verify that the gross profit (including shipping revenue minus carrier costs) per order increases or remains neutral.

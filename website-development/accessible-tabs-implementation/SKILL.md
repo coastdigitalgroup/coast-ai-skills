@@ -26,7 +26,7 @@ interaction patterns (arrow key navigation).
 
 ## When NOT to Use
 
-- **Global Navigation:** Use the `accessible-main-navigation` skill for
+- **Global Navigation:** Use the `responsive-navigation-implementation` skill for
   site-wide menus. Tabs are for switching content _within_ a page, not for
   navigating between pages.
 - **Accordions:** Use accordions if multiple sections of content need to be

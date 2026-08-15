@@ -244,7 +244,7 @@ However, we must ensure that our interactive elements stay in sync:
 
 ---
 
-## Validation Steps
+## Validation Criteria
 
 - [ ] **Viewport Scaling Test:** Set up an expandable block in a responsive grid. Narrow the browser window until the text overflows. Verify that the "Show More" button instantly becomes visible. Expand the browser window until the text fits on one line. Verify that the button immediately disappears.
 - [ ] **Zero-Effect Click Check:** Confirm there is no scenario where clicking "Show More" does not expand the text, or where the button is visible for text that fits on screen.

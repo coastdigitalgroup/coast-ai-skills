@@ -124,7 +124,7 @@ a hero image or a large text block).
 - **Async LCP Scripts:** Marking the script that renders the LCP content as
   `async`, leading to unpredictable rendering times.
 
-## Validation Steps
+## Validation Criteria
 
 - [ ] **Waterfall Audit:** Verify in the Network tab that preloaded assets and
       `fetchpriority="high"` assets start downloading earlier and have a

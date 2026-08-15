@@ -128,7 +128,7 @@ memory.
 - **Zombie Connections:** Leaving WebSockets open, causing the server to keep
   connections alive for pages that are "frozen" in the user's cache.
 
-## Validation Steps
+## Validation Criteria
 
 - [ ] **DevTools Audit:** Verify "Back/forward cache" panel shows "Successfully
       restored from back/forward cache."

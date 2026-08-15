@@ -385,7 +385,7 @@ W3C WAI-ARIA requires separators to support precise keyboard resizing when focus
 - **Mouse-Only Event Listeners:** Listening exclusively to `mousedown` and `mouseup`, which leaves mobile touch screens unable to operate the splitter.
 - **Unbounded Collapse:** Allowing users to drag the separator to `0%` or `100%`, completely hiding panels without providing a mechanism to restore them, leading to broken page layouts.
 
-## Validation Steps
+## Validation Criteria
 
 - [ ] **Roving Pointer Test:** Drag the splitter rapidly with a mouse and touch input. Confirm that the splitter tracks the pointer smoothly without catching, lagging, or decoupling from the gesture, even when dragging over nested text or elements.
 - [ ] **Iframe Test:** Place an `<iframe>` inside Pane B. Drag the splitter toward the iframe. Verify that dragging works consistently and is not blocked/frozen when the cursor crosses into the iframe viewport.

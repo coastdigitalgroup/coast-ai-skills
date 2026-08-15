@@ -88,6 +88,28 @@ Once submitted, the prospect's intent is at its absolute peak. Do not show a gen
 
 ---
 
+## Constraints
+
+- **SLA Must Be Honorable:** Response-time commitments (e.g., "2-hour
+  turnaround") can only be promised if the sales/estimating team can
+  actually deliver on them; an unmet SLA promise damages trust more than no
+  promise at all.
+- **File Handling Limits:** File-upload optimization is bounded by the CAD
+  and spec formats the internal estimating system can actually ingest —
+  this skill cannot expand what the backend supports.
+- **Routing Infrastructure:** Multi-step lead routing (regional/product
+  specialist) depends on CRM or routing logic already existing; this skill
+  designs the front-end capture, not the backend routing rules.
+
+## Non-Goals
+
+- Does not cover fixed-price e-commerce checkout — see
+  `checkout-flow-optimization` or `cart-experience-optimization`.
+- Does not script the sales call or design CRM lead-routing logic, only the
+  handoff/scheduling touchpoint on the thank-you page.
+- Does not apply to generic support/help-desk inquiries — see
+  `contact-page-optimization`.
+
 ## Common Failure Patterns
 
 - **The "CAD Wall":** Making file uploads mandatory for prospects who are in the early budgeting phase and don't have drawings yet. Always provide an option to "Skip and describe project in text."
@@ -98,7 +120,7 @@ Once submitted, the prospect's intent is at its absolute peak. Do not show a gen
 
 ---
 
-## Validation Methods
+## Validation Criteria
 
 - [ ] **Quote Request Conversion Rate (QRCR) Lift:** Measure the percentage of page visitors who successfully complete the RFQ flow. Target: 15–35% relative lift.
 - [ ] **Average Form Completion Time:** Track the reduction in seconds from the moment a user begins step one to the final click of "Request My Quote."

@@ -185,7 +185,7 @@ Image compression is asynchronous and takes a brief period. Visual progress load
 
 ---
 
-## Validation Steps
+## Validation Criteria
 
 - [ ] **Data Reduction Audit:** Select a heavy photo (e.g., 5MB+). Upload it through the compressor. Confirm that the final output blob is successfully reduced (e.g., under 500KB) and has sharp, highly legible details.
 - [ ] **Transparency Test:** Select a PNG image with transparent sections. Verify that compiling it does not result in a harsh black background (either convert to PNG with transparent canvas, WebP with transparency support, or fill JPEG backgrounds with solid white).

@@ -129,7 +129,7 @@ If a shopper is experiencing multiple payment declines, they are highly motivate
 
 ---
 
-## Validation Methods
+## Validation Criteria
 
 ### 1. Primary Performance Metrics
 - **Decline Recovery Rate (%):** Calculate as `(Recovered Declined checkouts / Total checkouts that experienced a decline) * 100`. (A checkout is "recovered" if a user completes the purchase within the same session after experiencing at least one decline). Target: **15% to 35%**.

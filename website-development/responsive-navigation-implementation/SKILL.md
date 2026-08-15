@@ -102,6 +102,14 @@ horizontal layouts, ensuring accessibility (ARIA, focus management), performance
 - Ensure the menu doesn't stay in a "broken" state if a user resizes from mobile
   to desktop while the menu is open (e.g., remove `overflow: hidden` from body).
 
+### 7. Handle Dropdowns (if applicable)
+
+- Trigger dropdowns on `click` for reliable mobile and keyboard support; if
+  hover is required for desktop, it must also respond to focus/click and use a
+  slight close delay to prevent accidental dismissal.
+- Use `aria-haspopup="true"` and `aria-expanded` on the trigger.
+- Ensure every dropdown can be closed with the `Esc` key.
+
 ## Decision Rules
 
 - **Button vs. Link:** Use a `<button>` for the hamburger menu because it
@@ -112,6 +120,11 @@ horizontal layouts, ensuring accessibility (ARIA, focus management), performance
   the hamburger button.
 - **Hidden Menu Visibility:** Use `visibility: hidden` or `display: none` for
   the closed mobile menu so it is not in the tab order when hidden.
+- **Click vs. Hover for Dropdowns:** Prefer click-triggered dropdowns over
+  hover-only ones, which lock out keyboard users.
+- **`aria-label` Scope:** Only add `aria-label` to `<nav>` when the page has
+  more than one navigation landmark (e.g., header nav vs. footer nav); a
+  single nav needs no extra label.
 
 ## Constraints
 
@@ -134,6 +147,8 @@ horizontal layouts, ensuring accessibility (ARIA, focus management), performance
 
 - **The "Inaccessible Hamburger":** Using a `<div>` or `<a>` for the menu toggle
   without proper ARIA attributes.
+- **Missing State Communication:** Forgetting to update `aria-expanded` when
+  the menu or a dropdown opens/closes.
 - **Focus Leak:** Tabbing past the mobile menu into the background content while
   the menu is open.
 - **Lack of "Skip Link":** Forcing keyboard users to tab through 20+ navigation

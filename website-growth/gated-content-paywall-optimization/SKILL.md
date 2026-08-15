@@ -25,6 +25,8 @@ This skill balances persuasive friction, choice architecture, and strict search 
 - **Top-of-Funnel Brand Awareness:** Highly generic educational content should remain completely open to maximize reach and organic keyword indexing.
 - **Transactional Support & Documentation:** Help articles, product wikis, and API references should never be gated.
 - **SaaS Product Interfaces:** Inside-the-app software paywalls and feature limits should use `trial-to-paid-optimization` or `billing-interval-optimization`.
+- **Soft-Friction Form Mechanics:** For the field design and friction reduction of the form behind a soft gate, see `lead-capture-form-optimization`.
+- **Standalone Downloadable Incentives:** For creating a new discrete offer (ebook, checklist) rather than gating existing content, see `lead-magnet-optimization`.
 
 ## Inputs
 

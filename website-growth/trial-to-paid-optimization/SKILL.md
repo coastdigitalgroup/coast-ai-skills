@@ -129,6 +129,15 @@ Verify the proposed strategy against the conversion heuristics below.
 - **Data Retention:** Clear communication is required regarding what happens to
   user data if they choose *not* to upgrade.
 
+## Non-Goals
+
+- Does not optimize initial user activation or the "Aha! Moment" — see
+  `user-onboarding-optimization`.
+- Does not cover one-time e-commerce checkout flows — see
+  `checkout-flow-optimization`.
+- Does not address enterprise/high-touch sales cycles with manual contracts
+  — see `conversational-conversion-optimization`.
+
 ## Common Failure Patterns
 
 - **The "Paywall Cliff":** Providing no warning that a trial is ending,

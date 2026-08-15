@@ -323,7 +323,7 @@ sliderMax.addEventListener('input', updateScreenReaderLabels);
 
 ---
 
-## Validation Steps
+## Validation Criteria
 
 ### Step 1: Automated & Functional Tests
 - [ ] Run an accessibility checker (Axe/Wave) on the page containing the slider to verify that inputs possess associated `<label>` references or valid `aria-label` declarations.

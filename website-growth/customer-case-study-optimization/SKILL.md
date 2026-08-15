@@ -118,6 +118,27 @@ Verify the optimized case study against the conversion heuristics below.
 - **The "One Win" Rule:** Focus the case study on solving ONE primary problem
   exceptionally well rather than trying to mention every feature used.
 
+## Constraints
+
+- **Requires Verifiable Data:** The "Specificity > Storytelling" rule only
+  works with real, customer-approved metrics. Do not fabricate or round
+  numbers beyond what the customer confirmed.
+- **Consent and Sign-Off:** Publishing a customer's name, logo, or quote
+  requires their explicit approval; anonymized case studies ("A leading
+  bank") are a fallback, not a first choice, and reduce persuasive power.
+- **Relationship Dependency:** Producing a strong case study depends on
+  access to the customer for interviews and data — this skill cannot
+  substitute for that access.
+
+## Non-Goals
+
+- Does not cover general testimonial widgets, star ratings, or review
+  aggregation — see `social-proof-optimization`.
+- Does not cover video production or editing quality, only the narrative
+  structure and on-page placement of case study content.
+- Does not apply to B2C low-consideration goods or internal success
+  reporting — see When NOT to Use.
+
 ## Common Failure Patterns
 
 - **The "Wall of Text":** Long, unformatted paragraphs that nobody reads.

@@ -37,6 +37,9 @@ Activation Rate, 1-Day/7-Day Retention, and Lifetime Value (LTV).
   users who have already mastered the basics.
 - **Checkout Flows:** While onboarding may include a payment step, use
   `checkout-flow-optimization` for dedicated payment funnel refinement.
+- **Paywall/Upgrade Prompts:** Once a user has activated and reached the
+  "Aha! Moment," optimizing the trial-expiration or upgrade prompt is
+  covered by `trial-to-paid-optimization`.
 
 ## Inputs
 

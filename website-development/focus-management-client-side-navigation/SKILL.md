@@ -134,7 +134,7 @@ header (use `scroll-margin-top` if necessary).
 - **Duplicate Announcements:** The screen reader announcing the page title twice
   because both the `aria-live` region and the focused `<h1>` fired.
 
-## Validation Steps
+## Validation Criteria
 
 - [ ] **Screen Reader Test:** Navigate to a new route. Does the screen reader
       announce the change? Does it start reading from the top of the new content?

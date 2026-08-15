@@ -115,7 +115,7 @@ responsive behaviors like horizontal scrolling or truncation.
 - **Clipped Content on Mobile:** Not handling overflow, causing the layout to
   break or titles to be cut off without an indication of more content.
 
-## Validation Steps
+## Validation Criteria
 
 - [ ] **Screen Reader Test:** Navigate the breadcrumbs with a screen reader.
       Verify the landmark is announced as "Breadcrumb", the list is announced
