@@ -1,0 +1,202 @@
+/* ==========================================================================
+   FORCED COLORS / HIGH CONTRAST MODE BOILERPLATE STYLESHEET
+   --------------------------------------------------------------------------
+   Production-ready CSS utilities and media query rules for component
+   resilience under Windows High Contrast Mode and forced-colors: active.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. CONTAINER & BOUNDARY UTILITIES
+   Borders that are invisible in default light/dark mode but automatically
+   become visible system borders under forced-colors mode.
+   -------------------------------------------------------------------------- */
+.hcm-boundary,
+.hcm-card,
+.hcm-modal,
+.hcm-dropdown,
+.hcm-tooltip {
+  /* Dual-purpose transparent border prevents layout jumps */
+  border: 1px solid transparent;
+}
+
+@media (forced-colors: active) {
+  .hcm-boundary,
+  .hcm-card,
+  .hcm-modal,
+  .hcm-dropdown,
+  .hcm-tooltip {
+    border-color: CanvasText;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   2. FOCUS INDICATOR REMEDIATION
+   Replaces box-shadow focus rings with system-compliant outlines.
+   -------------------------------------------------------------------------- */
+.hcm-focusable {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+}
+
+.hcm-focusable:focus-visible {
+  outline-color: currentColor;
+}
+
+@media (forced-colors: active) {
+  .hcm-focusable:focus-visible,
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible,
+  [tabindex="0"]:focus-visible {
+    outline: 2px solid Highlight;
+    outline-offset: 2px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   3. CUSTOM FORM CONTROLS (Checkboxes, Radios, Switches)
+   -------------------------------------------------------------------------- */
+.hcm-control-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.hcm-control-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.hcm-control-box {
+  width: 1.25rem;
+  height: 1.25rem;
+  border: 2px solid currentColor;
+  border-radius: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: transparent;
+}
+
+.hcm-control-box svg {
+  width: 0.875rem;
+  height: 0.875rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 3;
+  display: none;
+}
+
+.hcm-control-input:checked + .hcm-control-box svg {
+  display: block;
+}
+
+@media (forced-colors: active) {
+  .hcm-control-box {
+    border-color: ButtonText;
+  }
+
+  .hcm-control-input:checked + .hcm-control-box {
+    background-color: Highlight;
+    border-color: HighlightText;
+  }
+
+  .hcm-control-input:checked + .hcm-control-box svg {
+    stroke: HighlightText;
+  }
+
+  .hcm-control-input:disabled + .hcm-control-box {
+    border-color: GrayText;
+    background-color: Canvas;
+  }
+
+  .hcm-control-input:disabled ~ span {
+    color: GrayText;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   4. NAVIGATION & SELECTION STATES (Tabs, Accordions, Active Lists)
+   -------------------------------------------------------------------------- */
+.hcm-tab {
+  padding: 0.5rem 1rem;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+}
+
+.hcm-tab[aria-selected="true"] {
+  border-bottom-color: currentColor;
+}
+
+@media (forced-colors: active) {
+  .hcm-tab[aria-selected="true"],
+  .hcm-menu-item[aria-selected="true"],
+  .hcm-list-item.is-selected {
+    background-color: Highlight;
+    color: HighlightText;
+    border-color: HighlightText;
+  }
+
+  .hcm-tab:hover,
+  .hcm-menu-item:hover {
+    outline: 1px solid Highlight;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   5. SVG ICON HANDLING
+   -------------------------------------------------------------------------- */
+.hcm-icon {
+  fill: currentColor;
+}
+
+.hcm-icon-stroke {
+  stroke: currentColor;
+}
+
+@media (forced-colors: active) {
+  .hcm-icon {
+    fill: CanvasText;
+  }
+
+  .hcm-icon-stroke {
+    stroke: CanvasText;
+  }
+
+  button:hover .hcm-icon,
+  a:hover .hcm-icon {
+    fill: Highlight;
+  }
+
+  button:disabled .hcm-icon,
+  button:disabled .hcm-icon-stroke {
+    fill: GrayText;
+    stroke: GrayText;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   6. COLOR PREVIEWS & SWATCHES (OPTING OUT WITH forced-color-adjust)
+   -------------------------------------------------------------------------- */
+.hcm-color-swatch {
+  forced-color-adjust: none;
+  border: 2px solid CanvasText;
+  display: inline-block;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 0.25rem;
+}
+
+@media (forced-colors: active) {
+  .hcm-color-swatch:focus-visible {
+    outline: 2px solid Highlight;
+    outline-offset: 2px;
+  }
+}

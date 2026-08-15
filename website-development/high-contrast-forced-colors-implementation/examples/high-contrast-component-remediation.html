@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>High Contrast & Forced Colors Component Remediation Example</title>
+  <style>
+    /* Reset & Base Styles */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      line-height: 1.5;
+      padding: 2rem;
+      background-color: #f8fafc;
+      color: #0f172a;
+    }
+
+    h1 {
+      font-size: 1.75rem;
+      margin-bottom: 0.5rem;
+    }
+
+    p.subtitle {
+      color: #475569;
+      margin-bottom: 2rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 2rem;
+    }
+
+    .section-card {
+      background: #ffffff;
+      border-radius: 8px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+
+      /* DUAL-PURPOSE TRANSPARENT BORDER FOR FORCED-COLORS MODE */
+      border: 1px solid transparent;
+    }
+
+    .section-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    /* ==========================================================================
+       BEFORE (BROKEN) IMPLEMENTATION - Fails in Windows High Contrast Mode
+       ========================================================================== */
+    .broken-control-group {
+      margin-bottom: 1rem;
+    }
+
+    /* Broken Focus Ring: Uses box-shadow which is removed in forced-colors mode */
+    .broken-btn {
+      background-color: #2563eb;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+
+    .broken-btn:focus {
+      outline: none; /* Silences focus ring! */
+      box-shadow: 0 0 0 4px #93c5fd; /* Stripped in forced-colors mode! */
+    }
+
+    /* Broken Custom Checkbox: Relies on background color fill and box-shadow */
+    .broken-checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+    }
+
+    .broken-checkbox-label input {
+      position: absolute;
+      opacity: 0;
+    }
+
+    .broken-checkbox-custom {
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+      background-color: #e2e8f0;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .broken-checkbox-label input:checked + .broken-checkbox-custom {
+      background-color: #2563eb; /* In forced-colors mode, background color is forced to ButtonFace! */
+    }
+
+    /* Broken Active Tab: Relies purely on background color change */
+    .broken-tabs {
+      display: flex;
+      gap: 0.5rem;
+      background: #f1f5f9;
+      padding: 0.25rem;
+      border-radius: 6px;
+    }
+
+    .broken-tab {
+      padding: 0.5rem 1rem;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+
+    .broken-tab.active {
+      background-color: #ffffff;
+      color: #2563eb;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); /* Stripped! Active tab looks like inactive tabs */
+    }
+
+    /* Broken Status Badge: Custom background colors without borders */
+    .broken-badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      background-color: #dcfce7;
+      color: #166534; /* Stripped background and text color blend into Canvas */
+    }
+
+
+    /* ==========================================================================
+       AFTER (REMEDIATED) IMPLEMENTATION - Robust under Forced-Colors Mode
+       ========================================================================== */
+    .fixed-control-group {
+      margin-bottom: 1rem;
+    }
+
+    /* Fixed Button: Uses transparent outline that resolves to visible system outline */
+    .fixed-btn {
+      background-color: #2563eb;
+      color: white;
+      border: 1px solid transparent; /* Dual-purpose transparent border */
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      outline: 2px solid transparent;
+      outline-offset: 2px;
+    }
+
+    .fixed-btn:focus-visible {
+      outline: 2px solid #2563eb;
+    }
+
+    /* Fixed Custom Checkbox: Uses visible SVG check and system colors in forced-colors mode */
+    .fixed-checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+    }
+
+    .fixed-checkbox-label input {
+      position: absolute;
+      opacity: 0;
+    }
+
+    .fixed-checkbox-custom {
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+      border: 2px solid #64748b;
+      background-color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .fixed-checkbox-custom svg {
+      width: 14px;
+      height: 14px;
+      fill: none;
+      stroke: white;
+      stroke-width: 3;
+      display: none;
+    }
+
+    .fixed-checkbox-label input:checked + .fixed-checkbox-custom {
+      background-color: #2563eb;
+      border-color: #2563eb;
+    }
+
+    .fixed-checkbox-label input:checked + .fixed-checkbox-custom svg {
+      display: block;
+    }
+
+    .fixed-checkbox-label input:focus-visible + .fixed-checkbox-custom {
+      outline: 2px solid #2563eb;
+      outline-offset: 2px;
+    }
+
+    /* Fixed Tabs: Uses transparent border-bottom and system colors for active state */
+    .fixed-tabs {
+      display: flex;
+      gap: 0.5rem;
+      border-bottom: 2px solid #e2e8f0;
+    }
+
+    .fixed-tab {
+      padding: 0.5rem 1rem;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      font-weight: 500;
+      color: #64748b;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+    }
+
+    .fixed-tab[aria-selected="true"] {
+      color: #2563eb;
+      border-bottom-color: #2563eb;
+    }
+
+    /* Fixed Status Badge: Uses dual-purpose transparent border */
+    .fixed-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      background-color: #dcfce7;
+      color: #166534;
+      border: 1px solid transparent; /* Becomes visible system border in forced-colors mode */
+    }
+
+    .fixed-badge-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: #166534;
+      border: 1px solid transparent;
+    }
+
+    /* Fixed Color Swatch Preview: Controlled forced-color-adjust usage */
+    .color-swatch-container {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .fixed-color-swatch {
+      width: 24px;
+      height: 24px;
+      border-radius: 4px;
+      background-color: #ec4899;
+
+      /* Opt out of color overrides ONLY for swatch preview, but provide visible border */
+      forced-color-adjust: none;
+      border: 2px solid CanvasText;
+    }
+
+
+    /* ==========================================================================
+       SPECIALIZED @media (forced-colors: active) OVERRIDES
+       ========================================================================== */
+    @media (forced-colors: active) {
+      /* Card Boundaries */
+      .section-card {
+        border-color: CanvasText;
+      }
+
+      /* Fixed Focus Rings: Guarantee system Highlight color focus rings */
+      .fixed-btn:focus-visible,
+      .fixed-checkbox-label input:focus-visible + .fixed-checkbox-custom,
+      .fixed-tab:focus-visible {
+        outline: 2px solid Highlight;
+        outline-offset: 2px;
+      }
+
+      /* Fixed Custom Checkbox in Forced-Colors Mode */
+      .fixed-checkbox-custom {
+        border-color: ButtonText;
+      }
+
+      .fixed-checkbox-label input:checked + .fixed-checkbox-custom {
+        background-color: Highlight;
+        border-color: HighlightText;
+      }
+
+      .fixed-checkbox-label input:checked + .fixed-checkbox-custom svg {
+        stroke: HighlightText;
+      }
+
+      /* Fixed Active Tabs in Forced-Colors Mode */
+      .fixed-tab[aria-selected="true"] {
+        background-color: Highlight;
+        color: HighlightText;
+        border-bottom-color: HighlightText;
+      }
+
+      /* Fixed Status Badges in Forced-Colors Mode */
+      .fixed-badge {
+        border-color: CanvasText;
+      }
+
+      .fixed-badge-dot {
+        background-color: CanvasText;
+        border-color: CanvasText;
+      }
+
+      /* Disabled Control States */
+      .fixed-btn:disabled,
+      .fixed-checkbox-label input:disabled + .fixed-checkbox-custom {
+        border-color: GrayText;
+        color: GrayText;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Windows High Contrast & Forced Colors Remediation</h1>
+  <p class="subtitle">Side-by-side comparison of vulnerable component patterns vs. resilient forced-colors patterns.</p>
+
+  <div class="grid">
+
+    <!-- BROKEN COLUMN -->
+    <div class="section-card">
+      <h2 class="section-title" style="color: #dc2626;">❌ Before (Broken in Forced Colors)</h2>
+
+      <div class="broken-control-group">
+        <label style="display: block; font-weight: 500; margin-bottom: 0.5rem;">Button Focus Ring</label>
+        <button class="broken-btn">Submit Action</button>
+      </div>
+
+      <div class="broken-control-group">
+        <label style="display: block; font-weight: 500; margin-bottom: 0.5rem;">Custom Checkbox</label>
+        <label class="broken-checkbox-label">
+          <input type="checkbox" checked>
+          <span class="broken-checkbox-custom"></span>
+          <span>Enable notifications</span>
+        </label>
+      </div>
+
+      <div class="broken-control-group">
+        <label style="display: block; font-weight: 500; margin-bottom: 0.5rem;">Active Navigation Tabs</label>
+        <div class="broken-tabs" role="tablist">
+          <button class="broken-tab active" role="tab" aria-selected="true">Account</button>
+          <button class="broken-tab" role="tab" aria-selected="false">Security</button>
+        </div>
+      </div>
+
+      <div class="broken-control-group">
+        <label style="display: block; font-weight: 500; margin-bottom: 0.5rem;">Status Badge</label>
+        <span class="broken-badge">Active Subscription</span>
+      </div>
+
+    </div>
+
+
+    <!-- REMEDIATED COLUMN -->
+    <div class="section-card">
+      <h2 class="section-title" style="color: #16a34a;">✅ After (Remediated for Forced Colors)</h2>
+
+      <div class="fixed-control-group">
+        <label style="display: block; font-weight: 500; margin-bottom: 0.5rem;">Button Focus Ring</label>
+        <button class="fixed-btn">Submit Action</button>
+      </div>
+
+      <div class="fixed-control-group">
+        <label style="display: block; font-weight: 500; margin-bottom: 0.5rem;">Custom Checkbox</label>
+        <label class="fixed-checkbox-label">
+          <input type="checkbox" checked>
+          <span class="fixed-checkbox-custom">
+            <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          </span>
+          <span>Enable notifications</span>
+        </label>
+      </div>
+
+      <div class="fixed-control-group">
+        <label style="display: block; font-weight: 500; margin-bottom: 0.5rem;">Active Navigation Tabs</label>
+        <div class="fixed-tabs" role="tablist">
+          <button class="fixed-tab" role="tab" aria-selected="true">Account</button>
+          <button class="fixed-tab" role="tab" aria-selected="false">Security</button>
+        </div>
+      </div>
+
+      <div class="fixed-control-group">
+        <label style="display: block; font-weight: 500; margin-bottom: 0.5rem;">Status Badge & Color Swatch</label>
+        <div style="display: flex; gap: 1rem; align-items: center;">
+          <span class="fixed-badge">
+            <span class="fixed-badge-dot"></span>
+            Active Subscription
+          </span>
+
+          <div class="color-swatch-container">
+            <span class="fixed-color-swatch" title="Pink Accent"></span>
+            <span style="font-size: 0.875rem;">#EC4899</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+</body>
+</html>
