@@ -5,8 +5,13 @@ All notable changes to this project will be documented here. The format follows
 
 ## [Unreleased]
 
+## [0.3.0] — 2026-08-16
+
 ### Added
 
+- `kanban-board-ui-system` skill to `website-design` category, defining a systematic, accessible, and responsive layout framework for Kanban boards and workflow status columns, covering spatial composition, column containment, card anatomy, WIP-limit signaling, and keyboard/screen-reader drag-and-drop accessibility.
+- `high-contrast-forced-colors-implementation` skill to `website-development` category, covering how to build and remediate web components for Windows High Contrast Mode and CSS forced-colors mode using system color keywords, explicit borders, and `forced-color-adjust` rules.
+- `post-purchase-cross-sell-optimization` skill to `website-growth` category, covering post-purchase cross-sells, one-click upsells, and thank-you page offer flows to increase AOV and LTV without introducing pre-purchase checkout friction.
 - `AUDIT.md` recurring skill-library audit process covering structural
   consistency, duplicate/overlap detection with a merge-vs-cross-reference
   decision framework, and content quality sweeps across all three categories.
@@ -17,9 +22,17 @@ All notable changes to this project will be documented here. The format follows
 - `accessible-range-slider-implementation` skill to `website-development` category, covering standard single and dual-thumb range sliders using native elements, cross-browser vendor styles, and keyboard/touch tracking.
 - `command-palette-system` skill to `website-design` category, defining a systematic framework for accessible, keyboard-first Cmd+K menus.
 - `meeting-scheduling-optimization` skill to `website-growth` category, improving calendar booking rates and show-up rates.
+- `master-detail-layout-system` skill to `website-design`, covering accessible, responsive list-detail interfaces with independent scrolling and mobile back-stack transitions.
+- `css-anchor-positioning-implementation` skill to `website-development`, covering anchored floating UI, progressive enhancement, and fallbacks without scroll/resize layout thrashing.
+- `focus-visible-styling-system` skill to `website-development`, covering WCAG-aligned keyboard focus indicators using `:focus-visible`, outlines, and high-contrast-safe styling.
+- `bundle-optimization` skill to `website-growth`, covering curated, tiered, and build-your-own product bundles for AOV and margin optimization.
+- `churn-prevention-flow-optimization` skill to `website-growth`, covering diagnostic cancellation flows, reason-matched retention offers, pauses, and downgrades.
 
 ### Changed
 
+- Updated the README skill catalogue and category totals to match all 217 validated skills included in the package.
+- Bumped `@modelcontextprotocol/sdk`, `@types/node`, `eslint`, `tsx`, and `typescript-eslint` devDependencies; `typescript` is now aliased (`npm:@typescript/typescript6`) so `typescript-eslint`'s peer range (`<6.1.0`) stays satisfied while the real TypeScript 7 compiler remains development-only under `@typescript/native` for `tsc`-driven build/typecheck.
+- Updated `allowScripts` to permit `esbuild@0.28.2`'s postinstall script (transitive bump via `tsx`).
 - Normalized the `Validation Criteria` section heading across `website-development` and `website-growth` (previously inconsistently titled `Validation Steps` or `Validation Methods`).
 - Added skill-specific `Constraints`/`Non-Goals` content to 9 `website-growth` skills that were missing them.
 - Resolved the toast/overlay scope overlap between `overlay-and-dialog-system` and `toast-and-snackbar-system` (`website-design`); folded a stray `Non-Goals` section into `Constraints` in `fluid-spacing-system`.

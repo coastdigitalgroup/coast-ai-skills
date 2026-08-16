@@ -126,82 +126,137 @@ This package is CLI-first. There is no documented stable JavaScript API.
 
 ## Available skills
 
-The package currently includes 130 validated skills across three categories.
+The package currently includes 217 validated skills across three categories.
 Use `list_skills` for the current runtime catalogue and `get_skill(name)` for
 the full execution guidance.
 
-### website-design (43 skills)
+### website-design (73 skills)
 
 - `accessible-color-system`
 - `accordion-ui-system`
 - `article-layout-system`
 - `badge-and-tag-system`
 - `banner-and-alert-system`
+- `bento-grid-layout-system`
 - `breadcrumb-wayfinding-system`
 - `button-and-action-system`
+- `calendar-and-date-system`
 - `card-ui-system`
 - `carousel-and-slider-system`
+- `command-palette-system`
+- `comment-and-discussion-system`
 - `comparison-matrix-system`
 - `consent-and-preference-system`
+- `conversational-chat-ui-system`
+- `custom-select-and-combobox-system`
+- `dark-theme-design-system`
+- `dashboard-layout-system`
 - `data-table-ui-system`
+- `data-visualization-system`
 - `elevation-and-depth-system`
 - `empty-state-system`
+- `error-and-status-system`
 - `file-upload-management-system`
 - `filter-and-sort-system`
 - `fluid-spacing-system`
 - `fluid-typography-system`
+- `focus-indicator-design-system`
 - `form-design-system`
 - `hero-design-system`
 - `iconography-system`
+- `image-comparison-slider-system`
+- `image-gallery-and-lightbox-system`
 - `imagery-and-media-system`
 - `interactive-state-system`
 - `interface-motion-system`
+- `internationalization-design-system`
+- `kanban-board-ui-system`
 - `logo-grid-system`
+- `master-detail-layout-system`
 - `metric-and-statistic-system`
+- `notification-center-system`
+- `onboarding-tour-system`
 - `overlay-and-dialog-system`
 - `page-header-system`
 - `pagination-system`
 - `pricing-table-ui-system`
+- `product-detail-layout-system`
+- `property-and-attribute-system`
 - `responsive-grid-system`
 - `review-and-rating-system`
 - `search-interface-system`
 - `section-composition-system`
+- `segmented-control-system`
+- `settings-interface-system`
+- `shopping-cart-ui-system`
 - `sidebar-navigation-system`
 - `site-footer-system`
 - `site-navigation-system`
 - `skeleton-state-system`
 - `step-progress-system`
+- `sticky-and-floating-ui-system`
+- `store-locator-system`
 - `tab-ui-system`
+- `table-of-contents-system`
+- `testimonial-and-quote-system`
 - `timeline-activity-system`
+- `toast-and-snackbar-system`
+- `tooltip-and-hint-system`
+- `tree-view-navigation-system`
 - `user-avatar-system`
 - `visual-hierarchy-system`
 
-### website-development (45 skills)
+### website-development (75 skills)
 
 - `accessible-accordion-implementation`
+- `accessible-audio-player-implementation`
+- `accessible-bottom-sheet-implementation`
+- `accessible-breadcrumb-implementation`
 - `accessible-carousel-implementation`
 - `accessible-combobox-implementation`
+- `accessible-context-menu-implementation`
+- `accessible-date-picker-implementation`
+- `accessible-drag-and-drop-list`
 - `accessible-file-upload-implementation`
 - `accessible-modal-dialog`
+- `accessible-multi-select-tag-input`
 - `accessible-pagination-implementation`
+- `accessible-password-field-implementation`
+- `accessible-range-slider-implementation`
+- `accessible-split-pane-implementation`
+- `accessible-star-rating-implementation`
+- `accessible-switch-implementation`
 - `accessible-tabs-implementation`
 - `accessible-toast-implementation`
 - `accessible-tooltip-implementation`
+- `accessible-tree-view-implementation`
+- `adaptive-loading`
 - `bfcache-optimization`
+- `body-scroll-lock-implementation`
+- `client-side-idle-detection`
+- `client-side-image-compression`
+- `client-side-storage-management`
 - `container-queries-implementation`
 - `copy-to-clipboard-implementation`
+- `css-anchor-positioning-implementation`
 - `css-cascade-layers`
 - `css-grid-layout-implementation`
 - `css-stacking-contexts`
 - `cumulative-layout-shift-mitigation`
 - `dark-mode-implementation`
+- `dynamic-text-truncation`
 - `fetch-race-condition-management`
 - `fluid-typography-and-spacing`
+- `focus-visible-styling-system`
 - `focus-management-client-side-navigation`
+- `focus-trap-implementation`
+- `high-contrast-forced-colors-implementation`
 - `high-performance-css-animations`
 - `infinite-scroll-implementation`
+- `input-masking-and-formatting`
 - `interaction-performance-optimization`
 - `keyboard-shortcut-implementation`
+- `lazy-loading-implementation`
 - `mobile-viewport-implementation`
 - `multi-step-form-implementation`
 - `native-video-implementation`
@@ -213,58 +268,92 @@ the full execution guidance.
 - `responsive-navigation-implementation`
 - `robust-form-implementation`
 - `rtl-layout-implementation`
+- `scroll-driven-animations-implementation`
 - `scroll-reveal-implementation`
 - `scrollbar-layout-shift-prevention`
+- `service-worker-offline-and-cache-management`
 - `skeleton-screen-implementation`
+- `sticky-element-implementation`
 - `svg-optimization-implementation`
 - `table-of-contents-implementation`
+- `text-zoom-and-resize-resilience`
 - `third-party-embed-optimization`
 - `url-state-synchronization`
 - `view-transitions-implementation`
+- `virtual-list-implementation`
 - `web-font-optimization`
 - `web-worker-implementation`
 
-### website-growth (40 skills)
+### website-growth (69 skills)
 
 - `404-page-recovery`
+- `abm-personalization-optimization`
 - `about-us-page-optimization`
+- `announcement-bar-optimization`
+- `app-download-optimization`
+- `billing-interval-optimization`
+- `bundle-optimization`
+- `buy-now-pay-later-optimization`
 - `cart-experience-optimization`
 - `checkout-flow-optimization`
+- `checkout-order-bump-optimization`
+- `checkout-payment-decline-optimization`
+- `churn-prevention-flow-optimization`
+- `co-branded-landing-page-optimization`
 - `competitor-comparison-optimization`
+- `contact-page-optimization`
 - `contextual-cta-optimization`
 - `conversational-conversion-optimization`
+- `cookie-consent-optimization`
 - `customer-case-study-optimization`
 - `discount-and-coupon-optimization`
+- `enterprise-trust-center-optimization`
 - `exit-intent-recovery`
+- `faq-section-optimization`
+- `free-shipping-threshold-optimization`
+- `gated-content-paywall-optimization`
+- `gift-with-purchase-optimization`
 - `guided-discovery-optimization`
 - `hero-section-optimization`
+- `inclusive-conversion-optimization`
+- `integrations-directory-optimization`
 - `interactive-demo-optimization`
 - `internal-search-optimization`
 - `landing-page-content-hierarchy`
 - `lead-capture-form-optimization`
 - `lead-magnet-optimization`
 - `localization-optimization`
+- `meeting-scheduling-optimization`
 - `message-match-optimization`
+- `micro-survey-optimization`
 - `mobile-conversion-optimization`
 - `objection-handling-optimization`
 - `post-conversion-momentum`
+- `post-purchase-cross-sell-optimization`
 - `pricing-page-optimization`
 - `product-listing-page-optimization`
 - `product-page-optimization`
 - `referral-loop-optimization`
+- `request-for-quote-optimization`
 - `return-visitor-optimization`
+- `risk-reversal-optimization`
 - `search-snippet-optimization`
+- `secondary-cta-optimization`
+- `size-guide-and-fit-optimization`
 - `social-auth-optimization`
 - `social-proof-optimization`
+- `stockout-recovery-optimization`
 - `subscription-cancel-flow-optimization`
 - `trial-to-paid-optimization`
 - `upsell-cross-sell-optimization`
 - `urgency-and-scarcity-optimization`
+- `user-intent-alignment`
 - `user-onboarding-optimization`
 - `value-calculator-optimization`
 - `video-conversion-optimization`
 - `visual-hierarchy-and-scanning-patterns`
 - `waitlist-prelaunch-optimization`
+- `welcome-popup-optimization`
 - `wishlist-optimization`
 
 ---
