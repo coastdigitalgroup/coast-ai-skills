@@ -1,0 +1,163 @@
+/* ==========================================================================
+   CSS ANCHOR POSITIONING BOILERPLATE STYLESHEET
+   Production-ready CSS architecture for tethering floating UI elements
+   (tooltips, popovers, dropdowns, hovercards) to anchor elements in pure CSS.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. ANCHOR TRIGGER DECLARATIONS
+   -------------------------------------------------------------------------- */
+
+/**
+ * Basic explicit anchor binding.
+ * Identifiers MUST begin with double dashes (--).
+ */
+.anchor-trigger {
+  anchor-name: --primary-anchor;
+}
+
+/**
+ * Scoped/Dynamic list anchors (e.g., Table rows or dynamic card lists).
+ * Apply unique custom ident variables inline via HTML style attribute:
+ * style="anchor-name: --item-anchor-123;"
+ */
+.anchor-trigger-dynamic {
+  /* Inherits inline anchor-name assignment */
+}
+
+
+/* --------------------------------------------------------------------------
+   2. CUSTOM POSITION TRY FALLBACK DEFINITIONS (@position-try)
+   -------------------------------------------------------------------------- */
+
+/**
+ * Fallback Rule 1: Position Above Anchor (Top Span Right)
+ */
+@position-try --try-top-left-aligned {
+  position-area: top span-right;
+  margin-top: 0;
+  margin-bottom: 8px;
+}
+
+/**
+ * Fallback Rule 2: Position Above Anchor (Top Span Left / Right Aligned)
+ */
+@position-try --try-top-right-aligned {
+  position-area: top span-left;
+  margin-top: 0;
+  margin-bottom: 8px;
+}
+
+/**
+ * Fallback Rule 3: Position Below Anchor (Bottom Span Left / Right Aligned)
+ */
+@position-try --try-bottom-right-aligned {
+  position-area: bottom span-left;
+  margin-top: 8px;
+  margin-bottom: 0;
+}
+
+/**
+ * Fallback Rule 4: Position Side-Anchored (Right Start)
+ */
+@position-try --try-right-centered {
+  position-area: right center;
+  margin-top: 0;
+  margin-left: 8px;
+}
+
+
+/* --------------------------------------------------------------------------
+   3. ANCHORED FLOATING TARGET STYLING
+   -------------------------------------------------------------------------- */
+
+.anchored-element {
+  /* Required: Must be fixed or absolute (fixed recommended for top-layer) */
+  position: fixed;
+
+  /* Link to target anchor identifier */
+  position-anchor: --primary-anchor;
+
+  /* Primary preferred layout position area (Bottom Left-Aligned) */
+  position-area: bottom span-right;
+  margin-top: 8px;
+
+  /* Automatic overflow handling using flip keywords & custom rules */
+  position-try-fallbacks:
+    flip-block,
+    --try-top-left-aligned,
+    --try-bottom-right-aligned,
+    --try-top-right-aligned;
+
+  /* Smooth visual boundary transitions */
+  transition:
+    display 0.2s allow-discrete,
+    overlay 0.2s allow-discrete,
+    opacity 0.2s ease,
+    transform 0.2s ease;
+
+  /* Default Hidden State */
+  opacity: 0;
+  transform: translateY(-4px);
+}
+
+/* Match anchor element width dynamically (Ideal for Combobox/Select) */
+.anchored-element-match-width {
+  width: anchor-size(--primary-anchor width);
+  min-width: 180px;
+}
+
+
+/* --------------------------------------------------------------------------
+   4. POPOVER TOP-LAYER & ACCESSIBLE STATES
+   -------------------------------------------------------------------------- */
+
+.anchored-element:popover-open,
+.anchored-element[aria-expanded="true"] {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@starting-style {
+  .anchored-element:popover-open {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+
+/* --------------------------------------------------------------------------
+   5. FINE-GRAINED MANUAL ANCHORING (ALTERNATIVE TO POSITION-AREA)
+   -------------------------------------------------------------------------- */
+
+.anchored-element-manual {
+  position: fixed;
+
+  /* Explicit edge anchoring using anchor() function */
+  top: anchor(--primary-anchor bottom);
+  left: anchor(--primary-anchor left);
+
+  /* Set maximum width constrained by viewport right edge */
+  max-width: calc(100vw - anchor(--primary-anchor left) - 16px);
+
+  margin-top: 6px;
+}
+
+
+/* --------------------------------------------------------------------------
+   6. PROGRESSIVE ENHANCEMENT & FALLBACK SYSTEM (@supports)
+   -------------------------------------------------------------------------- */
+
+/* Legacy / Non-Supporting Browsers Baseline */
+@supports not (anchor-name: --test) {
+  .anchor-trigger {
+    position: relative;
+  }
+
+  .anchored-element {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 1000;
+  }
+}
