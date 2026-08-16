@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Master-Detail Layout System Blueprint</title>
+  <style>
+    /* ==========================================================================
+       DESIGN TOKENS & ROOT VARIABLES
+       ========================================================================== */
+    :root {
+      /* Colors */
+      --color-bg-app: #f8fafc;
+      --color-surface-card: #ffffff;
+      --color-surface-hover: #f1f5f9;
+      --color-surface-active: #e2e8f0;
+      --color-surface-selected: #f0f9ff;
+      --color-border-subtle: #cbd5e1;
+      --color-border-hover: #94a3b8;
+
+      /* Typography Colors */
+      --color-text-primary: #0f172a;
+      --color-text-secondary: #475569;
+      --color-text-muted: #64748b;
+      --color-text-inverse: #ffffff;
+
+      /* Brand & Status Colors */
+      --color-brand-primary: #0284c7;
+      --color-brand-hover: #0369a1;
+      --color-focus-ring: #0284c7;
+      --color-badge-high-bg: #fef2f2;
+      --color-badge-high-text: #991b1b;
+      --color-badge-medium-bg: #fffbeb;
+      --color-badge-medium-text: #92400e;
+      --color-badge-open-bg: #f0fdf4;
+      --color-badge-open-text: #166534;
+
+      /* Elevation & Shadows */
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+
+      /* Typography Scales */
+      --font-family-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    /* Reset & Base Styles */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-family-sans);
+      background-color: var(--color-bg-app);
+      color: var(--color-text-primary);
+      height: 100vh;
+      overflow: hidden; /* Lock browser window scrolling */
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Screen Reader Only Utility */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    /* ==========================================================================
+       1. GLOBAL APPLICATION SHELL HEADER
+       ========================================================================== */
+    .app-header {
+      height: 56px;
+      background: var(--color-surface-card);
+      border-bottom: 1px solid var(--color-border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      flex-shrink: 0;
+      z-index: 20;
+    }
+
+    .app-header__title {
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .app-header__user {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.875rem;
+      color: var(--color-text-secondary);
+    }
+
+    .avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background-color: var(--color-brand-primary);
+      color: var(--color-text-inverse);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 0.875rem;
+    }
+
+    /* ==========================================================================
+       2. MASTER-DETAIL SPLIT-PANE CANVAS CONTAINER
+       ========================================================================== */
+    .master-detail-container {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 360px 1fr; /* Desktop Split Pane */
+      height: calc(100vh - 56px);
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* ==========================================================================
+       3. MASTER PANE (LIST COLUMN)
+       ========================================================================== */
+    .master-pane {
+      background: var(--color-surface-card);
+      border-right: 1px solid var(--color-border-subtle);
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      overflow: hidden;
+      z-index: 5;
+    }
+
+    /* Master Pane Sticky Control Bar */
+    .master-header {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--color-border-subtle);
+      background: var(--color-surface-card);
+      flex-shrink: 0;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid var(--color-border-subtle);
+      border-radius: 6px;
+      font-size: 0.875rem;
+      color: var(--color-text-primary);
+      outline: none;
+    }
+
+    .search-input:focus {
+      border-color: var(--color-focus-ring);
+      box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.2);
+    }
+
+    /* Master Independent Scroll List */
+    .master-list {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      list-style: none;
+    }
+
+    /* Master Card Item */
+    .master-item {
+      position: relative;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--color-border-subtle);
+      cursor: pointer;
+      transition: background-color 0.15s ease;
+      outline: none;
+    }
+
+    .master-item:hover {
+      background-color: var(--color-surface-hover);
+    }
+
+    .master-item:focus-visible {
+      outline: 2px solid var(--color-focus-ring);
+      outline-offset: -2px;
+    }
+
+    /* Selected Active State */
+    .master-item[aria-selected="true"] {
+      background-color: var(--color-surface-selected);
+      border-left: 4px solid var(--color-brand-primary);
+    }
+
+    .master-item__top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+
+    .master-item__id {
+      font-size: 0.8125rem;
+      font-weight: 700;
+      color: var(--color-brand-primary);
+    }
+
+    .master-item__time {
+      font-size: 0.75rem;
+      color: var(--color-text-muted);
+    }
+
+    .master-item__title {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .master-item__preview {
+      font-size: 0.8125rem;
+      color: var(--color-text-secondary);
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+
+    .master-item__footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* Status Pills */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .badge--high {
+      background-color: var(--color-badge-high-bg);
+      color: var(--color-badge-high-text);
+    }
+
+    .badge--medium {
+      background-color: var(--color-badge-medium-bg);
+      color: var(--color-badge-medium-text);
+    }
+
+    .badge--open {
+      background-color: var(--color-badge-open-bg);
+      color: var(--color-badge-open-text);
+    }
+
+    /* ==========================================================================
+       4. DETAIL PANE (WORKSPACE COLUMN)
+       ========================================================================== */
+    .detail-pane {
+      background: var(--color-bg-app);
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    /* Sticky Detail Action Header */
+    .detail-header {
+      background: var(--color-surface-card);
+      border-bottom: 1px solid var(--color-border-subtle);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .detail-header__left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    /* Mobile Back Button */
+    .btn-back {
+      display: none; /* Hidden on Desktop */
+      align-items: center;
+      gap: 6px;
+      background: var(--color-surface-hover);
+      border: 1px solid var(--color-border-subtle);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      cursor: pointer;
+      min-height: 36px;
+    }
+
+    .btn-back:hover {
+      background: var(--color-surface-active);
+    }
+
+    .btn-back:focus-visible {
+      outline: 2px solid var(--color-focus-ring);
+    }
+
+    .detail-header__title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--color-text-primary);
+    }
+
+    .detail-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid transparent;
+      min-height: 36px;
+      transition: background-color 0.15s ease;
+    }
+
+    .btn--primary {
+      background-color: var(--color-brand-primary);
+      color: var(--color-text-inverse);
+    }
+
+    .btn--primary:hover {
+      background-color: var(--color-brand-hover);
+    }
+
+    .btn--secondary {
+      background-color: var(--color-surface-card);
+      border-color: var(--color-border-subtle);
+      color: var(--color-text-primary);
+    }
+
+    .btn--secondary:hover {
+      background-color: var(--color-surface-hover);
+    }
+
+    .btn:focus-visible {
+      outline: 2px solid var(--color-focus-ring);
+      outline-offset: 2px;
+    }
+
+    /* Detail Independent Scroll Workspace */
+    .detail-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px;
+    }
+
+    .detail-card {
+      background: var(--color-surface-card);
+      border: 1px solid var(--color-border-subtle);
+      border-radius: 8px;
+      padding: 24px;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 20px;
+    }
+
+    .detail-card__header {
+      margin-bottom: 16px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--color-border-subtle);
+    }
+
+    .detail-card__h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .detail-meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+      background: var(--color-bg-app);
+      padding: 12px;
+      border-radius: 6px;
+    }
+
+    .meta-item__label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--color-text-muted);
+      margin-bottom: 2px;
+    }
+
+    .meta-item__value {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+
+    .message-thread {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .message-bubble {
+      background: var(--color-surface-card);
+      border: 1px solid var(--color-border-subtle);
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .message-bubble__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .message-bubble__author {
+      font-weight: 600;
+      font-size: 0.875rem;
+    }
+
+    .message-bubble__body {
+      font-size: 0.875rem;
+      color: var(--color-text-secondary);
+      line-height: 1.5;
+    }
+
+    /* ==========================================================================
+       5. RESPONSIVE MOBILE STACK TRANSITIONS (< 768px)
+       ========================================================================== */
+    @media (max-width: 767px) {
+      .master-detail-container {
+        grid-template-columns: 1fr; /* Single column stack */
+      }
+
+      /* Desktop Dual-Pane Overrides for Mobile */
+      .master-pane {
+        width: 100%;
+      }
+
+      .detail-pane {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 10;
+        transform: translateX(100%); /* Translated offscreen by default */
+        transition: transform 0.25s ease-in-out;
+      }
+
+      /* Mobile Detail Active State */
+      .master-detail-container[data-mobile-view="detail"] .detail-pane {
+        transform: translateX(0); /* Slide into view */
+      }
+
+      .btn-back {
+        display: inline-flex; /* Show Back button on mobile */
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- GLOBAL APPLICATION SHELL HEADER -->
+  <header class="app-header" role="banner">
+    <div class="app-header__title">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path d="M4 6h16M4 12h16M4 18h16"/>
+      </svg>
+      <span>Helpdesk Inspector</span>
+    </div>
+    <div class="app-header__user">
+      <span>Alex Rivera (Support Lead)</span>
+      <div class="avatar" aria-label="Alex Rivera profile">AR</div>
+    </div>
+  </header>
+
+  <!-- ARIA Live Region for Screen Reader Updates -->
+  <div class="sr-only" role="status" aria-live="polite" id="aria-status">
+    Viewing Ticket TK-8492: Payment Gateway Returning 500 Errors
+  </div>
+
+  <!-- MASTER-DETAIL SPLIT-PANE CANVAS -->
+  <main class="master-detail-container" id="canvas-container" data-mobile-view="master">
+
+    <!-- MASTER PANE (LIST COLUMN) -->
+    <section class="master-pane" role="region" aria-label="Ticket Index List">
+      <div class="master-header">
+        <label for="ticket-search" class="sr-only">Search tickets</label>
+        <input type="search" id="ticket-search" class="search-input" placeholder="Search tickets (e.g. TK-8492)...">
+      </div>
+
+      <!-- Scrollable List Container -->
+      <ul class="master-list" role="listbox" aria-label="Support Tickets" id="master-item-list">
+
+        <!-- Master Item 1 (Active / Selected) -->
+        <li class="master-item"
+            role="option"
+            aria-selected="true"
+            tabindex="0"
+            data-ticket-id="TK-8492"
+            data-ticket-title="Payment Gateway Returning 500 Errors"
+            data-ticket-org="Acquired Inc.">
+          <div class="master-item__top">
+            <span class="master-item__id">TK-8492</span>
+            <span class="master-item__time">10:42 AM</span>
+          </div>
+          <div class="master-item__title">Payment Gateway Returning 500 Errors</div>
+          <div class="master-item__preview">Customers reporting checkout API failures during payment token authorization steps...</div>
+          <div class="master-item__footer">
+            <span class="badge badge--high">High Priority</span>
+            <span class="badge badge--open">Open</span>
+          </div>
+        </li>
+
+        <!-- Master Item 2 -->
+        <li class="master-item"
+            role="option"
+            aria-selected="false"
+            tabindex="-1"
+            data-ticket-id="TK-8490"
+            data-ticket-title="SAML SSO Configuration Query"
+            data-ticket-org="Global Tech">
+          <div class="master-item__top">
+            <span class="master-item__id">TK-8490</span>
+            <span class="master-item__time">09:15 AM</span>
+          </div>
+          <div class="master-item__title">SAML SSO Configuration Query</div>
+          <div class="master-item__preview">Where can our IT administrator upload the SAML IdP metadata XML file for single sign-on...</div>
+          <div class="master-item__footer">
+            <span class="badge badge--medium">Medium</span>
+            <span class="badge badge--open">Open</span>
+          </div>
+        </li>
+
+        <!-- Master Item 3 -->
+        <li class="master-item"
+            role="option"
+            aria-selected="false"
+            tabindex="-1"
+            data-ticket-id="TK-8488"
+            data-ticket-title="Invoice Export Formatting Issue"
+            data-ticket-org="Apex Financial">
+          <div class="master-item__top">
+            <span class="master-item__id">TK-8488</span>
+            <span class="master-item__time">Yesterday</span>
+          </div>
+          <div class="master-item__title">Invoice Export Formatting Issue</div>
+          <div class="master-item__preview">The PDF monthly billing export is truncating foreign character accents in company names...</div>
+          <div class="master-item__footer">
+            <span class="badge badge--medium">Medium</span>
+            <span class="badge badge--open">Open</span>
+          </div>
+        </li>
+
+      </ul>
+    </section>
+
+    <!-- DETAIL PANE (WORKSPACE COLUMN) -->
+    <section class="detail-pane" role="region" aria-label="Ticket Detail Workspace" id="detail-workspace">
+
+      <!-- Sticky Action Header -->
+      <div class="detail-header">
+        <div class="detail-header__left">
+          <button class="btn-back" id="btn-mobile-back" aria-label="Back to ticket list">
+            ← Back
+          </button>
+          <span class="detail-header__title" id="detail-record-id">Ticket #TK-8492</span>
+        </div>
+        <div class="detail-actions">
+          <button class="btn btn--secondary">Assign Agent</button>
+          <button class="btn btn--primary">Close Ticket</button>
+        </div>
+      </div>
+
+      <!-- Scrollable Detail Body -->
+      <div class="detail-content">
+
+        <article class="detail-card">
+          <div class="detail-card__header">
+            <h1 class="detail-card__h1" id="detail-ticket-heading">Payment Gateway Returning 500 Errors</h1>
+            <span class="badge badge--high">High Priority</span>
+          </div>
+
+          <div class="detail-meta-grid">
+            <div class="meta-item">
+              <div class="meta-item__label">Reporter</div>
+              <div class="meta-item__value" id="detail-reporter">Sarah Connor (Acquired Inc)</div>
+            </div>
+            <div class="meta-item">
+              <div class="meta-item__label">Created</div>
+              <div class="meta-item__value">Today at 10:42 AM</div>
+            </div>
+            <div class="meta-item">
+              <div class="meta-item__label">Category</div>
+              <div class="meta-item__value">API / Payment Gateway</div>
+            </div>
+            <div class="meta-item">
+              <div class="meta-item__label">Assignee</div>
+              <div class="meta-item__value">Alex Rivera</div>
+            </div>
+          </div>
+        </article>
+
+        <!-- Message Thread -->
+        <div class="message-thread">
+          <div class="message-bubble">
+            <div class="message-bubble__header">
+              <span class="message-bubble__author">Sarah Connor (Customer)</span>
+              <span class="master-item__time">10:42 AM</span>
+            </div>
+            <div class="message-bubble__body">
+              Our web application checkout API calls are failing with 500 internal server errors during payment tokenization. Multiple customers are currently unable to complete checkout.
+            </div>
+          </div>
+
+          <div class="message-bubble">
+            <div class="message-bubble__header">
+              <span class="message-bubble__author">Alex Rivera (Support Lead)</span>
+              <span class="master-item__time">10:50 AM</span>
+            </div>
+            <div class="message-bubble__body">
+              Hello Sarah, I am escalating this immediately to our payments infrastructure team. We are examining provider gateway logs now.
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- JAVASCRIPT CONTROLLER FOR SELECTION & MOBILE BACK-STACK -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const canvasContainer = document.getElementById('canvas-container');
+      const masterItems = document.querySelectorAll('.master-item');
+      const btnMobileBack = document.getElementById('btn-mobile-back');
+      const ariaStatus = document.getElementById('aria-status');
+
+      // Detail DOM Targets
+      const detailRecordId = document.getElementById('detail-record-id');
+      const detailHeading = document.getElementById('detail-ticket-heading');
+      const detailReporter = document.getElementById('detail-reporter');
+
+      let activeItemIndex = 0;
+
+      // Handle Master Item Selection
+      function selectMasterItem(item, index) {
+        masterItems.forEach((el, i) => {
+          el.setAttribute('aria-selected', 'false');
+          el.setAttribute('tabindex', '-1');
+        });
+
+        item.setAttribute('aria-selected', 'true');
+        item.setAttribute('tabindex', '0');
+        activeItemIndex = index;
+
+        // Update Detail Pane Record Attributes
+        const ticketId = item.dataset.ticketId;
+        const ticketTitle = item.dataset.ticketTitle;
+        const ticketOrg = item.dataset.ticketOrg;
+
+        detailRecordId.textContent = `Ticket #${ticketId}`;
+        detailHeading.textContent = ticketTitle;
+        detailReporter.textContent = `${ticketOrg}`;
+
+        // Announce via ARIA Live Region
+        ariaStatus.textContent = `Loaded Ticket ${ticketId}: ${ticketTitle}`;
+
+        // On Mobile: Switch Viewport State Machine to Detail View
+        if (window.innerWidth < 768) {
+          canvasContainer.setAttribute('data-mobile-view', 'detail');
+          btnMobileBack.focus();
+        }
+      }
+
+      // Event Listeners for Click & Pointer
+      masterItems.forEach((item, index) => {
+        item.addEventListener('click', () => {
+          selectMasterItem(item, index);
+        });
+
+        // Keyboard Navigation (Up / Down Arrow Keys)
+        item.addEventListener('keydown', (e) => {
+          if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            const nextIndex = (index + 1) % masterItems.length;
+            masterItems[nextIndex].focus();
+            selectMasterItem(masterItems[nextIndex], nextIndex);
+          } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            const prevIndex = (index - 1 + masterItems.length) % masterItems.length;
+            masterItems[prevIndex].focus();
+            selectMasterItem(masterItems[prevIndex], prevIndex);
+          } else if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            selectMasterItem(item, index);
+          }
+        });
+      });
+
+      // Mobile Back Button Handler
+      btnMobileBack.addEventListener('click', () => {
+        canvasContainer.setAttribute('data-mobile-view', 'master');
+        // Restore focus to the active master item
+        if (masterItems[activeItemIndex]) {
+          masterItems[activeItemIndex].focus();
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>
