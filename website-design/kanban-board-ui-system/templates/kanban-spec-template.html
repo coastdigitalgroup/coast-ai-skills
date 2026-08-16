@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Accessible Kanban Board UI System Template</title>
+  <style>
+    :root {
+      --color-bg-app: #f8fafc;
+      --color-surface-column: #f1f5f9;
+      --color-surface-card: #ffffff;
+      --color-text-primary: #0f172a;
+      --color-text-secondary: #475569;
+      --color-text-muted: #64748b;
+      --color-border-subtle: #cbd5e1;
+      --color-border-hover: #94a3b8;
+      --color-focus-ring: #2563eb;
+      --color-brand-primary: #2563eb;
+
+      --color-priority-high-bg: #fef3c7;
+      --color-priority-high-text: #92400e;
+      --color-priority-urgent-bg: #fee2e2;
+      --color-priority-urgent-text: #991b1b;
+      --color-priority-low-bg: #e0f2fe;
+      --color-priority-low-text: #075985;
+
+      --color-wip-warning-bg: #fef3c7;
+      --color-wip-warning-text: #92400e;
+      --color-wip-danger-bg: #fee2e2;
+      --color-wip-danger-text: #991b1b;
+      --color-wip-danger-border: #ef4444;
+
+      --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+      --shadow-card-hover: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+      --shadow-card-grabbed: 0 10px 15px -3px rgba(37, 99, 235, 0.25), 0 4px 6px -4px rgba(37, 99, 235, 0.1);
+
+      --radius-sm: 4px;
+      --radius-md: 6px;
+      --radius-lg: 8px;
+
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+
+    /* Resets & Base Layout */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--color-bg-app);
+      color: var(--color-text-primary);
+      height: 100vh;
+      height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Top App Shell Navigation */
+    .app-header {
+      height: 56px;
+      background: #ffffff;
+      border-bottom: 1px solid var(--color-border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      flex-shrink: 0;
+    }
+
+    .app-title {
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .sprint-badge {
+      font-size: 0.75rem;
+      background: #e2e8f0;
+      color: var(--color-text-secondary);
+      padding: 2px 8px;
+      border-radius: 9999px;
+      font-weight: 600;
+    }
+
+    /* Screen Reader Live Region */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border-0: 0;
+    }
+
+    /* Mobile Segmented Tab Bar (<768px) */
+    .mobile-tab-bar {
+      display: none;
+      background: #ffffff;
+      border-bottom: 1px solid var(--color-border-subtle);
+      padding: 8px;
+      overflow-x: auto;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .tab-btn {
+      padding: 8px 16px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      border-radius: var(--radius-md);
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tab-btn[aria-selected="true"] {
+      background: #eff6ff;
+      color: var(--color-brand-primary);
+      border-color: #bfdbfe;
+    }
+
+    /* Main Kanban Canvas Workspace */
+    .kanban-canvas {
+      flex: 1;
+      display: flex;
+      flex-direction: row;
+      gap: 16px;
+      padding: 20px 24px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      align-items: flex-start;
+      height: calc(100% - 56px);
+    }
+
+    /* Individual Column Shell */
+    .kanban-column {
+      width: 320px;
+      min-width: 320px;
+      max-height: 100%;
+      background: var(--color-surface-column);
+      border: 1px solid var(--color-border-subtle);
+      border-radius: var(--radius-lg);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+
+    /* Column Header */
+    .column-header {
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(255, 255, 255, 0.6);
+      border-bottom: 1px solid var(--color-border-subtle);
+      border-top-left-radius: var(--radius-lg);
+      border-top-right-radius: var(--radius-lg);
+      flex-shrink: 0;
+    }
+
+    .column-title-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .status-dot.backlog { background: #64748b; }
+    .status-dot.in-progress { background: #0284c7; }
+    .status-dot.review { background: #9333ea; }
+    .status-dot.done { background: #16a34a; }
+
+    .column-title {
+      font-size: 0.9375rem;
+      font-weight: 700;
+      color: var(--color-text-primary);
+    }
+
+    /* WIP Limit Badge States */
+    .wip-badge {
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      background: #e2e8f0;
+      color: var(--color-text-secondary);
+      border: 1px solid var(--color-border-subtle);
+    }
+
+    .wip-badge.exceeded {
+      background: var(--color-wip-danger-bg);
+      color: var(--color-wip-danger-text);
+      border-color: var(--color-wip-danger-border);
+    }
+
+    .kanban-column.wip-exceeded {
+      border-top: 3px solid var(--color-wip-danger-border);
+    }
+
+    /* Scrollable Task Cards Container */
+    .card-list {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      list-style: none;
+      min-height: 120px;
+    }
+
+    /* Task Card Component */
+    .kanban-card {
+      background: var(--color-surface-card);
+      border: 1px solid var(--color-border-subtle);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      cursor: grab;
+      position: relative;
+      transition: box-shadow 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+    }
+
+    .kanban-card:hover {
+      border-color: var(--color-border-hover);
+      box-shadow: var(--shadow-card-hover);
+      transform: translateY(-1px);
+    }
+
+    .kanban-card:focus-visible {
+      outline: 2px solid var(--color-focus-ring);
+      outline-offset: 2px;
+    }
+
+    /* Keyboard Grabbed State */
+    .kanban-card[aria-grabbed="true"] {
+      outline: 3px solid var(--color-brand-primary);
+      background: #eff6ff;
+      box-shadow: var(--shadow-card-grabbed);
+      cursor: grabbing;
+    }
+
+    /* Card Top Metadata Row */
+    .card-top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .badge-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .priority-badge {
+      font-size: 0.6875rem;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: var(--radius-sm);
+      text-transform: uppercase;
+    }
+
+    .priority-high { background: var(--color-priority-high-bg); color: var(--color-priority-high-text); }
+    .priority-urgent { background: var(--color-priority-urgent-bg); color: var(--color-priority-urgent-text); }
+    .priority-low { background: var(--color-priority-low-bg); color: var(--color-priority-low-text); }
+
+    .task-key {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--color-text-muted);
+      font-weight: 600;
+    }
+
+    .drag-handle-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--color-text-muted);
+      border-radius: var(--radius-sm);
+      padding: 2px 6px;
+      font-size: 0.75rem;
+      cursor: grab;
+      min-width: 24px;
+      min-height: 24px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .drag-handle-btn:focus-visible {
+      outline: 2px solid var(--color-focus-ring);
+    }
+
+    /* Card Main Content */
+    .card-title {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      line-height: 1.35;
+    }
+
+    /* Card Bottom Metadata */
+    .card-bottom-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 6px;
+      border-top: 1px solid #f1f5f9;
+      font-size: 0.75rem;
+      color: var(--color-text-secondary);
+    }
+
+    .subtask-counter {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-weight: 600;
+    }
+
+    .due-date {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 6px;
+      border-radius: var(--radius-sm);
+      background: #f1f5f9;
+    }
+
+    .due-date.overdue {
+      background: #fee2e2;
+      color: #991b1b;
+      font-weight: 700;
+    }
+
+    .avatar-stack {
+      display: flex;
+      align-items: center;
+    }
+
+    .avatar-img {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      border: 2px solid #ffffff;
+      margin-left: -6px;
+      background: #cbd5e1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.6875rem;
+      font-weight: 700;
+      color: var(--color-text-primary);
+    }
+
+    .avatar-img:first-child {
+      margin-left: 0;
+    }
+
+    /* Responsive Adaptation (<768px) */
+    @media (max-width: 767px) {
+      .mobile-tab-bar {
+        display: flex;
+      }
+
+      .kanban-canvas {
+        padding: 12px;
+        flex-direction: column;
+      }
+
+      .kanban-column {
+        width: 100%;
+        min-width: 100%;
+        display: none; /* Controlled by mobile tabs */
+      }
+
+      .kanban-column.active-mobile {
+        display: flex;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Global Application Shell Header -->
+  <header class="app-header">
+    <h1 class="app-title">
+      Sprint 42 Board
+      <span class="sprint-badge">Oct 14 - Oct 28</span>
+    </h1>
+  </header>
+
+  <!-- Live Region for Screen Reader Drag & Move Announcements -->
+  <div id="kanban-announcer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- Mobile Segmented Column Tabs -->
+  <nav class="mobile-tab-bar" aria-label="Kanban Columns Mobile Filter">
+    <button class="tab-btn" aria-selected="false" data-target="col-backlog">Backlog (1)</button>
+    <button class="tab-btn" aria-selected="true" data-target="col-in-progress">In Progress (2)</button>
+    <button class="tab-btn" aria-selected="false" data-target="col-review">Review (2) ⚠️</button>
+    <button class="tab-btn" aria-selected="false" data-target="col-done">Done (1)</button>
+  </nav>
+
+  <!-- Main Kanban Board Horizontal Canvas -->
+  <main class="kanban-canvas" aria-label="Project Task Board">
+
+    <!-- Column 1: Backlog -->
+    <section id="col-backlog" class="kanban-column" aria-labelledby="header-backlog">
+      <header class="column-header">
+        <div class="column-title-group">
+          <span class="status-dot backlog" aria-hidden="true"></span>
+          <h2 id="header-backlog" class="column-title">Backlog</h2>
+        </div>
+        <span class="wip-badge" aria-label="1 task in backlog">1</span>
+      </header>
+      <ul class="card-list" role="list" aria-labelledby="header-backlog">
+        <li class="kanban-card" tabindex="0" role="listitem" aria-grabbed="false">
+          <div class="card-top-row">
+            <div class="badge-group">
+              <span class="priority-badge priority-low">Low</span>
+              <span class="task-key">PROJ-1048</span>
+            </div>
+            <button class="drag-handle-btn" aria-label="Reorder task PROJ-1048">⠿</button>
+          </div>
+          <h3 class="card-title">Add dark mode preference persistence in LocalStorage</h3>
+          <div class="card-bottom-row">
+            <span class="subtask-counter">✓ 2/4</span>
+            <span class="due-date">Oct 28</span>
+            <div class="avatar-stack">
+              <div class="avatar-img" title="Assigned to Sarah Chen">SC</div>
+            </div>
+          </div>
+        </li>
+      </ul>
+    </section>
+
+    <!-- Column 2: In Progress -->
+    <section id="col-in-progress" class="kanban-column active-mobile" aria-labelledby="header-in-progress">
+      <header class="column-header">
+        <div class="column-title-group">
+          <span class="status-dot in-progress" aria-hidden="true"></span>
+          <h2 id="header-in-progress" class="column-title">In Progress</h2>
+        </div>
+        <span class="wip-badge" aria-label="2 tasks of maximum 3 allowed">2/3</span>
+      </header>
+      <ul class="card-list" role="list" aria-labelledby="header-in-progress">
+        <li class="kanban-card" tabindex="0" role="listitem" aria-grabbed="false">
+          <div class="card-top-row">
+            <div class="badge-group">
+              <span class="priority-badge priority-urgent">Urgent</span>
+              <span class="task-key">PROJ-1042</span>
+            </div>
+            <button class="drag-handle-btn" aria-label="Reorder task PROJ-1042">⠿</button>
+          </div>
+          <h3 class="card-title">Fix Authentication Token Expiration Timeout on Mobile Safari</h3>
+          <div class="card-bottom-row">
+            <span class="subtask-counter">✓ 3/3</span>
+            <span class="due-date overdue">⚠️ Oct 20</span>
+            <div class="avatar-stack">
+              <div class="avatar-img" title="Assigned to Alex Morgan">AM</div>
+              <div class="avatar-img" title="Assigned to David Kim">DK</div>
+            </div>
+          </div>
+        </li>
+      </ul>
+    </section>
+
+    <!-- Column 3: Code Review (WIP Exceeded) -->
+    <section id="col-review" class="kanban-column wip-exceeded" aria-labelledby="header-review">
+      <header class="column-header">
+        <div class="column-title-group">
+          <span class="status-dot review" aria-hidden="true"></span>
+          <h2 id="header-review" class="column-title">Code Review</h2>
+        </div>
+        <span class="wip-badge exceeded" aria-label="Warning: 2 tasks exceeds WIP limit of 1">2/1 !</span>
+      </header>
+      <ul class="card-list" role="list" aria-labelledby="header-review">
+        <li class="kanban-card" tabindex="0" role="listitem" aria-grabbed="false">
+          <div class="card-top-row">
+            <div class="badge-group">
+              <span class="priority-badge priority-high">High</span>
+              <span class="task-key">PROJ-1035</span>
+            </div>
+            <button class="drag-handle-btn" aria-label="Reorder task PROJ-1035">⠿</button>
+          </div>
+          <h3 class="card-title">Refactor Navigation Drawer Focus Trap Controller</h3>
+          <div class="card-bottom-row">
+            <span class="subtask-counter">✓ 1/2</span>
+            <span class="due-date">Oct 25</span>
+            <div class="avatar-stack">
+              <div class="avatar-img" title="Assigned to Elena Rostova">ER</div>
+            </div>
+          </div>
+        </li>
+      </ul>
+    </section>
+
+    <!-- Column 4: Done -->
+    <section id="col-done" class="kanban-column" aria-labelledby="header-done">
+      <header class="column-header">
+        <div class="column-title-group">
+          <span class="status-dot done" aria-hidden="true"></span>
+          <h2 id="header-done" class="column-title">Done</h2>
+        </div>
+        <span class="wip-badge" aria-label="1 task completed">1</span>
+      </header>
+      <ul class="card-list" role="list" aria-labelledby="header-done">
+        <li class="kanban-card" tabindex="0" role="listitem" aria-grabbed="false">
+          <div class="card-top-row">
+            <div class="badge-group">
+              <span class="priority-badge priority-low">Low</span>
+              <span class="task-key">PROJ-1012</span>
+            </div>
+            <button class="drag-handle-btn" aria-label="Reorder task PROJ-1012">⠿</button>
+          </div>
+          <h3 class="card-title">Update README deployment scripts documentation</h3>
+          <div class="card-bottom-row">
+            <span class="subtask-counter">✓ 1/1</span>
+            <span class="due-date">Oct 18</span>
+            <div class="avatar-stack">
+              <div class="avatar-img" title="Assigned to Alex Morgan">AM</div>
+            </div>
+          </div>
+        </li>
+      </ul>
+    </section>
+
+  </main>
+
+  <script>
+    // Simple script to handle mobile tab switching
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.setAttribute('aria-selected', 'false'));
+        btn.setAttribute('aria-selected', 'true');
+
+        const targetId = btn.getAttribute('data-target');
+        document.querySelectorAll('.kanban-column').forEach(col => {
+          if (col.id === targetId) {
+            col.classList.add('active-mobile');
+          } else {
+            col.classList.remove('active-mobile');
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>
