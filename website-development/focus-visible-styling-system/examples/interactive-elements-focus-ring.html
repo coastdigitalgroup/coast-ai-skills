@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Focus Visible Styling System Examples</title>
+  <style>
+    :root {
+      --bg-surface: #f8fafc;
+      --bg-card: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --border-color: #cbd5e1;
+
+      /* Focus Token System */
+      --focus-ring-color: #0284c7;
+      --focus-ring-halo: rgba(2, 132, 199, 0.25);
+      --focus-ring-offset: 2px;
+      --focus-ring-width: 2px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg-surface: #0f172a;
+        --bg-card: #1e293b;
+        --text-main: #f8fafc;
+        --text-muted: #94a3b8;
+        --border-color: #334155;
+
+        --focus-ring-color: #38bdf8;
+        --focus-ring-halo: rgba(56, 189, 248, 0.3);
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: var(--bg-surface);
+      color: var(--text-main);
+      margin: 0;
+      padding: 0;
+      line-height: 1.5;
+    }
+
+    /* Sticky Header - Testing WCAG 2.2 SC 2.4.13 Focus Unobscured */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border-color);
+      padding: 1rem 2rem;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    header nav {
+      display: flex;
+      gap: 1.5rem;
+      align-items: center;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+
+    section {
+      background: var(--bg-card);
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    h1, h2, h3 {
+      margin-top: 0;
+    }
+
+    /* Scroll Margin for unobscured sticky header tabbing */
+    :is(section, .card, button, input, a, [tabindex="0"]) {
+      scroll-margin-top: 5rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 600px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .badge-bad {
+      background: #fee2e2;
+      color: #991b1b;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .badge-good {
+      background: #dcfce7;
+      color: #166534;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    /* ==========================================================================
+       BEFORE / BAD PATTERNS
+       ========================================================================== */
+    .bad-button {
+      background: #0284c7;
+      color: white;
+      border: none;
+      padding: 0.6rem 1.2rem;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    /* ANTI-PATTERN: Completely removing outline */
+    .bad-button:focus {
+      outline: none;
+    }
+
+    .bad-input {
+      padding: 0.6rem;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      width: 100%;
+    }
+
+    /* ANTI-PATTERN: Low contrast subtle ring */
+    .bad-input:focus {
+      outline: 1px solid #e2e8f0; /* Fails 3:1 contrast ratio */
+    }
+
+    .bad-overflow-box {
+      overflow: hidden; /* Clips outer outlines */
+      border: 1px solid var(--border-color);
+      padding: 0.5rem;
+      border-radius: 6px;
+    }
+
+    .bad-clipped-button {
+      background: #475569;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+    }
+
+    .bad-clipped-button:focus-visible {
+      outline: 3px solid #0284c7;
+      outline-offset: 4px; /* Gets clipped by parent overflow: hidden */
+    }
+
+    /* ==========================================================================
+       AFTER / ACCESSIBLE FOCUS VISIBLE PATTERNS
+       ========================================================================== */
+
+    /* Generic reset for focus-visible compliance */
+    :focus {
+      outline: none;
+    }
+
+    .good-button {
+      background: var(--focus-ring-color);
+      color: white;
+      border: none;
+      padding: 0.6rem 1.2rem;
+      border-radius: 6px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.15s ease;
+    }
+
+    .good-button:hover {
+      opacity: 0.9;
+    }
+
+    /* High-contrast double ring pattern */
+    .good-button:focus-visible {
+      outline: var(--focus-ring-width) solid var(--focus-ring-color);
+      outline-offset: var(--focus-ring-offset);
+      box-shadow: 0 0 0 4px var(--focus-ring-halo);
+    }
+
+    .good-input {
+      background: var(--bg-card);
+      color: var(--text-main);
+      padding: 0.6rem;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      width: 100%;
+    }
+
+    .good-input:focus-visible {
+      border-color: var(--focus-ring-color);
+      outline: var(--focus-ring-width) solid var(--focus-ring-color);
+      outline-offset: var(--focus-ring-offset);
+      box-shadow: 0 0 0 3px var(--focus-ring-halo);
+    }
+
+    /* Inset focus ring for overflow containers */
+    .good-overflow-box {
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+      padding: 0.5rem;
+      border-radius: 6px;
+    }
+
+    .good-clipped-button {
+      background: #475569;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .good-clipped-button:focus-visible {
+      outline: var(--focus-ring-width) solid var(--focus-ring-color);
+      outline-offset: -2px; /* Inset offset prevents parent clipping! */
+      box-shadow: inset 0 0 0 2px white;
+    }
+
+    /* Interactive Card Pattern */
+    .interactive-card {
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 1rem;
+      cursor: pointer;
+      transition: border-color 0.15s ease;
+    }
+
+    .interactive-card:focus-visible {
+      outline: 3px solid var(--focus-ring-color);
+      outline-offset: 2px;
+      box-shadow: 0 0 0 4px var(--focus-ring-halo);
+    }
+
+    /* Forced Colors / High Contrast Mode Guardrail */
+    @media (forced-colors: active) {
+      .good-button:focus-visible,
+      .good-input:focus-visible,
+      .good-clipped-button:focus-visible,
+      .interactive-card:focus-visible {
+        outline: 3px solid Highlight !important;
+        outline-offset: 3px !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <nav>
+      <strong>Accessible Focus System</strong>
+      <a href="#examples" class="good-button" style="text-decoration: none; font-size: 0.9rem;">Skip to Demos</a>
+    </nav>
+  </header>
+
+  <main class="container" id="examples">
+    <h1>Focus Visible Styling System Examples</h1>
+    <p>Test keyboard navigation using <code>Tab</code> and <code>Shift + Tab</code>. Compare the behavior between mouse clicks and keyboard focus.</p>
+
+    <!-- SECTION 1: BUTTONS -->
+    <section>
+      <h2>1. Action Buttons</h2>
+      <div class="grid">
+        <div>
+          <h3><span class="badge-bad">FAIL</span> Inaccessible Button</h3>
+          <p>Uses <code>outline: none</code> on focus. Mouse and keyboard users see zero visual focus feedback.</p>
+
+          <button class="bad-button">Click or Tab Here</button>
+        </div>
+
+        <div>
+          <h3><span class="badge-good">PASS</span> WCAG 2.2 Compliant Button</h3>
+          <p>Uses <code>:focus-visible</code> with double-ring high-contrast styling and forced-colors fallbacks.</p>
+
+          <button class="good-button">Click or Tab Here</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 2: FORM INPUTS -->
+    <section>
+      <h2>2. Text Form Controls</h2>
+      <div class="grid">
+        <div>
+          <h3><span class="badge-bad">FAIL</span> Low Contrast Outline</h3>
+          <p>Focus outline fails WCAG 2.2 SC 2.4.11 3:1 contrast ratio against the light/dark background.</p>
+
+          <input type="text" class="bad-input" placeholder="Type something..." aria-label="Bad input example">
+        </div>
+
+        <div>
+          <h3><span class="badge-good">PASS</span> Dual-Ring Focused Input</h3>
+          <p>Features 3:1+ high-contrast focus ring with distinct border highlighting.</p>
+
+          <input type="text" class="good-input" placeholder="Type something..." aria-label="Good input example">
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 3: OVERFLOW CLIPPING -->
+    <section>
+      <h2>3. Overflow Clipping Defenses</h2>
+      <div class="grid">
+        <div>
+          <h3><span class="badge-bad">FAIL</span> Outer Ring Clipped</h3>
+          <p>Positive <code>outline-offset: 4px</code> inside an <code>overflow: hidden</code> card gets clipped off.</p>
+
+          <div class="bad-overflow-box">
+            <button class="bad-clipped-button">Clipped Focus</button>
+          </div>
+        </div>
+
+        <div>
+          <h3><span class="badge-good">PASS</span> Inset Focus Ring</h3>
+          <p>Negative <code>outline-offset: -2px</code> keeps focus outline within container bounds.</p>
+
+          <div class="good-overflow-box">
+            <button class="good-clipped-button">Protected Focus</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 4: INTERACTIVE CARD -->
+    <section>
+      <h2>4. Focusable Compound Container (Card)</h2>
+      <p>Custom component with <code>tabindex="0"</code> receiving focus rings cleanly.</p>
+
+      <div class="interactive-card" tabindex="0" role="region" aria-label="Interactive feature card">
+        <h3>Focusable Feature Card</h3>
+        <p>Press <code>Tab</code> to focus this container. Notice the clear outline and halo surrounding the entire card area.</p>
+      </div>
+    </section>
+  </main>
+
+</body>
+</html>

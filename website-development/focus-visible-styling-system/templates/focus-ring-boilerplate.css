@@ -1,0 +1,143 @@
+/**
+ * Focus Visible Styling System Boilerplate
+ * Zero-dependency CSS Custom Properties & Rules for WCAG 2.2 AA Focus Compliance
+ *
+ * Compliance:
+ * - WCAG 2.2 SC 2.4.7 (Focus Visible - Level A)
+ * - WCAG 2.2 SC 2.4.11 (Focus Appearance - Level AA)
+ * - WCAG 2.2 SC 2.4.13 (Focus Unobscured - Level AA)
+ */
+
+:root {
+  /* ==========================================================================
+     Focus Design Tokens
+     ========================================================================== */
+  --focus-ring-color: #0284c7;             /* High contrast primary accent (>= 3:1) */
+  --focus-ring-halo: rgba(2, 132, 199, 0.25);/* Outer soft glow */
+  --focus-ring-width: 2px;                 /* Outer ring width */
+  --focus-ring-offset: 2px;                /* Gap between element and ring */
+  --focus-ring-style: solid;
+  --focus-scroll-margin: 5rem;             /* Buffer height for sticky headers */
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --focus-ring-color: #38bdf8;
+    --focus-ring-halo: rgba(56, 189, 248, 0.35);
+  }
+}
+
+/* ==========================================================================
+   1. Unobscured Focus Guardrail (WCAG 2.2 SC 2.4.13)
+   ========================================================================== */
+:is(
+  a,
+  button,
+  input,
+  select,
+  textarea,
+  summary,
+  [tabindex="0"],
+  [contenteditable="true"]
+) {
+  scroll-margin-top: var(--focus-scroll-margin);
+  scroll-margin-bottom: 2rem;
+}
+
+/* ==========================================================================
+   2. Modality Separation & Focus Reset
+   ========================================================================== */
+/* Reset generic focus ring ONLY when focus-visible is supported */
+:focus {
+  outline: none;
+}
+
+/* Fallback for legacy browsers without focus-visible support */
+@supports not selector(:focus-visible) {
+  :focus {
+    outline: var(--focus-ring-width) var(--focus-ring-style) var(--focus-ring-color);
+    outline-offset: var(--focus-ring-offset);
+  }
+}
+
+/* ==========================================================================
+   3. Base Interactive Control Focus Visible Rules
+   ========================================================================== */
+
+/* Buttons, Anchors, Summaries */
+:is(
+  button,
+  .btn,
+  a[href],
+  summary,
+  [role="button"],
+  [role="tab"],
+  [role="option"],
+  [tabindex="0"]
+):focus-visible {
+  outline: var(--focus-ring-width) var(--focus-ring-style) var(--focus-ring-color) !important;
+  outline-offset: var(--focus-ring-offset) !important;
+  box-shadow: 0 0 0 4px var(--focus-ring-halo) !important;
+}
+
+/* Text Inputs, Textareas, Select Dropdowns */
+:is(
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="search"],
+  input[type="tel"],
+  input[type="url"],
+  input[type="number"],
+  input[type="date"],
+  textarea,
+  select
+):focus-visible {
+  border-color: var(--focus-ring-color) !important;
+  outline: var(--focus-ring-width) var(--focus-ring-style) var(--focus-ring-color) !important;
+  outline-offset: var(--focus-ring-offset) !important;
+  box-shadow: 0 0 0 3px var(--focus-ring-halo) !important;
+}
+
+/* Checkboxes and Radio Buttons */
+:is(
+  input[type="checkbox"],
+  input[type="radio"]
+):focus-visible {
+  outline: var(--focus-ring-width) var(--focus-ring-style) var(--focus-ring-color) !important;
+  outline-offset: var(--focus-ring-offset) !important;
+  box-shadow: 0 0 0 3px var(--focus-ring-halo) !important;
+}
+
+/* ==========================================================================
+   4. Overflow Container Protection (Inset Focus Ring)
+   ========================================================================== */
+/* Apply this helper class to controls inside tight overflow: hidden containers */
+.focus-ring-inset:focus-visible {
+  outline: var(--focus-ring-width) var(--focus-ring-style) var(--focus-ring-color) !important;
+  outline-offset: -2px !important;
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.8) !important;
+}
+
+/* ==========================================================================
+   5. Windows High Contrast / Forced Colors Mode
+   ========================================================================== */
+@media (forced-colors: active) {
+  :is(
+    a,
+    button,
+    input,
+    select,
+    textarea,
+    summary,
+    [tabindex="0"]
+  ):focus-visible {
+    outline: 3px solid Highlight !important;
+    outline-offset: 3px !important;
+    box-shadow: none !important;
+  }
+
+  .focus-ring-inset:focus-visible {
+    outline-offset: -3px !important;
+  }
+}
