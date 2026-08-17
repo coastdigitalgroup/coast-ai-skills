@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Master-Detail Layout System Template</title>
+  <style>
+    /* CSS Custom Properties & Tokens */
+    :root {
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --bg-app: #f8fafc;
+      --surface-card: #ffffff;
+      --surface-hover: #f1f5f9;
+      --surface-selected: #eff6ff;
+      --border-subtle: #e2e8f0;
+      --border-strong: #cbd5e1;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #94a3b8;
+      --brand-primary: #2563eb;
+      --brand-hover: #1d4ed8;
+      --brand-light: #dbeafe;
+      --status-success: #16a34a;
+      --status-warning: #d97706;
+      --focus-ring: #2563eb;
+      --header-height: 56px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-family);
+      background-color: var(--bg-app);
+      color: var(--text-primary);
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* App Header Shell */
+    .app-header {
+      height: var(--header-height);
+      background-color: var(--surface-card);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      flex-shrink: 0;
+    }
+
+    .app-title {
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .app-badge {
+      font-size: 0.75rem;
+      background-color: var(--brand-light);
+      color: var(--brand-primary);
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-weight: 600;
+    }
+
+    /* Master-Detail Shell */
+    .master-detail-container {
+      display: flex;
+      flex: 1;
+      height: calc(100vh - var(--header-height));
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Master Pane Styling */
+    .master-pane {
+      flex: 0 0 360px;
+      min-width: 280px;
+      max-width: 420px;
+      height: 100%;
+      background-color: var(--surface-card);
+      border-right: 1px solid var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .master-toolbar {
+      padding: 16px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background-color: var(--surface-card);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .search-input-wrapper {
+      position: relative;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 8px 12px 8px 36px;
+      border: 1px solid var(--border-strong);
+      border-radius: 6px;
+      font-size: 0.875rem;
+      color: var(--text-primary);
+      background-color: var(--bg-app);
+      outline: none;
+    }
+
+    .search-input:focus {
+      border-color: var(--brand-primary);
+      box-shadow: 0 0 0 2px var(--brand-light);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 16px;
+      height: 16px;
+      fill: var(--text-muted);
+    }
+
+    /* Master Item List */
+    .master-list {
+      flex: 1;
+      overflow-y: auto;
+      list-style: none;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .master-item {
+      padding: 16px;
+      border-bottom: 1px solid var(--border-subtle);
+      cursor: pointer;
+      transition: background-color 0.15s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      position: relative;
+    }
+
+    .master-item:hover {
+      background-color: var(--surface-hover);
+    }
+
+    .master-item:focus-visible {
+      outline: 2px solid var(--focus-ring);
+      outline-offset: -2px;
+    }
+
+    .master-item[aria-selected="true"] {
+      background-color: var(--surface-selected);
+      border-left: 4px solid var(--brand-primary);
+    }
+
+    .item-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .item-title {
+      font-size: 0.9375rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .item-timestamp {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+
+    .item-subtitle {
+      font-size: 0.84375rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .item-snippet {
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      line-height: 1.4;
+    }
+
+    /* Detail Pane Styling */
+    .detail-pane {
+      flex: 1;
+      min-width: 0;
+      height: 100%;
+      background-color: var(--bg-app);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .detail-header {
+      padding: 16px 24px;
+      background-color: var(--surface-card);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-shrink: 0;
+    }
+
+    .detail-header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .back-button {
+      display: none;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 12px;
+      border: 1px solid var(--border-strong);
+      border-radius: 6px;
+      background-color: var(--surface-card);
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      cursor: pointer;
+    }
+
+    .back-button:hover {
+      background-color: var(--surface-hover);
+    }
+
+    .detail-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .detail-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn {
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: background-color 0.15s ease;
+    }
+
+    .btn-primary {
+      background-color: var(--brand-primary);
+      color: #ffffff;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--brand-hover);
+    }
+
+    .btn-secondary {
+      background-color: var(--surface-card);
+      border-color: var(--border-strong);
+      color: var(--text-primary);
+    }
+
+    .btn-secondary:hover {
+      background-color: var(--surface-hover);
+    }
+
+    .detail-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .card {
+      background-color: var(--surface-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 20px;
+    }
+
+    .card-title {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: var(--text-primary);
+    }
+
+    .attribute-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+    }
+
+    .attribute-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .attribute-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .attribute-value {
+      font-size: 0.9375rem;
+      color: var(--text-primary);
+      font-weight: 500;
+    }
+
+    /* Unselected Empty State */
+    .empty-state {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+      text-align: center;
+      color: var(--text-secondary);
+    }
+
+    .empty-state-icon {
+      width: 64px;
+      height: 64px;
+      margin-bottom: 16px;
+      fill: var(--text-muted);
+    }
+
+    .empty-state-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+
+    /* Screen Reader Live Region */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    /* Mobile Responsive Logic (<768px) */
+    @media (max-width: 767px) {
+      .master-pane, .detail-pane {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        max-width: 100%;
+        transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      .master-detail-container[data-mobile-view="master"] .master-pane {
+        transform: translateX(0);
+        z-index: 2;
+      }
+
+      .master-detail-container[data-mobile-view="master"] .detail-pane {
+        transform: translateX(100%);
+        z-index: 1;
+      }
+
+      .master-detail-container[data-mobile-view="detail"] .master-pane {
+        transform: translateX(-100%);
+        z-index: 1;
+      }
+
+      .master-detail-container[data-mobile-view="detail"] .detail-pane {
+        transform: translateX(0);
+        z-index: 2;
+      }
+
+      .back-button {
+        display: inline-flex;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- App Header -->
+  <header class="app-header">
+    <div class="app-title">
+      <span>Enterprise Customer CRM</span>
+      <span class="app-badge">Master-Detail View</span>
+    </div>
+  </header>
+
+  <!-- Master-Detail Container Wrapper -->
+  <main class="master-detail-container" id="masterDetailContainer" data-mobile-view="master">
+
+    <!-- ARIA Live Region for Screen Reader Updates -->
+    <div id="srLiveRegion" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+    <!-- Master Pane (Left List) -->
+    <section class="master-pane" aria-label="Account Records List">
+      <div class="master-toolbar">
+        <div class="search-input-wrapper">
+          <svg class="search-icon" viewBox="0 0 24 24">
+            <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+          </svg>
+          <input type="text" class="search-input" placeholder="Search accounts..." id="searchInput" aria-label="Search accounts">
+        </div>
+      </div>
+
+      <ul class="master-list" id="masterList" role="listbox" aria-label="Customer Accounts">
+        <li class="master-item" role="option" aria-selected="true" tabindex="0" data-id="1">
+          <div class="item-header">
+            <span class="item-title">ACME Corporation</span>
+            <span class="item-timestamp">10m ago</span>
+          </div>
+          <div class="item-subtitle">$450,000 ARR • Enterprise Renewal</div>
+          <p class="item-snippet">Contract renewal discussion scheduled with VP of Procurement Bruce Wayne.</p>
+        </li>
+        <li class="master-item" role="option" aria-selected="false" tabindex="-1" data-id="2">
+          <div class="item-header">
+            <span class="item-title">Stark Industries</span>
+            <span class="item-timestamp">1h ago</span>
+          </div>
+          <div class="item-subtitle">$280,000 ARR • Expansion Deal</div>
+          <p class="item-snippet">Security review completed for cloud infrastructure expansion proposal.</p>
+        </li>
+        <li class="master-item" role="option" aria-selected="false" tabindex="-1" data-id="3">
+          <div class="item-header">
+            <span class="item-title">Wayne Enterprises</span>
+            <span class="item-timestamp">1d ago</span>
+          </div>
+          <div class="item-subtitle">$150,000 ARR • Closed Won</div>
+          <p class="item-snippet">Signed annual license agreement for 500 developer seats.</p>
+        </li>
+      </ul>
+    </section>
+
+    <!-- Detail Pane (Right Content Area) -->
+    <section class="detail-pane" aria-label="Account Details Canvas" id="detailPane">
+
+      <!-- Detail Header -->
+      <header class="detail-header" id="detailHeader">
+        <div class="detail-header-left">
+          <button class="back-button" id="backToListBtn" aria-label="Back to Account List">
+            &#8592; Back
+          </button>
+          <h2 class="detail-title" id="detailTitle">ACME Corporation</h2>
+        </div>
+        <div class="detail-actions">
+          <button class="btn btn-secondary">Export PDF</button>
+          <button class="btn btn-primary">Edit Account</button>
+        </div>
+      </header>
+
+      <!-- Detail Workspace Body -->
+      <div class="detail-content" id="detailContent">
+        <div class="card">
+          <h3 class="card-title">Deal Summary</h3>
+          <div class="attribute-grid">
+            <div class="attribute-item">
+              <span class="attribute-label">Annual Recurring Revenue</span>
+              <span class="attribute-value">$450,000 / yr</span>
+            </div>
+            <div class="attribute-item">
+              <span class="attribute-label">Pipeline Stage</span>
+              <span class="attribute-value">Contract Negotiation</span>
+            </div>
+            <div class="attribute-item">
+              <span class="attribute-label">Close Probability</span>
+              <span class="attribute-value">85%</span>
+            </div>
+            <div class="attribute-item">
+              <span class="attribute-label">Target Close Date</span>
+              <span class="attribute-value">Oct 31, 2025</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title">Key Decision Makers</h3>
+          <div class="attribute-grid">
+            <div class="attribute-item">
+              <span class="attribute-label">Primary Contact</span>
+              <span class="attribute-value">Bruce Wayne (VP Procurement)</span>
+            </div>
+            <div class="attribute-item">
+              <span class="attribute-label">Email</span>
+              <span class="attribute-value">bwayne@acme.com</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <!-- Interactive JavaScript Controller -->
+  <script>
+    const mockData = {
+      1: {
+        title: "ACME Corporation",
+        arr: "$450,000 / yr",
+        stage: "Contract Negotiation",
+        prob: "85%",
+        date: "Oct 31, 2025",
+        contact: "Bruce Wayne (VP Procurement)",
+        email: "bwayne@acme.com"
+      },
+      2: {
+        title: "Stark Industries",
+        arr: "$280,000 / yr",
+        stage: "Proposal Sent",
+        prob: "70%",
+        date: "Nov 15, 2025",
+        contact: "Pepper Potts (COO)",
+        email: "ppotts@stark.com"
+      },
+      3: {
+        title: "Wayne Enterprises",
+        arr: "$150,000 / yr",
+        stage: "Closed Won",
+        prob: "100%",
+        date: "Completed",
+        contact: "Lucius Fox (CTO)",
+        email: "lfox@wayne.com"
+      }
+    };
+
+    const container = document.getElementById('masterDetailContainer');
+    const masterItems = document.querySelectorAll('.master-item');
+    const backBtn = document.getElementById('backToListBtn');
+    const detailTitle = document.getElementById('detailTitle');
+    const detailContent = document.getElementById('detailContent');
+    const srLiveRegion = document.getElementById('srLiveRegion');
+    let currentActiveItem = masterItems[0];
+
+    function selectItem(item) {
+      const id = item.getAttribute('data-id');
+      const data = mockData[id];
+      if (!data) return;
+
+      // Update ARIA selection
+      masterItems.forEach(i => {
+        i.setAttribute('aria-selected', 'false');
+        i.setAttribute('tabindex', '-1');
+      });
+      item.setAttribute('aria-selected', 'true');
+      item.setAttribute('tabindex', '0');
+      currentActiveItem = item;
+
+      // Update Detail View
+      detailTitle.textContent = data.title;
+      detailContent.innerHTML = `
+        <div class="card">
+          <h3 class="card-title">Deal Summary</h3>
+          <div class="attribute-grid">
+            <div class="attribute-item">
+              <span class="attribute-label">Annual Recurring Revenue</span>
+              <span class="attribute-value">${data.arr}</span>
+            </div>
+            <div class="attribute-item">
+              <span class="attribute-label">Pipeline Stage</span>
+              <span class="attribute-value">${data.stage}</span>
+            </div>
+            <div class="attribute-item">
+              <span class="attribute-label">Close Probability</span>
+              <span class="attribute-value">${data.prob}</span>
+            </div>
+            <div class="attribute-item">
+              <span class="attribute-label">Target Close Date</span>
+              <span class="attribute-value">${data.date}</span>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <h3 class="card-title">Key Decision Makers</h3>
+          <div class="attribute-grid">
+            <div class="attribute-item">
+              <span class="attribute-label">Primary Contact</span>
+              <span class="attribute-value">${data.contact}</span>
+            </div>
+            <div class="attribute-item">
+              <span class="attribute-label">Email</span>
+              <span class="attribute-value">${data.email}</span>
+            </div>
+          </div>
+        </div>
+      `;
+
+      // Screen Reader Announcement
+      srLiveRegion.textContent = `Loaded account details for ${data.title}, ARR ${data.arr}`;
+
+      // Mobile view state toggle
+      if (window.innerWidth < 768) {
+        container.setAttribute('data-mobile-view', 'detail');
+        detailTitle.focus();
+      }
+    }
+
+    // Event Listeners
+    masterItems.forEach(item => {
+      item.addEventListener('click', () => selectItem(item));
+      item.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          selectItem(item);
+        } else if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          const next = item.nextElementSibling;
+          if (next) {
+            next.focus();
+            selectItem(next);
+          }
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          const prev = item.previousElementSibling;
+          if (prev) {
+            prev.focus();
+            selectItem(prev);
+          }
+        }
+      });
+    });
+
+    backBtn.addEventListener('click', () => {
+      container.setAttribute('data-mobile-view', 'master');
+      if (currentActiveItem) {
+        currentActiveItem.focus();
+      }
+    });
+  </script>
+</body>
+</html>
