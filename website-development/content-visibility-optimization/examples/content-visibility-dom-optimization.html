@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Content Visibility DOM Rendering Optimization Example</title>
+  <style>
+    /* Global Base Reset and Styles */
+    :root {
+      --bg-primary: #f8fafc;
+      --card-bg: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border-color: #e2e8f0;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: var(--bg-primary);
+      color: var(--text-main);
+      line-height: 1.6;
+      padding-bottom: 40px;
+    }
+
+    header {
+      background-color: var(--card-bg);
+      border-bottom: 1px solid var(--border-color);
+      padding: 24px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .header-container {
+      max-width: 1000px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .status-badge {
+      font-size: 0.875rem;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 20px;
+      background-color: #dbeafe;
+      color: var(--accent);
+    }
+
+    .controls {
+      display: flex;
+      gap: 12px;
+    }
+
+    button {
+      background-color: var(--accent);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    button:hover {
+      background-color: var(--accent-hover);
+    }
+
+    main {
+      max-width: 1000px;
+      margin: 32px auto;
+      padding: 0 16px;
+    }
+
+    .intro-banner {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 24px;
+      margin-bottom: 32px;
+    }
+
+    /* -------------------------------------------------------------
+       OPTIMIZED CONTENT VISIBILITY CSS PATTERN
+       ------------------------------------------------------------- */
+
+    /* Before optimization: standard rendering across thousands of nodes */
+    .unoptimized-feed .feed-card {
+      /* Standard rendering triggers full style recalculation and layout for offscreen items */
+      content-visibility: visible;
+    }
+
+    /* After optimization: Skips offscreen layout & paint calculation */
+    .optimized-feed .feed-card {
+      /*
+        content-visibility: auto skips layout & paint calculation for off-screen cards.
+        The browser automatically renders cards as they approach the viewport.
+      */
+      content-visibility: auto;
+
+      /*
+        contain-intrinsic-size: auto 260px provides an estimated 260px height placeholder
+        for unrendered cards to maintain stable scrollbar thumb size and avoid CLS.
+        The 'auto' keyword caches actual rendered height once scrolled past!
+      */
+      contain-intrinsic-size: auto 260px;
+
+      /*
+        scroll-margin-top ensures anchor fragment links scroll smoothly with header offset
+      */
+      scroll-margin-top: 90px;
+    }
+
+    /* -------------------------------------------------------------
+       Card Anatomy & Styling
+       ------------------------------------------------------------- */
+    .feed-card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: #cbd5e1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: #475569;
+    }
+
+    .card-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+    }
+
+    .card-meta {
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+    }
+
+    .card-body {
+      font-size: 0.9375rem;
+      color: #334155;
+      margin-bottom: 16px;
+    }
+
+    .card-footer {
+      display: flex;
+      gap: 16px;
+      border-top: 1px solid var(--border-color);
+      padding-top: 12px;
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+    }
+
+    .action-btn {
+      background: transparent;
+      color: var(--text-muted);
+      padding: 4px 8px;
+    }
+
+    .action-btn:hover {
+      background-color: #f1f5f9;
+      color: var(--text-main);
+    }
+
+    /* Focus ring for accessibility */
+    a:focus-visible,
+    button:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-container">
+      <div>
+        <h1>Content Visibility Optimization Demo</h1>
+        <p class="card-meta">200 DOM-Heavy Feed Items (10,000+ DOM Nodes)</p>
+      </div>
+      <div class="controls">
+        <span id="optimization-status" class="status-badge">Mode: OPTIMIZED (content-visibility: auto)</span>
+        <button type="button" id="toggle-btn">Switch to Unoptimized</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="intro-banner">
+      <h2>Rendering Performance Test</h2>
+      <p>
+        Toggle between <strong>OPTIMIZED</strong> and <strong>UNOPTIMIZED</strong> mode. Open Chrome DevTools
+        <strong>Performance Panel</strong> to measure style recalculation and layout paint times. Notice how
+        <code>content-visibility: auto</code> drastically reduces rendering thread work while preserving
+        full <code>Ctrl+F</code> searchability and screen reader accessibility!
+      </p>
+    </section>
+
+    <!-- Main Feed Container -->
+    <section id="feed-container" class="optimized-feed" aria-label="Social Activity Feed">
+      <!-- Generated dynamically by script below -->
+    </section>
+  </main>
+
+  <script>
+    // Generate 200 DOM-heavy feed cards (50+ DOM nodes each = 10,000+ DOM nodes total)
+    const feedContainer = document.getElementById('feed-container');
+    const toggleBtn = document.getElementById('toggle-btn');
+    const statusBadge = document.getElementById('optimization-status');
+
+    let isOptimized = true;
+
+    function buildCards() {
+      const fragment = document.createDocumentFragment();
+
+      for (let i = 1; i <= 200; i++) {
+        const article = document.createElement('article');
+        article.className = 'feed-card';
+        article.id = `card-${i}`;
+
+        article.innerHTML = `
+          <div class="card-header">
+            <div class="avatar">${i % 99}</div>
+            <div>
+              <h3 class="card-title"><a href="#card-${i}">Activity Post #${i}</a></h3>
+              <p class="card-meta">Posted by User #${1000 + i} &bull; 2 hours ago</p>
+            </div>
+          </div>
+          <div class="card-body">
+            <p>
+              This is article card item #${i}. It contains multiple nested DOM nodes, structured metadata,
+              interactive action buttons, and nested content blocks. When content-visibility is set to
+              <code>auto</code>, the rendering engine skips calculating layout and painting this card when it is off-screen.
+            </p>
+            <div style="margin-top: 10px; padding: 10px; background: #f1f5f9; border-radius: 4px;">
+              <strong>Sub-content block ${i}:</strong> Nested metadata container testing deep DOM style calculation overhead.
+            </div>
+          </div>
+          <div class="card-footer">
+            <button type="button" class="action-btn" aria-label="Like post ${i}"> Like (12)</button>
+            <button type="button" class="action-btn" aria-label="Comment on post ${i}"> Comment (4)</button>
+            <button type="button" class="action-btn" aria-label="Share post ${i}"> Share</button>
+          </div>
+        `;
+
+        fragment.appendChild(article);
+      }
+
+      feedContainer.appendChild(fragment);
+    }
+
+    // Toggle optimization mode
+    toggleBtn.addEventListener('click', () => {
+      isOptimized = !isOptimized;
+
+      if (isOptimized) {
+        feedContainer.className = 'optimized-feed';
+        statusBadge.textContent = 'Mode: OPTIMIZED (content-visibility: auto)';
+        statusBadge.style.backgroundColor = '#dbeafe';
+        statusBadge.style.color = '#2563eb';
+        toggleBtn.textContent = 'Switch to Unoptimized';
+      } else {
+        feedContainer.className = 'unoptimized-feed';
+        statusBadge.textContent = 'Mode: UNOPTIMIZED (content-visibility: visible)';
+        statusBadge.style.backgroundColor = '#fee2e2';
+        statusBadge.style.color = '#dc2626';
+        toggleBtn.textContent = 'Switch to Optimized';
+      }
+    });
+
+    // Initialize
+    buildCards();
+  </script>
+</body>
+</html>
