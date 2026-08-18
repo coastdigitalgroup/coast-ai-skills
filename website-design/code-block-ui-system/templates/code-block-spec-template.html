@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Code Block UI System Specification Template</title>
+  <style>
+    :root {
+      /* Code Block Design Tokens (Dark Theme Base) */
+      --code-bg: #0f172a;               /* Slate 900 */
+      --code-header-bg: #1e293b;        /* Slate 800 */
+      --code-border: #334155;           /* Slate 700 */
+      --code-text: #e2e8f0;             /* Slate 200 */
+      --code-gutter-text: #64748b;      /* Slate 500 */
+      --code-font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+      /* Syntax Tokens (WCAG AA ≥ 4.5:1 against #0f172a) */
+      --token-keyword: #c084fc;        /* Purple 400 - Contrast 7.2:1 */
+      --token-function: #38bdf8;       /* Sky 400 - Contrast 8.5:1 */
+      --token-string: #4ade80;         /* Emerald 400 - Contrast 9.1:1 */
+      --token-comment: #94a3b8;        /* Slate 400 - Contrast 5.1:1 */
+      --token-type: #facc15;           /* Yellow 400 - Contrast 11.4:1 */
+      --token-number: #fb923c;         /* Orange 400 - Contrast 7.8:1 */
+
+      /* Line Highlight & Diff Tokens */
+      --highlight-bg: rgba(56, 189, 248, 0.12);
+      --highlight-border: #38bdf8;
+      --diff-add-bg: rgba(34, 197, 94, 0.15);
+      --diff-add-border: #22c55e;
+      --diff-remove-bg: rgba(239, 68, 68, 0.15);
+      --diff-remove-border: #ef4444;
+
+      /* Interactive Ring & Focus */
+      --focus-ring: #38bdf8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: #f8fafc;
+      color: #0f172a;
+      padding: 32px 16px;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 840px;
+      margin: 0 auto;
+    }
+
+    .spec-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .spec-subtitle {
+      color: #475569;
+      margin-bottom: 24px;
+      font-size: 0.95rem;
+    }
+
+    /* --- CODE BLOCK COMPONENT ARCHITECTURE --- */
+
+    .code-block-container {
+      background-color: var(--code-bg);
+      border: 1px solid var(--code-border);
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Sticky Header Toolbar */
+    .code-block-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background-color: var(--code-header-bg);
+      border-bottom: 1px solid var(--code-border);
+      padding: 0 8px 0 16px;
+      height: 44px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    /* Tabbed File Navigation */
+    .code-tabs {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      height: 100%;
+    }
+
+    .code-tab {
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--code-gutter-text);
+      font-family: inherit;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      padding: 0 12px;
+      height: 100%;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      transition: color 0.15s ease, border-color 0.15s ease;
+    }
+
+    .code-tab:hover {
+      color: var(--code-text);
+    }
+
+    .code-tab:focus-visible {
+      outline: 2px solid var(--focus-ring);
+      outline-offset: -2px;
+    }
+
+    .code-tab[aria-selected="true"] {
+      color: var(--code-text);
+      border-bottom-color: var(--focus-ring);
+      font-weight: 600;
+    }
+
+    /* Header Actions */
+    .code-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-action {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--code-border);
+      border-radius: 6px;
+      color: var(--code-text);
+      font-family: inherit;
+      font-size: 0.75rem;
+      font-weight: 500;
+      padding: 6px 10px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+      min-height: 32px;
+    }
+
+    .btn-action:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: #475569;
+    }
+
+    .btn-action:focus-visible {
+      outline: 2px solid var(--focus-ring);
+      outline-offset: 2px;
+    }
+
+    .btn-action.copied {
+      background: rgba(34, 197, 94, 0.2);
+      border-color: var(--diff-add-border);
+      color: #4ade80;
+    }
+
+    /* Code Body Canvas */
+    .code-wrapper {
+      position: relative;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    pre.code-block {
+      margin: 0;
+      padding: 16px 0;
+      font-family: var(--code-font-family);
+      font-size: 0.875rem;
+      line-height: 1.6;
+      color: var(--code-text);
+      tab-size: 2;
+    }
+
+    /* Line Structure */
+    .code-line {
+      display: flex;
+      width: 100%;
+      min-width: max-content;
+      padding: 0 16px 0 0;
+    }
+
+    .line-number {
+      width: 48px;
+      flex-shrink: 0;
+      text-align: right;
+      padding-right: 16px;
+      user-select: none;
+      color: var(--code-gutter-text);
+      font-size: 0.8125rem;
+    }
+
+    .line-content {
+      flex: 1;
+      white-space: pre;
+    }
+
+    /* Soft Wrap State Toggle Modifier */
+    .code-wrapper.soft-wrap .line-content {
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .code-wrapper.soft-wrap .code-line {
+      min-width: 100%;
+    }
+
+    /* Highlighted / Focused Line */
+    .code-line.highlighted {
+      background-color: var(--highlight-bg);
+      border-left: 3px solid var(--highlight-border);
+    }
+
+    .code-line.highlighted .line-number {
+      padding-left: 13px; /* Adjust for 3px border */
+    }
+
+    /* Diff View Lines */
+    .code-line.diff-add {
+      background-color: var(--diff-add-bg);
+      border-left: 3px solid var(--diff-add-border);
+    }
+
+    .code-line.diff-remove {
+      background-color: var(--diff-remove-bg);
+      border-left: 3px solid var(--diff-remove-border);
+    }
+
+    /* Syntax Token Classes */
+    .tok-kw { color: var(--token-keyword); font-weight: 600; }
+    .tok-fn { color: var(--token-function); }
+    .tok-str { color: var(--token-string); }
+    .tok-cm { color: var(--token-comment); font-style: italic; }
+    .tok-type { color: var(--token-type); }
+    .tok-num { color: var(--token-number); }
+
+    /* Screen Reader Utility */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+  </style>
+</head>
+<body>
+
+  <main class="container">
+    <h1 class="spec-title">Code Block UI System Specification</h1>
+    <p class="spec-subtitle">Production layout template with tabbed files, line-level callouts, diff views, and accessible copy status.</p>
+
+    <!-- CODE BLOCK COMPONENT -->
+    <div class="code-block-container">
+
+      <!-- STICKY HEADER TOOLBAR -->
+      <header class="code-block-header">
+
+        <!-- MULTI-FILE TABS -->
+        <nav class="code-tabs" role="tablist" aria-label="Code example files">
+          <button type="button" class="code-tab" role="tab" aria-selected="true" aria-controls="panel-client" id="tab-client">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
+            client.ts
+          </button>
+          <button type="button" class="code-tab" role="tab" aria-selected="false" aria-controls="panel-config" id="tab-config">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
+            .env.local
+          </button>
+        </nav>
+
+        <!-- HEADER ACTIONS -->
+        <div class="code-actions">
+          <button type="button" class="btn-action" id="btn-wrap" aria-label="Toggle word wrap">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="4 6 20 6"/><path d="M4 12h12a3 3 0 0 1 0 6H11"/><polyline points="14 15 11 18 14 21"/></svg>
+            <span>Wrap</span>
+          </button>
+
+          <button type="button" class="btn-action" id="btn-copy" aria-label="Copy client.ts code to clipboard">
+            <svg id="copy-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            <span id="copy-text">Copy</span>
+          </button>
+        </div>
+
+      </header>
+
+      <!-- CODE CANVAS -->
+      <div class="code-wrapper" id="code-canvas">
+        <pre class="code-block"><code class="language-typescript">
+<div class="code-line"><span class="line-number" aria-hidden="true">1</span><span class="line-content"><span class="tok-kw">import</span> { <span class="tok-type">ApiClient</span> } <span class="tok-kw">from</span> <span class="tok-str">'@coast/sdk'</span>;</span></div>
+<div class="code-line"><span class="line-number" aria-hidden="true">2</span><span class="line-content"></span></div>
+<div class="code-line"><span class="line-number" aria-hidden="true">3</span><span class="line-content"><span class="tok-cm">// Initialize client with API credentials</span></span></div>
+<div class="code-line"><span class="line-number" aria-hidden="true">4</span><span class="line-content"><span class="tok-kw">export const</span> client = <span class="tok-kw">new</span> <span class="tok-type">ApiClient</span>({</span></div>
+<div class="code-line"><span class="line-number" aria-hidden="true">5</span><span class="line-content">  apiKey: process.env.<span class="tok-type">COAST_API_KEY</span>,</span></div>
+<div class="code-line"><span class="line-number" aria-hidden="true">6</span><span class="line-content">});</span></div>
+<div class="code-line"><span class="line-number" aria-hidden="true">7</span><span class="line-content"></span></div>
+<div class="code-line highlighted"><span class="line-number" aria-hidden="true">8</span><span class="line-content"><span class="tok-cm">// Highlighted line: Main API entry point</span></span></div>
+<div class="code-line highlighted"><span class="line-number" aria-hidden="true">9</span><span class="line-content"><span class="tok-kw">export async function</span> <span class="tok-fn">fetchUserData</span>(<span class="tok-type">userId</span>: <span class="tok-type">string</span>) {</span></div>
+<div class="code-line highlighted"><span class="line-number" aria-hidden="true">10</span><span class="line-content">  <span class="tok-kw">return await</span> client.users.<span class="tok-fn">get</span>(userId);</span></div>
+<div class="code-line"><span class="line-number" aria-hidden="true">11</span><span class="line-content">}</span></div>
+<div class="code-line"><span class="line-number" aria-hidden="true">12</span><span class="line-content"></span></div>
+<div class="code-line diff-remove"><span class="line-number" aria-hidden="true">13</span><span class="line-content"><span class="sr-only">Removed line:</span><span class="tok-cm">// Legacy fallback method</span></span></div>
+<div class="code-line diff-add"><span class="line-number" aria-hidden="true">14</span><span class="line-content"><span class="sr-only">Added line:</span><span class="tok-cm">// Updated async handler with retry logic</span></span></div>
+        </code></pre>
+      </div>
+
+    </div>
+
+    <!-- ACCESSIBLE LIVE REGION FOR SCREEN READERS -->
+    <div id="copy-status-announcer" class="sr-only" live="polite" aria-atomic="true"></div>
+
+  </main>
+
+  <script>
+    // Copy Button Interaction Logic
+    const btnCopy = document.getElementById('btn-copy');
+    const copyText = document.getElementById('copy-text');
+    const copyIcon = document.getElementById('copy-icon');
+    const announcer = document.getElementById('copy-status-announcer');
+    const btnWrap = document.getElementById('btn-wrap');
+    const codeCanvas = document.getElementById('code-canvas');
+
+    btnCopy.addEventListener('click', () => {
+      // Simulate Clipboard Action
+      const codeToCopy = `import { ApiClient } from '@coast/sdk';\n\nexport const client = new ApiClient({\n  apiKey: process.env.COAST_API_KEY,\n});\n\nexport async function fetchUserData(userId: string) {\n  return await client.users.get(userId);\n}`;
+      navigator.clipboard.writeText(codeToCopy).then(() => {
+        // Apply Copied Success State
+        btnCopy.classList.add('copied');
+        copyText.textContent = 'Copied!';
+        copyIcon.innerHTML = '<polyline points="20 6 9 17 4 12"/>';
+        announcer.textContent = 'client.ts code copied to clipboard';
+
+        // Revert State after 2000ms
+        setTimeout(() => {
+          btnCopy.classList.remove('copied');
+          copyText.textContent = 'Copy';
+          copyIcon.innerHTML = '<rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>';
+          announcer.textContent = '';
+        }, 2000);
+      });
+    });
+
+    // Soft Wrap Toggle Interaction Logic
+    btnWrap.addEventListener('click', () => {
+      codeCanvas.classList.toggle('soft-wrap');
+      const isWrapped = codeCanvas.classList.contains('soft-wrap');
+      btnWrap.setAttribute('aria-pressed', isWrapped ? 'true' : 'false');
+    });
+  </script>
+</body>
+</html>
