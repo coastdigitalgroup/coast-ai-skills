@@ -1,0 +1,147 @@
+/* ==========================================================================
+   CSS Scroll Snap Boilerplate
+   Modular styles for horizontal carousels, vertical presentation decks,
+   sticky header offsets, keyboard focus indicators, and reduced-motion safety.
+   ========================================================================== */
+
+:root {
+  --snap-padding-inline: 1.5rem;
+  --snap-padding-block: 1rem;
+  --snap-gap: 1.25rem;
+  --snap-card-min-width: 280px;
+  --snap-card-max-width: 420px;
+  --snap-focus-ring: #38bdf8;
+  --snap-active-border: #0284c7;
+  --header-offset-height: 80px;
+}
+
+/* --------------------------------------------------------------------------
+   1. Horizontal Scroll Snap Container
+   -------------------------------------------------------------------------- */
+.scroll-snap-horizontal {
+  display: flex;
+  flex-direction: row;
+  gap: var(--snap-gap);
+  overflow-x: auto;
+  overflow-y: hidden;
+
+  /* Native CSS Scroll Snap rules */
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: var(--snap-padding-inline);
+  scroll-behavior: smooth;
+
+  /* Prevent vertical pull-to-refresh / horizontal history bounce */
+  overscroll-behavior-x: contain;
+
+  /* iOS momentum scrolling */
+  -webkit-overflow-scrolling: touch;
+
+  /* Layout spacing */
+  padding: var(--snap-padding-block) var(--snap-padding-inline);
+  margin-inline: calc(var(--snap-padding-inline) * -1);
+  box-sizing: border-box;
+
+  /* Focus styling */
+  outline-offset: 4px;
+}
+
+.scroll-snap-horizontal:focus-visible {
+  outline: 2px solid var(--snap-focus-ring);
+  border-radius: 6px;
+}
+
+/* Horizontal Snap Item */
+.scroll-snap-horizontal > .scroll-snap-item {
+  flex: 0 0 85%;
+  min-width: var(--snap-card-min-width);
+  max-width: var(--snap-card-max-width);
+
+  /* Lock to start boundary */
+  scroll-snap-align: start;
+
+  /* Enforce step-by-step navigation without skipping */
+  scroll-snap-stop: always;
+
+  /* Margin offset fallback */
+  scroll-margin-inline: var(--snap-padding-inline);
+  box-sizing: border-box;
+}
+
+/* Center-aligned Snap Variant */
+.scroll-snap-horizontal.align-center {
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: center;
+}
+
+.scroll-snap-horizontal.align-center > .scroll-snap-item {
+  scroll-snap-align: center;
+}
+
+/* Proximity Snap Variant (Soft Snapping) */
+.scroll-snap-horizontal.snap-proximity {
+  scroll-snap-type: x proximity;
+}
+
+/* --------------------------------------------------------------------------
+   2. Vertical Scroll Snap Presentation Slides
+   -------------------------------------------------------------------------- */
+.scroll-snap-vertical {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - var(--header-offset-height));
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  /* Vertical Snap Rules */
+  scroll-snap-type: y mandatory;
+  scroll-padding-top: var(--header-offset-height);
+  scroll-behavior: smooth;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.scroll-snap-vertical > .scroll-snap-slide {
+  flex: 0 0 100%;
+  height: calc(100vh - var(--header-offset-height));
+  width: 100%;
+
+  /* Lock to start of viewport */
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  scroll-margin-top: var(--header-offset-height);
+  box-sizing: border-box;
+}
+
+/* --------------------------------------------------------------------------
+   3. Focus & Active Indicator States
+   -------------------------------------------------------------------------- */
+.scroll-snap-item:focus-visible,
+.scroll-snap-slide:focus-visible {
+  outline: 2px solid var(--snap-focus-ring);
+  outline-offset: 2px;
+}
+
+.scroll-snap-item.is-active,
+.scroll-snap-slide.is-active {
+  border-color: var(--snap-active-border);
+}
+
+/* Hide scrollbar visually while retaining full scroll functionality */
+.scroll-snap-no-scrollbar {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+}
+
+.scroll-snap-no-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+/* --------------------------------------------------------------------------
+   4. Motion Safety & System Preferences
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .scroll-snap-horizontal,
+  .scroll-snap-vertical {
+    scroll-behavior: auto !important;
+  }
+}
