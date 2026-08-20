@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Event Listener Lifecycle Management & Delegation Example</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #334155;
+      --accent-red: #ef4444;
+      --accent-green: #22c55e;
+      --accent-blue: #3b82f6;
+      --font: system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      padding: 2rem;
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      line-height: 1.5;
+    }
+
+    h1, h2, h3 {
+      margin-top: 0;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-top: 1.5rem;
+    }
+
+    @media (max-width: 900px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.5rem;
+    }
+
+    .panel.before {
+      border-top: 4px solid var(--accent-red);
+    }
+
+    .panel.after {
+      border-top: 4px solid var(--accent-green);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 1rem;
+    }
+
+    .badge.before {
+      background: rgba(239, 68, 68, 0.2);
+      color: var(--accent-red);
+    }
+
+    .badge.after {
+      background: rgba(34, 197, 94, 0.2);
+      color: var(--accent-green);
+    }
+
+    .controls {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+
+    button {
+      background: var(--accent-blue);
+      color: #fff;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    button.danger {
+      background: var(--accent-red);
+    }
+
+    .metric {
+      background: rgba(0, 0, 0, 0.2);
+      padding: 0.75rem;
+      border-radius: 6px;
+      margin-bottom: 1rem;
+      font-family: monospace;
+      font-size: 0.875rem;
+    }
+
+    .item-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      max-height: 250px;
+      overflow-y: auto;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+    }
+
+    .item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .item:last-child {
+      border-bottom: none;
+    }
+
+    .item-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .item-actions button {
+      padding: 0.25rem 0.5rem;
+      font-size: 0.75rem;
+    }
+
+    .log-box {
+      background: #090d16;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.75rem;
+      font-family: monospace;
+      font-size: 0.8rem;
+      height: 120px;
+      overflow-y: auto;
+      margin-top: 1rem;
+      color: var(--text-muted);
+    }
+
+    .log-entry {
+      margin-bottom: 0.25rem;
+    }
+
+    .log-entry.warn {
+      color: #f59e0b;
+    }
+
+    .log-entry.error {
+      color: var(--accent-red);
+    }
+
+    .log-entry.success {
+      color: var(--accent-green);
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Event Listener Lifecycle & Delegation Patterns</h1>
+  <p style="color: var(--text-muted);">
+    This interactive demonstration shows the difference between unmanaged DOM event listeners (causing memory leaks and listener accumulation) vs deterministic lifecycle teardown using <code>AbortController</code> and event delegation.
+  </p>
+
+  <div class="grid">
+
+    <!-- BEFORE PANEL: Unmanaged Event Listeners -->
+    <div class="panel before">
+      <span class="badge before">Before: Unmanaged & Leaking</span>
+      <h2>Unmanaged Listener Antipattern</h2>
+      <p style="font-size: 0.875rem; color: var(--text-muted);">
+        Attaches individual event listeners to every list item, binds non-passive window scroll listeners, and leaves listeners active when re-rendered or destroyed.
+      </p>
+
+      <div class="controls">
+        <button id="before-render-btn">Render List (50 items)</button>
+        <button id="before-destroy-btn" class="danger">Simulate View Unmount</button>
+      </div>
+
+      <div class="metric">
+        <div>Registered Item Listeners: <strong id="before-listener-count" style="color: var(--accent-red);">0</strong></div>
+        <div>Active Global Listeners: <strong id="before-global-count" style="color: var(--accent-red);">0</strong></div>
+      </div>
+
+      <ul id="before-item-list" class="item-list">
+        <li class="item" style="color: var(--text-muted); justify-content: center;">List uninitialized</li>
+      </ul>
+
+      <div id="before-log" class="log-box"></div>
+    </div>
+
+    <!-- AFTER PANEL: Managed AbortController & Delegation -->
+    <div class="panel after">
+      <span class="badge after">After: Managed & Leak-Free</span>
+      <h2>AbortController & Delegation Pattern</h2>
+      <p style="font-size: 0.875rem; color: var(--text-muted);">
+        Uses 1 delegated listener on parent container via <code>Element.closest()</code>, passive scroll listeners, and <code>AbortController</code> for 1-call teardown on unmount.
+      </p>
+
+      <div class="controls">
+        <button id="after-render-btn">Render List (50 items)</button>
+        <button id="after-destroy-btn" class="danger">Simulate View Unmount</button>
+      </div>
+
+      <div class="metric">
+        <div>Registered Item Listeners: <strong id="after-listener-count" style="color: var(--accent-green);">0</strong> (1 delegated)</div>
+        <div>Active Global Listeners: <strong id="after-global-count" style="color: var(--accent-green);">0</strong></div>
+      </div>
+
+      <ul id="after-item-list" class="item-list">
+        <li class="item" style="color: var(--text-muted); justify-content: center;">List uninitialized</li>
+      </ul>
+
+      <div id="after-log" class="log-box"></div>
+    </div>
+
+  </div>
+
+  <script>
+    // Utility for logging
+    function logMessage(boxId, text, type = 'normal') {
+      const box = document.getElementById(boxId);
+      const entry = document.createElement('div');
+      entry.className = `log-entry ${type}`;
+      entry.textContent = `[${new Date().toLocaleTimeString()}] ${text}`;
+      box.appendChild(entry);
+      box.scrollTop = box.scrollHeight;
+    }
+
+    // =========================================================================
+    // BEFORE: UNMANAGED IMPLEMENTATION
+    // =========================================================================
+    let beforeActiveListenersCount = 0;
+    let beforeGlobalScrollCount = 0;
+    let beforeGlobalKeydownCount = 0;
+
+    function renderUnmanagedList() {
+      const list = document.getElementById('before-item-list');
+      list.innerHTML = '';
+
+      // Non-passive scroll handler attached directly on window every time render is called
+      const scrollHandler = function() {
+        // Heavy non-passive handler
+      };
+      window.addEventListener('scroll', scrollHandler); // Leaked! No teardown!
+      beforeGlobalScrollCount++;
+
+      // Global keydown handler attached directly without AbortController
+      const keydownHandler = function(e) {
+        if (e.key === 'Escape') {
+          logMessage('before-log', 'Unmanaged Escape key pressed', 'warn');
+        }
+      };
+      window.addEventListener('keydown', keydownHandler); // Leaked! Duplicate on re-render!
+      beforeGlobalKeydownCount++;
+
+      // Create 50 items and attach individual click listeners to EVERY button
+      for (let i = 1; i <= 50; i++) {
+        const li = document.createElement('li');
+        li.className = 'item';
+        li.dataset.id = i;
+        li.innerHTML = `
+          <span>Item #${i}</span>
+          <div class="item-actions">
+            <button class="action-edit">Edit</button>
+            <button class="action-delete danger">Delete</button>
+          </div>
+        `;
+
+        const editBtn = li.querySelector('.action-edit');
+        const deleteBtn = li.querySelector('.action-delete');
+
+        // ANTIPATTERN 1: Individual listeners per element
+        editBtn.addEventListener('click', function() {
+          logMessage('before-log', `Edit clicked on Item #${i}`);
+        });
+
+        // ANTIPATTERN 2: Closure holding references to DOM node
+        deleteBtn.addEventListener('click', function() {
+          logMessage('before-log', `Deleting Item #${i}...`, 'warn');
+          li.remove(); // Removes node from DOM, but event listener callback retained in memory!
+        });
+
+        beforeActiveListenersCount += 2;
+      }
+
+      document.getElementById('before-listener-count').textContent = beforeActiveListenersCount;
+      document.getElementById('before-global-count').textContent = beforeGlobalScrollCount + beforeGlobalKeydownCount;
+
+      logMessage('before-log', `Rendered 50 items. Attached 100 direct button listeners + 2 global listeners.`, 'warn');
+      if (beforeGlobalScrollCount > 1) {
+        logMessage('before-log', `WARNING: ${beforeGlobalScrollCount} duplicate window scroll listeners accumulated!`, 'error');
+      }
+    }
+
+    document.getElementById('before-render-btn').addEventListener('click', renderUnmanagedList);
+
+    document.getElementById('before-destroy-btn').addEventListener('click', function() {
+      const list = document.getElementById('before-item-list');
+      list.innerHTML = '<li class="item" style="color: var(--text-muted); justify-content: center;">List destroyed</li>';
+
+      // Notice: We emptied innerHTML, but window.addEventListener('scroll') and window.addEventListener('keydown') STILL REMAIN ACTIVE!
+      logMessage('before-log', 'View unmounted. DOM cleared, BUT global listeners were NOT removed! Memory leaked.', 'error');
+    });
+
+    // =========================================================================
+    // AFTER: MANAGED IMPLEMENTATION WITH ABORTCONTROLLER & DELEGATION
+    // =========================================================================
+    class ManagedListView {
+      constructor(containerEl, logBoxId) {
+        this.containerEl = containerEl;
+        this.logBoxId = logBoxId;
+        this.controller = null;
+        this.itemMetadata = new WeakMap(); // Leak-free element association
+      }
+
+      mount() {
+        // Teardown previous controller if re-mounted
+        if (this.controller) {
+          this.controller.abort();
+        }
+
+        // Create new AbortController for this lifecycle instance
+        this.controller = new AbortController();
+        const { signal } = this.controller;
+
+        // 1. Delegated listener on parent container
+        this.containerEl.addEventListener('click', (e) => {
+          const editBtn = e.target.closest('.action-edit');
+          const deleteBtn = e.target.closest('.action-delete');
+          const itemEl = e.target.closest('.item');
+
+          if (!itemEl || !this.containerEl.contains(itemEl)) return;
+
+          const itemId = itemEl.dataset.id;
+          const meta = this.itemMetadata.get(itemEl);
+
+          if (editBtn) {
+            logMessage(this.logBoxId, `Edit clicked on Item #${itemId} (Created at ${meta.created})`, 'success');
+          } else if (deleteBtn) {
+            logMessage(this.logBoxId, `Deleting Item #${itemId}...`, 'warn');
+            itemEl.remove(); // Removed node is GC'd immediately because WeakMap releases reference!
+          }
+        }, { signal });
+
+        // 2. Passive scroll listener
+        window.addEventListener('scroll', () => {
+          // Passive scroll handler
+        }, { passive: true, signal });
+
+        // 3. Global keydown handler
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape') {
+            logMessage(this.logBoxId, 'Managed Escape key pressed', 'success');
+          }
+        }, { signal });
+      }
+
+      render(count = 50) {
+        this.mount(); // Always resets controller signal on re-render
+
+        this.containerEl.innerHTML = '';
+        const fragment = document.createDocumentFragment();
+
+        for (let i = 1; i <= count; i++) {
+          const li = document.createElement('li');
+          li.className = 'item';
+          li.dataset.id = i;
+          li.innerHTML = `
+            <span>Item #${i}</span>
+            <div class="item-actions">
+              <button class="action-edit">Edit</button>
+              <button class="action-delete danger">Delete</button>
+            </div>
+          `;
+
+          // Associate state without attaching individual listeners
+          this.itemMetadata.set(li, { created: new Date().toLocaleTimeString() });
+          fragment.appendChild(li);
+        }
+
+        this.containerEl.appendChild(fragment);
+
+        document.getElementById('after-listener-count').textContent = '1';
+        document.getElementById('after-global-count').textContent = '2';
+
+        logMessage(this.logBoxId, `Rendered ${count} items. Exactly 1 delegated listener + 2 global listeners bound to signal.`, 'success');
+      }
+
+      destroy() {
+        if (this.controller) {
+          this.controller.abort(); // Destroys ALL listeners instantly in 1 call!
+          this.controller = null;
+        }
+
+        this.containerEl.innerHTML = '<li class="item" style="color: var(--text-muted); justify-content: center;">List destroyed</li>';
+
+        document.getElementById('after-listener-count').textContent = '0';
+        document.getElementById('after-global-count').textContent = '0';
+
+        logMessage(this.logBoxId, 'View unmounted. controller.abort() invoked. ALL listeners detached cleanly.', 'success');
+      }
+    }
+
+    const managedView = new ManagedListView(
+      document.getElementById('after-item-list'),
+      'after-log'
+    );
+
+    document.getElementById('after-render-btn').addEventListener('click', () => managedView.render(50));
+    document.getElementById('after-destroy-btn').addEventListener('click', () => managedView.destroy());
+  </script>
+</body>
+</html>
