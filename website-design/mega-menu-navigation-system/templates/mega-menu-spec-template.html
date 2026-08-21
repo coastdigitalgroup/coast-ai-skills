@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Accessible Mega Menu Navigation System Template</title>
+  <style>
+    /* CSS RESET & VARIABLES */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --color-bg-header: #ffffff;
+      --color-bg-panel: #ffffff;
+      --color-bg-hover: #f1f5f9;
+      --color-bg-subtle: #f8fafc;
+      --color-border: #e2e8f0;
+      --color-text-main: #0f172a;
+      --color-text-muted: #475569;
+      --color-text-header: #64748b;
+      --color-primary: #2563eb;
+      --color-primary-hover: #1d4ed8;
+      --color-focus: #2563eb;
+      --shadow-panel: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+      --container-max-width: 1280px;
+      --header-height: 72px;
+    }
+
+    body {
+      font-family: var(--font-family);
+      color: var(--color-text-main);
+      background-color: #f1f5f9;
+      line-height: 1.5;
+    }
+
+    /* SKIP LINK */
+    .skip-link {
+      position: absolute;
+      top: -100px;
+      left: 16px;
+      background: var(--color-primary);
+      color: #ffffff;
+      padding: 8px 16px;
+      border-radius: 4px;
+      z-index: 9999;
+      text-decoration: none;
+      font-weight: 600;
+      transition: top 0.2s ease;
+    }
+    .skip-link:focus {
+      top: 16px;
+    }
+
+    /* HEADER CONTAINER */
+    .site-header {
+      position: relative;
+      background-color: var(--color-bg-header);
+      border-bottom: 1px solid var(--color-border);
+      height: var(--header-height);
+      z-index: 1000;
+    }
+
+    .header-container {
+      max-width: var(--container-max-width);
+      margin: 0 auto;
+      padding: 0 24px;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand-logo {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--color-text-main);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* PRIMARY NAV LINK LIST */
+    .nav-menu {
+      display: flex;
+      align-items: center;
+      list-style: none;
+      gap: 8px;
+      height: 100%;
+    }
+
+    .nav-item {
+      position: relative;
+      height: 100%;
+      display: flex;
+      align-items: center;
+    }
+
+    .nav-trigger {
+      background: transparent;
+      border: none;
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--color-text-main);
+      padding: 10px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background-color 0.15s ease, color 0.15s ease;
+    }
+
+    .nav-trigger:hover,
+    .nav-trigger[aria-expanded="true"] {
+      background-color: var(--color-bg-hover);
+      color: var(--color-primary);
+    }
+
+    .nav-trigger:focus-visible {
+      outline: 2px solid var(--color-focus);
+      outline-offset: 2px;
+    }
+
+    .chevron-icon {
+      width: 14px;
+      height: 14px;
+      transition: transform 0.2s ease;
+      fill: currentColor;
+    }
+
+    .nav-trigger[aria-expanded="true"] .chevron-icon {
+      transform: rotate(180deg);
+    }
+
+    /* MEGA MENU OVERLAY PANEL */
+    .mega-panel {
+      position: absolute;
+      top: var(--header-height);
+      left: 0;
+      width: 100%;
+      background-color: var(--color-bg-panel);
+      border-top: 1px solid var(--color-border);
+      box-shadow: var(--shadow-panel);
+      display: none;
+      opacity: 0;
+      transform: translateY(-8px);
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      z-index: 1010;
+    }
+
+    .mega-panel.is-active {
+      display: block;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .panel-container {
+      max-width: var(--container-max-width);
+      margin: 0 auto;
+      padding: 32px 24px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr) 320px;
+      gap: 32px;
+    }
+
+    /* COLUMN STYLES */
+    .panel-column-header {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--color-text-header);
+      margin-bottom: 16px;
+    }
+
+    .column-link-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .mega-link {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: background-color 0.15s ease;
+    }
+
+    .mega-link:hover {
+      background-color: var(--color-bg-hover);
+    }
+
+    .mega-link:focus-visible {
+      outline: 2px solid var(--color-focus);
+      outline-offset: 0;
+      background-color: var(--color-bg-hover);
+    }
+
+    .mega-link-icon {
+      width: 20px;
+      height: 20px;
+      color: var(--color-primary);
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .mega-link-content {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .mega-link-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--color-text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .mega-link-desc {
+      font-size: 0.8rem;
+      color: var(--color-text-muted);
+      margin-top: 2px;
+      line-height: 1.35;
+    }
+
+    .badge {
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 2px 6px;
+      border-radius: 999px;
+      background-color: #dbeafe;
+      color: #1e40af;
+    }
+
+    /* FEATURED SPOTLIGHT CARD */
+    .spotlight-card {
+      background-color: var(--color-bg-subtle);
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .spotlight-image {
+      width: 100%;
+      height: 140px;
+      object-fit: cover;
+      border-radius: 8px;
+      background-color: #cbd5e1;
+    }
+
+    .spotlight-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--color-text-main);
+    }
+
+    .spotlight-desc {
+      font-size: 0.825rem;
+      color: var(--color-text-muted);
+    }
+
+    .spotlight-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--color-primary);
+      text-decoration: none;
+      margin-top: 4px;
+    }
+
+    .spotlight-cta:hover {
+      color: var(--color-primary-hover);
+      text-decoration: underline;
+    }
+
+    /* UTILITY STRIP FOOTER */
+    .panel-footer-strip {
+      background-color: var(--color-bg-subtle);
+      border-top: 1px solid var(--color-border);
+      padding: 12px 24px;
+    }
+
+    .footer-strip-container {
+      max-width: var(--container-max-width);
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      color: var(--color-text-muted);
+    }
+
+    .footer-strip-link {
+      color: var(--color-primary);
+      font-weight: 600;
+      text-decoration: none;
+    }
+    .footer-strip-link:hover {
+      text-decoration: underline;
+    }
+
+    /* MOBILE DRAWER TOGGLE & RESPONSIVE */
+    .mobile-toggle {
+      display: none;
+      background: transparent;
+      border: none;
+      padding: 8px;
+      cursor: pointer;
+    }
+
+    @media (max-width: 1023px) {
+      .mobile-toggle {
+        display: block;
+      }
+
+      .nav-menu {
+        position: fixed;
+        top: var(--header-height);
+        left: 0;
+        width: 100%;
+        height: calc(100vh - var(--header-height));
+        background: var(--color-bg-header);
+        flex-direction: column;
+        align-items: stretch;
+        overflow-y: auto;
+        padding: 16px;
+        display: none;
+      }
+
+      .nav-menu.is-mobile-open {
+        display: flex;
+      }
+
+      .nav-item {
+        height: auto;
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .nav-trigger {
+        width: 100%;
+        justify-content: space-between;
+        padding: 14px 16px;
+        font-size: 1rem;
+      }
+
+      .mega-panel {
+        position: static;
+        box-shadow: none;
+        border-top: none;
+        transform: none;
+        opacity: 1;
+        transition: none;
+      }
+
+      .panel-container {
+        grid-template-columns: 1fr;
+        padding: 16px;
+        gap: 24px;
+      }
+
+      .panel-footer-strip {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- SKIP TO MAIN CONTENT LINK FOR ACCESSIBILITY -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <header class="site-header">
+    <div class="header-container">
+      <a href="/" class="brand-logo" aria-label="CloudPulse Home">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M175 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>
+        CloudPulse
+      </a>
+
+      <!-- MOBILE HAMBURGER BUTTON -->
+      <button class="mobile-toggle" id="mobile-toggle-btn" aria-expanded="false" aria-controls="primary-nav-menu" aria-label="Toggle navigation menu">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+
+      <!-- PRIMARY NAVIGATION -->
+      <nav aria-label="Global Site Navigation">
+        <ul class="nav-menu" id="primary-nav-menu">
+
+          <!-- MEGA MENU ITEM 1 -->
+          <li class="nav-item">
+            <button
+              class="nav-trigger"
+              id="mega-trigger-platform"
+              aria-expanded="false"
+              aria-controls="mega-panel-platform"
+              aria-haspopup="true">
+              Platform & Solutions
+              <svg class="chevron-icon" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg>
+            </button>
+
+            <!-- MEGA MENU OVERLAY PANEL -->
+            <div class="mega-panel" id="mega-panel-platform" role="region" aria-labelledby="mega-trigger-platform">
+              <div class="panel-container">
+
+                <!-- COLUMN 1: CORE PRODUCTS -->
+                <div class="panel-column">
+                  <h3 class="panel-column-header">Core Infrastructure</h3>
+                  <ul class="column-link-list">
+                    <li>
+                      <a href="/compute" class="mega-link">
+                        <svg class="mega-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/></svg>
+                        <span class="mega-link-content">
+                          <span class="mega-link-title">Elastic Compute <span class="badge">Hot</span></span>
+                          <span class="mega-link-desc">High-performance virtual instances with auto-scaling.</span>
+                        </span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="/database" class="mega-link">
+                        <svg class="mega-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+                        <span class="mega-link-content">
+                          <span class="mega-link-title">Global Database</span>
+                          <span class="mega-link-desc">Multi-region distributed SQL & NoSQL engine.</span>
+                        </span>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+
+                <!-- COLUMN 2: SOLUTIONS -->
+                <div class="panel-column">
+                  <h3 class="panel-column-header">Solutions by Use Case</h3>
+                  <ul class="column-link-list">
+                    <li>
+                      <a href="/solutions/fintech" class="mega-link">
+                        <svg class="mega-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                        <span class="mega-link-content">
+                          <span class="mega-link-title">Financial Services</span>
+                          <span class="mega-link-desc">SOC2 Type II & PCI-DSS compliant infrastructure.</span>
+                        </span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="/solutions/ai" class="mega-link">
+                        <svg class="mega-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 10 10H12V2z"/></svg>
+                        <span class="mega-link-content">
+                          <span class="mega-link-title">AI & Data Pipeline</span>
+                          <span class="mega-link-desc">GPU clusters optimized for LLM model training.</span>
+                        </span>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+
+                <!-- COLUMN 3: ENTERPRISE -->
+                <div class="panel-column">
+                  <h3 class="panel-column-header">Enterprise Readiness</h3>
+                  <ul class="column-link-list">
+                    <li>
+                      <a href="/enterprise/security" class="mega-link">
+                        <svg class="mega-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                        <span class="mega-link-content">
+                          <span class="mega-link-title">Zero Trust Security</span>
+                          <span class="mega-link-desc">End-to-end encryption & DDoS mitigation.</span>
+                        </span>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+
+                <!-- COLUMN 4: SPOTLIGHT CARD -->
+                <div class="panel-column">
+                  <div class="spotlight-card">
+                    <div class="spotlight-image"></div>
+                    <h4 class="spotlight-title">New: AI Studio 2.0</h4>
+                    <p class="spotlight-desc">Build, fine-tune, and deploy generative models directly inside your private VPC.</p>
+                    <a href="/ai-studio" class="spotlight-cta">Explore AI Studio &rarr;</a>
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- PANEL FOOTER UTILITY STRIP -->
+              <div class="panel-footer-strip">
+                <div class="footer-strip-container">
+                  <span>Need help migrating workloads? <a href="/contact-architect" class="footer-strip-link">Talk to a Solutions Architect &rarr;</a></span>
+                  <span>System Status: <strong>All Systems Operational</strong></span>
+                </div>
+              </div>
+            </div>
+          </li>
+
+          <!-- REGULAR NAV ITEMS -->
+          <li class="nav-item">
+            <a href="/pricing" class="nav-trigger" style="text-decoration:none;">Pricing</a>
+          </li>
+        </ul>
+      </nav>
+
+    </div>
+  </header>
+
+  <main id="main-content" style="max-width: 1280px; margin: 40px auto; padding: 0 24px;">
+    <h1>Enterprise Platform Workspace</h1>
+    <p style="margin-top: 12px; color: var(--color-text-muted);">Demonstrating accessible mega menu hover intent, focus management, and responsive drawer adaptation.</p>
+  </main>
+
+  <!-- INTERACTION CONTROLLER SCRIPT -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const trigger = document.getElementById('mega-trigger-platform');
+      const panel = document.getElementById('mega-panel-platform');
+      const navItem = trigger.closest('.nav-item');
+
+      let hoverTimer = null;
+      const OPEN_DELAY = 150; // Hover intent delay in ms
+      const CLOSE_DELAY = 250; // Buffer delay in ms
+
+      function openPanel() {
+        clearTimeout(hoverTimer);
+        trigger.setAttribute('aria-expanded', 'true');
+        panel.classList.add('is-active');
+      }
+
+      function closePanel() {
+        clearTimeout(hoverTimer);
+        trigger.setAttribute('aria-expanded', 'false');
+        panel.classList.remove('is-active');
+      }
+
+      // HOVER INTENT LISTENERS FOR POINTER
+      navItem.addEventListener('mouseenter', () => {
+        clearTimeout(hoverTimer);
+        hoverTimer = setTimeout(openPanel, OPEN_DELAY);
+      });
+
+      navItem.addEventListener('mouseleave', () => {
+        clearTimeout(hoverTimer);
+        hoverTimer = setTimeout(closePanel, CLOSE_DELAY);
+      });
+
+      // CLICK TOGGLE FOR TOUCH & KEYBOARD
+      trigger.addEventListener('click', (e) => {
+        const isExpanded = trigger.getAttribute('aria-expanded') === 'true';
+        if (isExpanded) {
+          closePanel();
+        } else {
+          openPanel();
+        }
+      });
+
+      // ESCAPE KEY CLOSES PANEL & MOVES FOCUS BACK TO TRIGGER
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && trigger.getAttribute('aria-expanded') === 'true') {
+          closePanel();
+          trigger.focus();
+        }
+      });
+
+      // MOBILE DRAWER TOGGLE
+      const mobileBtn = document.getElementById('mobile-toggle-btn');
+      const navMenu = document.getElementById('primary-nav-menu');
+
+      mobileBtn.addEventListener('click', () => {
+        const isOpen = mobileBtn.getAttribute('aria-expanded') === 'true';
+        mobileBtn.setAttribute('aria-expanded', !isOpen);
+        navMenu.classList.toggle('is-mobile-open');
+      });
+    });
+  </script>
+</body>
+</html>
