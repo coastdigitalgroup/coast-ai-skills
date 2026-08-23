@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Accessible Media Player UI Spec Template</title>
+  <style>
+    :root {
+      /* Surface & Contrast Tokens */
+      --media-bg: #000000;
+      --media-surface-overlay: rgba(15, 23, 42, 0.85);
+      --media-scrim-gradient: linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.4) 60%, transparent 100%);
+      --media-text-primary: #FFFFFF;
+      --media-text-secondary: rgba(255, 255, 255, 0.75);
+
+      /* Interactive & Focus Tokens */
+      --media-brand-primary: #3B82F6;
+      --media-brand-hover: #60A5FA;
+      --media-focus-ring: #60A5FA;
+      --media-track-bg: rgba(255, 255, 255, 0.25);
+      --media-track-buffered: rgba(255, 255, 255, 0.45);
+
+      /* Spacing & Radii */
+      --media-radius: 8px;
+      --media-touch-target: 44px;
+    }
+
+    /* Container Specification */
+    .media-player-container {
+      position: relative;
+      width: 100%;
+      max-width: 960px;
+      aspect-ratio: 16 / 9;
+      background-color: var(--media-bg);
+      border-radius: var(--media-radius);
+      overflow: hidden;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      user-select: none;
+    }
+
+    .media-video-element {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* Gradient Scrim Layer */
+    .media-scrim-overlay {
+      position: absolute;
+      inset: 0;
+      background: var(--media-scrim-gradient);
+      pointer-events: none;
+      opacity: 1;
+      transition: opacity 0.25s ease-in-out;
+      z-index: 1;
+    }
+
+    /* Large Centered Play Trigger */
+    .media-center-play-trigger {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 64px;
+      height: 64px;
+      min-width: var(--media-touch-target);
+      min-height: var(--media-touch-target);
+      border-radius: 50%;
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: var(--media-text-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 2;
+      transition: transform 0.15s ease, background-color 0.15s ease;
+    }
+
+    .media-center-play-trigger:hover {
+      transform: translate(-50%, -50%) scale(1.08);
+      background: var(--media-brand-primary);
+    }
+
+    .media-center-play-trigger:focus-visible {
+      outline: 3px solid var(--media-focus-ring);
+      outline-offset: 4px;
+    }
+
+    /* Bottom Control Bar Layout */
+    .media-control-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 3;
+    }
+
+    /* Timeline Scrub Bar Component */
+    .media-timeline-container {
+      position: relative;
+      width: 100%;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .media-timeline-rail {
+      position: relative;
+      width: 100%;
+      height: 4px;
+      background-color: var(--media-track-bg);
+      border-radius: 2px;
+      transition: height 0.15s ease;
+    }
+
+    .media-timeline-container:hover .media-timeline-rail {
+      height: 8px;
+    }
+
+    .media-timeline-buffered {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      width: 60%;
+      background-color: var(--media-track-buffered);
+      border-radius: 2px;
+    }
+
+    .media-timeline-played {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      width: 35%;
+      background-color: var(--media-brand-primary);
+      border-radius: 2px;
+    }
+
+    .media-timeline-thumb {
+      position: absolute;
+      top: 50%;
+      left: 35%;
+      transform: translate(-50%, -50%) scale(0);
+      width: 14px;
+      height: 14px;
+      background-color: #FFFFFF;
+      border-radius: 50%;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+      transition: transform 0.15s ease;
+    }
+
+    .media-timeline-container:hover .media-timeline-thumb,
+    .media-timeline-container:focus-within .media-timeline-thumb {
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    /* Time Hover Tooltip */
+    .media-timeline-tooltip {
+      position: absolute;
+      bottom: 24px;
+      left: 35%;
+      transform: translateX(-50%);
+      padding: 4px 8px;
+      background: rgba(0, 0, 0, 0.9);
+      color: #FFFFFF;
+      font-size: 0.75rem;
+      border-radius: 4px;
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.15s ease;
+    }
+
+    .media-timeline-container:hover .media-timeline-tooltip {
+      opacity: 1;
+    }
+
+    /* Action Row Controls */
+    .media-action-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .media-control-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .media-btn {
+      min-width: var(--media-touch-target);
+      min-height: var(--media-touch-target);
+      width: var(--media-touch-target);
+      height: var(--media-touch-target);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: none;
+      color: var(--media-text-primary);
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.15s ease, color 0.15s ease;
+    }
+
+    .media-btn:hover {
+      background-color: rgba(255, 255, 255, 0.15);
+      color: var(--media-brand-hover);
+    }
+
+    .media-btn:focus-visible {
+      outline: 2px solid var(--media-focus-ring);
+      outline-offset: 2px;
+    }
+
+    .media-btn[aria-pressed="true"] {
+      color: var(--media-brand-primary);
+      border-bottom: 2px solid var(--media-brand-primary);
+    }
+
+    .media-time-display {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.8125rem;
+      color: var(--media-text-primary);
+      margin-left: 4px;
+    }
+
+    .media-volume-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .media-volume-slider {
+      width: 70px;
+      height: 4px;
+      accent-color: var(--media-brand-primary);
+      cursor: pointer;
+    }
+
+    /* Screen Reader Announcements */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Custom Video Player UI Container Spec -->
+  <div class="media-player-container" id="video-player-shell">
+
+    <!-- Native Media Canvas -->
+    <video class="media-video-element" poster="https://via.placeholder.com/960x540/0f172a/ffffff?text=Video+Poster+Frame">
+      <source src="video-sample.mp4" type="video/mp4">
+      Your browser does not support HTML5 video playback.
+    </video>
+
+    <!-- Visual Gradient Scrim Layer -->
+    <div class="media-scrim-overlay" aria-hidden="true"></div>
+
+    <!-- Centered Play Trigger -->
+    <button type="button" class="media-center-play-trigger" id="btn-center-play" aria-label="Play video">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <polygon points="5,3 19,12 5,21"></polygon>
+      </svg>
+    </button>
+
+    <!-- Bottom Control Bar -->
+    <div class="media-control-bar" role="region" aria-label="Video Player Controls">
+
+      <!-- Timeline Scrub Bar Component -->
+      <div class="media-timeline-container"
+           role="slider"
+           tabindex="0"
+           aria-label="Seek video timeline"
+           aria-valuemin="0"
+           aria-valuemax="750"
+           aria-valuenow="255"
+           aria-valuetext="04 minutes 15 seconds of 12 minutes 30 seconds">
+
+        <div class="media-timeline-tooltip">04:15</div>
+        <div class="media-timeline-rail">
+          <div class="media-timeline-buffered"></div>
+          <div class="media-timeline-played"></div>
+          <div class="media-timeline-thumb"></div>
+        </div>
+      </div>
+
+      <!-- Action Button Row -->
+      <div class="media-action-row">
+
+        <!-- Primary Controls (Left) -->
+        <div class="media-control-group">
+          <button type="button" class="media-btn" id="btn-play-toggle" aria-label="Play">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <polygon points="5,3 19,12 5,21"></polygon>
+            </svg>
+          </button>
+
+          <button type="button" class="media-btn" id="btn-skip-back" aria-label="Seek back 10 seconds">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M11 17l-5-5 5-5M18 17l-5-5 5-5"></path>
+            </svg>
+          </button>
+
+          <div class="media-volume-wrapper">
+            <button type="button" class="media-btn" id="btn-mute-toggle" aria-label="Mute volume">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+              </svg>
+            </button>
+            <input type="range" class="media-volume-slider" min="0" max="100" value="80" aria-label="Volume level">
+          </div>
+
+          <span class="media-time-display">
+            <span id="current-time">04:15</span> / <span id="duration-time">12:30</span>
+          </span>
+        </div>
+
+        <!-- Secondary Controls (Right) -->
+        <div class="media-control-group">
+          <button type="button" class="media-btn" id="btn-captions" aria-pressed="true" aria-label="Closed captions active">
+            <span style="font-weight: bold; font-size: 0.8125rem;">CC</span>
+          </button>
+
+          <button type="button" class="media-btn" id="btn-speed" aria-label="Playback speed 1.5x">
+            <span style="font-weight: 600; font-size: 0.75rem;">1.5x</span>
+          </button>
+
+          <button type="button" class="media-btn" id="btn-pip" aria-label="Toggle picture in picture">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="2" y="3" width="20" height="14" rx="2"></rect>
+              <rect x="11" y="9" width="9" height="6" rx="1" fill="currentColor"></rect>
+            </svg>
+          </button>
+
+          <button type="button" class="media-btn" id="btn-fullscreen" aria-label="Toggle full screen">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+            </svg>
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Live Region for Screen Reader Announcements -->
+    <div id="media-status-announcer" class="sr-only" aria-live="polite">Playing</div>
+
+  </div>
+
+</body>
+</html>
