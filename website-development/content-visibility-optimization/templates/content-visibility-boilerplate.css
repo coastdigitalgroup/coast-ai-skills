@@ -1,0 +1,97 @@
+/* ==========================================================================
+   CONTENT VISIBILITY & RENDERING CONTAINMENT BOILERPLATE
+   ========================================================================== */
+
+/**
+ * PRODUCTION CSS CONTAINMENT UTILITIES
+ *
+ * Use these helper classes and custom properties to optimize DOM rendering,
+ * style recalculations, and layout performance for off-screen components.
+ */
+
+/* Root Custom Properties for Intrinsic Sizing Defaults */
+:root {
+  --contain-size-card: auto 280px;
+  --contain-size-section: auto 600px;
+  --contain-size-comment: auto 120px;
+  --contain-size-footer: auto 450px;
+}
+
+/* --------------------------------------------------------------------------
+   1. SECTION & BELOW-THE-FOLD CONTAINMENT
+   -------------------------------------------------------------------------- */
+
+/**
+ * Apply to major page sections located below initial viewport (e.g., article
+ * blocks, product grids, comment threads, footers).
+ */
+.cv-auto-section {
+  content-visibility: auto;
+  contain-intrinsic-size: var(--contain-size-section);
+  scroll-margin-top: 80px; /* Offset for fixed header navigation */
+}
+
+.cv-auto-card {
+  content-visibility: auto;
+  contain-intrinsic-size: var(--contain-size-card);
+}
+
+.cv-auto-comment {
+  content-visibility: auto;
+  contain-intrinsic-size: var(--contain-size-comment);
+}
+
+.cv-auto-footer {
+  content-visibility: auto;
+  contain-intrinsic-size: var(--contain-size-footer);
+}
+
+/* --------------------------------------------------------------------------
+   2. PROGRESSIVE ENHANCEMENT GUARDING
+   -------------------------------------------------------------------------- */
+
+/**
+ * Explicit @supports fallback for legacy browsers without CSS content-visibility.
+ */
+@supports (content-visibility: auto) {
+  .cv-feature-guarded {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 350px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   3. ISOLATED LAYOUT & PAINT CONTAINMENT
+   -------------------------------------------------------------------------- */
+
+/**
+ * Use when an element remains visible on-screen, but internal DOM updates
+ * or animations should not trigger layout recalculation on parent containers.
+ */
+.cv-isolate-layout {
+  contain: layout paint;
+}
+
+/**
+ * Strict containment for fixed-dimension widget cards, ad slots, or media containers.
+ * Requires explicit width and height.
+ */
+.cv-contain-strict {
+  contain: strict; /* Equivalent to size layout paint style */
+  width: 100%;
+  height: 300px;
+}
+
+/* --------------------------------------------------------------------------
+   4. TOP LAYER & OVERLAY OVERRIDES
+   -------------------------------------------------------------------------- */
+
+/**
+ * Ensure active modal dialogs, expanded drawers, or popovers force immediate
+ * rendering even if nested within a contained section.
+ */
+.cv-force-visible,
+:popover-open,
+dialog[open] {
+  content-visibility: visible !important;
+}
