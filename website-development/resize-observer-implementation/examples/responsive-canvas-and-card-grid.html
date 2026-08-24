@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ResizeObserver Implementation Examples: Before and After</title>
+  <style>
+    :root {
+      --bg-color: #0f172a;
+      --card-bg: #1e293b;
+      --card-border: #334155;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent-blue: #38bdf8;
+      --accent-red: #f87171;
+      --accent-green: #4ade80;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      padding: 2rem;
+      line-height: 1.5;
+    }
+
+    h1, h2, h3 {
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    h1 {
+      font-size: 1.875rem;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .description {
+      color: var(--text-muted);
+      margin-bottom: 2rem;
+      max-width: 800px;
+    }
+
+    .section-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    @media (min-width: 900px) {
+      .section-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .demo-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .demo-card.before {
+      border-left: 4px solid var(--accent-red);
+    }
+
+    .demo-card.after {
+      border-left: 4px solid var(--accent-green);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      width: fit-content;
+    }
+
+    .badge.before {
+      background: rgba(248, 113, 113, 0.2);
+      color: var(--accent-red);
+    }
+
+    .badge.after {
+      background: rgba(74, 222, 128, 0.2);
+      color: var(--accent-green);
+    }
+
+    .canvas-container {
+      position: relative;
+      width: 100%;
+      height: 200px;
+      background: #090d16;
+      border-radius: 6px;
+      overflow: hidden;
+      border: 1px dashed var(--card-border);
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    .card-resizer-container {
+      width: 100%;
+      background: #090d16;
+      border: 1px solid var(--card-border);
+      border-radius: 6px;
+      padding: 1rem;
+      resize: horizontal;
+      overflow: auto;
+      min-width: 200px;
+      max-width: 100%;
+    }
+
+    .resizable-widget {
+      padding: 1rem;
+      background: #131c2e;
+      border-radius: 4px;
+      color: var(--text-main);
+      font-size: 0.875rem;
+    }
+
+    .resizable-widget.compact {
+      background: #1e1b4b;
+      color: #a5b4fc;
+    }
+
+    .log-box {
+      background: #020617;
+      border: 1px solid var(--card-border);
+      border-radius: 4px;
+      padding: 0.75rem;
+      font-family: monospace;
+      font-size: 0.75rem;
+      color: var(--accent-blue);
+      height: 80px;
+      overflow-y: auto;
+    }
+
+    .log-box.error {
+      color: var(--accent-red);
+    }
+
+    button {
+      background: var(--accent-blue);
+      color: #0f172a;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>ResizeObserver Implementation: Before vs After</h1>
+  <p class="description">
+    This page demonstrates the difference between naive element resize monitoring (which causes canvas blurriness and infinite resize loop warnings) and a production-grade, frame-batched <code>ResizeObserver</code> implementation using <code>devicePixelContentBoxSize</code>.
+  </p>
+
+  <div class="section-grid">
+    <!-- BEFORE CARD -->
+    <div class="demo-card before">
+      <span class="badge before">Before (Problematic)</span>
+      <h2>Naive Sizing & Unbatched Mutations</h2>
+      <p style="font-size: 0.875rem; color: var(--text-muted);">
+        Uses <code>window.onresize</code> for canvas (causing blurry rendering on Retina displays) and synchronous element mutations inside <code>ResizeObserver</code> (causing layout thrashing or browser loop limit errors).
+      </p>
+
+      <h3>1. Canvas Rendering (Blurry on High-DPI)</h3>
+      <div class="canvas-container">
+        <canvas id="canvas-before"></canvas>
+      </div>
+
+      <h3>2. Resizable Widget (Triggers Loop Exception)</h3>
+      <div class="card-resizer-container">
+        <div id="widget-before" class="resizable-widget">
+          Drag container handle (bottom-right) to resize me!
+        </div>
+      </div>
+
+      <div id="log-before" class="log-box error">Log: Ready</div>
+    </div>
+
+    <!-- AFTER CARD -->
+    <div class="demo-card after">
+      <span class="badge after">After (Optimized)</span>
+      <h2>Frame-Batched Device-Pixel Observer</h2>
+      <p style="font-size: 0.875rem; color: var(--text-muted);">
+        Uses <code>devicePixelContentBoxSize</code> for razor-sharp canvas drawing and a shared <code>ResizeObserver</code> manager with <code>requestAnimationFrame</code> batching to prevent loop errors.
+      </p>
+
+      <h3>1. Canvas Rendering (Sharp High-DPI)</h3>
+      <div class="canvas-container">
+        <canvas id="canvas-after"></canvas>
+      </div>
+
+      <h3>2. Resizable Widget (Safe Batching)</h3>
+      <div class="card-resizer-container">
+        <div id="widget-after" class="resizable-widget">
+          Drag container handle (bottom-right) to resize me!
+        </div>
+      </div>
+
+      <div id="log-after" class="log-box">Log: Shared ResizeObserver initialized</div>
+    </div>
+  </div>
+
+  <script>
+    // =========================================================================
+    // BEFORE IMPLEMENTATION (Anti-Patterns)
+    // =========================================================================
+    (function initBefore() {
+      const canvas = document.getElementById('canvas-before');
+      const ctx = canvas.getContext('2d');
+      const widget = document.getElementById('widget-before');
+      const logBox = document.getElementById('log-before');
+
+      function drawCanvas() {
+        // Anti-pattern: Using CSS logical dimensions directly without DPR scale
+        const width = canvas.clientWidth;
+        const height = canvas.clientHeight;
+        canvas.width = width;
+        canvas.height = height;
+
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(0, 0, width, height);
+
+        ctx.strokeStyle = '#f87171';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(width / 2, height / 2, Math.min(width, height) / 3, 0, Math.PI * 2);
+        ctx.stroke();
+
+        ctx.fillStyle = '#f87171';
+        ctx.font = '14px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('Blurry Canvas (No DPR Scaling)', width / 2, height / 2 + 5);
+      }
+
+      // Anti-pattern: Listening only to window resize (misses container-only resizes)
+      window.addEventListener('resize', drawCanvas);
+      drawCanvas();
+
+      // Anti-pattern: Direct synchronous DOM mutation inside ResizeObserver callback
+      // This will cause "ResizeObserver loop limit exceeded" or layout thrashing
+      if ('ResizeObserver' in window) {
+        const naiveObserver = new ResizeObserver((entries) => {
+          for (const entry of entries) {
+            const width = entry.contentRect.width;
+            // Direct style mutation during callback execution
+            if (width < 300) {
+              widget.style.padding = '0.25rem'; // MUTATION CAUSES ANOTHER RESIZE!
+              widget.classList.add('compact');
+            } else {
+              widget.style.padding = '1rem';
+              widget.classList.remove('compact');
+            }
+            logBox.textContent = `[BEFORE] Resized width: ${Math.round(width)}px (Unbatched mutation fired)`;
+          }
+        });
+        naiveObserver.observe(widget);
+      }
+    })();
+
+    // =========================================================================
+    // AFTER IMPLEMENTATION (Production-Grade Framework)
+    // =========================================================================
+
+    // Shared Singleton ResizeObserver Class with rAF Batching
+    class SharedResizeObserverManager {
+      constructor() {
+        this.callbacks = new WeakMap();
+        this.pendingEntries = new Map();
+        this.rafId = null;
+
+        this.observer = new ResizeObserver((entries) => {
+          for (const entry of entries) {
+            this.pendingEntries.set(entry.target, entry);
+          }
+
+          if (!this.rafId) {
+            this.rafId = requestAnimationFrame(() => this.flush());
+          }
+        });
+      }
+
+      flush() {
+        this.rafId = null;
+        for (const [target, entry] of this.pendingEntries) {
+          const config = this.callbacks.get(target);
+          if (config) {
+            const dims = this.extractDimensions(entry, config.box);
+            config.callback(dims, entry);
+          }
+        }
+        this.pendingEntries.clear();
+      }
+
+      extractDimensions(entry, boxType) {
+        if (boxType === 'device-pixel-content-box' && entry.devicePixelContentBoxSize?.length) {
+          return {
+            width: entry.devicePixelContentBoxSize[0].inlineSize,
+            height: entry.devicePixelContentBoxSize[0].blockSize
+          };
+        }
+
+        if (boxType === 'border-box' && entry.borderBoxSize?.length) {
+          return {
+            width: entry.borderBoxSize[0].inlineSize,
+            height: entry.borderBoxSize[0].blockSize
+          };
+        }
+
+        if (entry.contentBoxSize?.length) {
+          return {
+            width: entry.contentBoxSize[0].inlineSize,
+            height: entry.contentBoxSize[0].blockSize
+          };
+        }
+
+        return {
+          width: entry.contentRect.width,
+          height: entry.contentRect.height
+        };
+      }
+
+      observe(target, callback, options = { box: 'border-box', signal: null }) {
+        if (!target) return;
+
+        const box = options.box || 'border-box';
+        this.callbacks.set(target, { callback, box });
+
+        try {
+          this.observer.observe(target, { box });
+        } catch (e) {
+          // Fallback if browser doesn't support device-pixel-content-box option
+          this.observer.observe(target, { box: 'content-box' });
+        }
+
+        if (options.signal) {
+          options.signal.addEventListener('abort', () => this.unobserve(target), { once: true });
+        }
+      }
+
+      unobserve(target) {
+        if (!target) return;
+        this.callbacks.delete(target);
+        this.pendingEntries.delete(target);
+        this.observer.unobserve(target);
+      }
+    }
+
+    const resizeManager = new SharedResizeObserverManager();
+
+    (function initAfter() {
+      const canvas = document.getElementById('canvas-after');
+      const ctx = canvas.getContext('2d');
+      const widget = document.getElementById('widget-after');
+      const logBox = document.getElementById('log-after');
+
+      // 1. Canvas observation using devicePixelContentBoxSize for crisp DPI
+      resizeManager.observe(canvas, (dims, entry) => {
+        let dprWidth, dprHeight;
+
+        if (entry.devicePixelContentBoxSize?.length) {
+          dprWidth = dims.width;
+          dprHeight = dims.height;
+        } else {
+          const dpr = window.devicePixelRatio || 1;
+          dprWidth = Math.round(dims.width * dpr);
+          dprHeight = Math.round(dims.height * dpr);
+        }
+
+        // Only update backing store if physical dimensions changed
+        if (canvas.width !== dprWidth || canvas.height !== dprHeight) {
+          canvas.width = dprWidth;
+          canvas.height = dprHeight;
+
+          ctx.fillStyle = '#0f172a';
+          ctx.fillRect(0, 0, dprWidth, dprHeight);
+
+          ctx.strokeStyle = '#4ade80';
+          ctx.lineWidth = Math.max(2, Math.round(2 * (window.devicePixelRatio || 1)));
+          ctx.beginPath();
+          ctx.arc(dprWidth / 2, dprHeight / 2, Math.min(dprWidth, dprHeight) / 3, 0, Math.PI * 2);
+          ctx.stroke();
+
+          ctx.fillStyle = '#4ade80';
+          ctx.font = `${Math.round(14 * (window.devicePixelRatio || 1))}px sans-serif`;
+          ctx.textAlign = 'center';
+          ctx.fillText(`Sharp Canvas (${dprWidth}x${dprHeight} physical px)`, dprWidth / 2, dprHeight / 2 + 5);
+        }
+      }, { box: 'device-pixel-content-box' });
+
+      // 2. Widget container observation using border-box with non-looping rAF updates
+      resizeManager.observe(widget, (dims) => {
+        const isCompact = dims.width < 300;
+        // Batch CSS class toggle without altering padding inline styles directly
+        widget.classList.toggle('compact', isCompact);
+        logBox.textContent = `[AFTER] Resized width: ${Math.round(dims.width)}px | Compact: ${isCompact} (Frame-batched via rAF)`;
+      }, { box: 'border-box' });
+    })();
+  </script>
+</body>
+</html>
