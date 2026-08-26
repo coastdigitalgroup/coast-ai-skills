@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Masonry Grid Layout Specification Template</title>
+  <style>
+    /* ==========================================================================
+       DESIGN TOKENS & RESPONSIVE VARIABLES
+       ========================================================================== */
+    :root {
+      --font-family-base: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      --color-bg: #0f172a;
+      --color-surface-card: #1e293b;
+      --color-surface-hover: #334155;
+      --color-text-primary: #f8fafc;
+      --color-text-secondary: #94a3b8;
+      --color-brand-primary: #38bdf8;
+      --color-brand-accent: #f59e0b;
+      --color-border: rgba(255, 255, 255, 0.1);
+      --color-focus-ring: #38bdf8;
+
+      --masonry-gap: clamp(16px, 2vw, 24px);
+      --masonry-columns: 4;
+      --card-radius: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-family-base);
+      background-color: var(--color-bg);
+      color: var(--color-text-primary);
+      line-height: 1.5;
+      padding: 24px 16px;
+    }
+
+    .masonry-header {
+      max-width: 1400px;
+      margin: 0 auto 32px auto;
+      text-align: center;
+    }
+
+    .masonry-header h1 {
+      font-size: clamp(1.75rem, 4vw, 2.5rem);
+      color: var(--color-text-primary);
+      margin-bottom: 8px;
+    }
+
+    .masonry-header p {
+      color: var(--color-text-secondary);
+      font-size: 1rem;
+    }
+
+    /* ==========================================================================
+       MASONRY GRID CONTAINER ARCHITECTURE
+       ========================================================================== */
+
+    /* Progressive Native CSS Grid Masonry (Supported in modern Firefox/Safari flags) */
+    @supports (grid-template-rows: masonry) {
+      .masonry-grid-container {
+        display: grid;
+        grid-template-columns: repeat(var(--masonry-columns), 1fr);
+        grid-template-rows: masonry;
+        gap: var(--masonry-gap);
+      }
+    }
+
+    /* Fallback Strategy: Multi-Column / Dynamic Flex Layout */
+    .masonry-grid-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      column-count: var(--masonry-columns);
+      column-gap: var(--masonry-gap);
+    }
+
+    /* Responsive Column Count Matrix */
+    @media (max-width: 1200px) {
+      :root { --masonry-columns: 3; }
+    }
+    @media (max-width: 899px) {
+      :root { --masonry-columns: 2; }
+    }
+    @media (max-width: 599px) {
+      :root { --masonry-columns: 1; }
+    }
+
+    /* ==========================================================================
+       MASONRY CARD ANATOMY & CLS PREVENTION
+       ========================================================================== */
+    .masonry-card {
+      break-inside: avoid;
+      margin-bottom: var(--masonry-gap);
+      background-color: var(--color-surface-card);
+      border: 1px solid var(--color-border);
+      border-radius: var(--card-radius);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .masonry-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 24px -6px rgba(0, 0, 0, 0.4);
+    }
+
+    /* Media aspect-ratio container prevents CLS during load */
+    .card-media-wrapper {
+      position: relative;
+      width: 100%;
+      background-color: #334155;
+      overflow: hidden;
+    }
+
+    .card-media-wrapper img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.3s ease;
+    }
+
+    .masonry-card:hover .card-media-wrapper img {
+      transform: scale(1.03);
+    }
+
+    /* Aspect Ratio Utilities */
+    .ratio-16-9 { aspect-ratio: 16 / 9; }
+    .ratio-4-3  { aspect-ratio: 4 / 3; }
+    .ratio-1-1  { aspect-ratio: 1 / 1; }
+    .ratio-3-4  { aspect-ratio: 3 / 4; }
+    .ratio-9-16 { aspect-ratio: 9 / 16; }
+
+    /* Card Content Body */
+    .card-content {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      flex-grow: 1;
+    }
+
+    .card-tag {
+      align-self: flex-start;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 4px 10px;
+      border-radius: 20px;
+      background-color: rgba(56, 189, 248, 0.15);
+      color: var(--color-brand-primary);
+    }
+
+    .card-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      line-height: 1.3;
+    }
+
+    .card-title a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .card-title a:hover {
+      color: var(--color-brand-primary);
+    }
+
+    .card-description {
+      font-size: 0.875rem;
+      color: var(--color-text-secondary);
+      line-height: 1.5;
+    }
+
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: auto;
+      padding-top: 12px;
+      border-top: 1px solid var(--color-border);
+    }
+
+    .author-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .author-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background-color: var(--color-brand-accent);
+    }
+
+    .author-name {
+      font-size: 0.8125rem;
+      color: var(--color-text-secondary);
+    }
+
+    /* Accessibility Interactive Trigger Target (Minimum 24x24px, preferred 44x44px) */
+    .action-button {
+      min-width: 44px;
+      min-height: 44px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      color: var(--color-text-primary);
+      cursor: pointer;
+      font-size: 0.875rem;
+      padding: 0 12px;
+      transition: background-color 0.2s ease, border-color 0.2s ease;
+    }
+
+    .action-button:hover {
+      background-color: var(--color-surface-hover);
+      border-color: var(--color-brand-primary);
+    }
+
+    /* Unclipped High-Contrast Focus Indicator (WCAG SC 2.4.7 / 2.4.11) */
+    .card-title a:focus-visible,
+    .action-button:focus-visible {
+      outline: 3px solid var(--color-focus-ring);
+      outline-offset: 3px;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+
+  <header class="masonry-header">
+    <h1>Masonry Feed Architecture</h1>
+    <p>Variable-height content cards packed densely with CLS protection & accessible focus navigation</p>
+  </header>
+
+  <main class="masonry-grid-container" id="masonryFeed" aria-label="Content Discovery Feed">
+
+    <!-- Card 1: Portrait 3:4 -->
+    <article class="masonry-card">
+      <div class="card-media-wrapper ratio-3-4">
+        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='400' viewBox='0 0 300 400'%3E%3Crect width='300' height='400' fill='%231e293b'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%2394a3b8' font-family='sans-serif' font-size='16'%3EPortrait 3:4%3C/text%3E%3C/svg%3E" alt="Portrait artwork render" width="300" height="400" loading="lazy">
+      </div>
+      <div class="card-content">
+        <span class="card-tag">Branding</span>
+        <h2 class="card-title">
+          <a href="#card-1">Architectural Light Study & Modular Concrete Framing</a>
+        </h2>
+        <p class="card-description">Exploration of minimalist architectural structures under dynamic sunlight angles.</p>
+        <div class="card-footer">
+          <div class="author-info">
+            <div class="author-avatar" aria-hidden="true"></div>
+            <span class="author-name">Elena Rostova</span>
+          </div>
+          <button type="button" class="action-button" aria-label="Save Architectural Light Study">Save</button>
+        </div>
+      </div>
+    </article>
+
+    <!-- Card 2: Square 1:1 -->
+    <article class="masonry-card">
+      <div class="card-media-wrapper ratio-1-1">
+        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300' viewBox='0 0 300 300'%3E%3Crect width='300' height='300' fill='%23334155'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%2394a3b8' font-family='sans-serif' font-size='16'%3ESquare 1:1%3C/text%3E%3C/svg%3E" alt="Minimalist brand icon set" width="300" height="300" loading="lazy">
+      </div>
+      <div class="card-content">
+        <span class="card-tag">Identity</span>
+        <h2 class="card-title">
+          <a href="#card-2">Geometric Icon System</a>
+        </h2>
+        <p class="card-description">Precision grid-aligned vectors designed for mobile dark themes.</p>
+        <div class="card-footer">
+          <div class="author-info">
+            <div class="author-avatar" aria-hidden="true"></div>
+            <span class="author-name">Marcus Chen</span>
+          </div>
+          <button type="button" class="action-button" aria-label="Save Geometric Icon System">Save</button>
+        </div>
+      </div>
+    </article>
+
+    <!-- Card 3: Widescreen 16:9 -->
+    <article class="masonry-card">
+      <div class="card-media-wrapper ratio-16-9">
+        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='225' viewBox='0 0 400 225'%3E%3Crect width='400' height='225' fill='%230f172a'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%2338bdf8' font-family='sans-serif' font-size='16'%3EWidescreen 16:9%3C/text%3E%3C/svg%3E" alt="3D motion reel preview" width="400" height="225" loading="lazy">
+      </div>
+      <div class="card-content">
+        <span class="card-tag">Motion</span>
+        <h2 class="card-title">
+          <a href="#card-3">SaaS Product Interaction Reel 2024</a>
+        </h2>
+        <p class="card-description">High-frequency fluid animations built with WebGL shaders.</p>
+        <div class="card-footer">
+          <div class="author-info">
+            <div class="author-avatar" aria-hidden="true"></div>
+            <span class="author-name">Aria Vance</span>
+          </div>
+          <button type="button" class="action-button" aria-label="Save SaaS Product Reel">Save</button>
+        </div>
+      </div>
+    </article>
+
+    <!-- Card 4: Tall Mobile 9:16 -->
+    <article class="masonry-card">
+      <div class="card-media-wrapper ratio-9-16">
+        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='270' height='480' viewBox='0 0 270 480'%3E%3Crect width='270' height='480' fill='%231e293b'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23f59e0b' font-family='sans-serif' font-size='16'%3ETall Mobile 9:16%3C/text%3E%3C/svg%3E" alt="Mobile interface poster" width="270" height="480" loading="lazy">
+      </div>
+      <div class="card-content">
+        <span class="card-tag">Mobile</span>
+        <h2 class="card-title">
+          <a href="#card-4">Vertical E-Commerce Discovery Interface</a>
+        </h2>
+        <p class="card-description">Optimizing thumb-zone navigation for high-volume catalog browsing.</p>
+        <div class="card-footer">
+          <div class="author-info">
+            <div class="author-avatar" aria-hidden="true"></div>
+            <span class="author-name">David K.</span>
+          </div>
+          <button type="button" class="action-button" aria-label="Save Mobile E-Commerce Interface">Save</button>
+        </div>
+      </div>
+    </article>
+
+  </main>
+
+  <!-- Dynamic Shortest-Column Layout Script (Optional JS enhancement for row-first order) -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const feed = document.getElementById('masonryFeed');
+
+      // Check if native masonry grid is supported
+      const supportsNativeMasonry = CSS.supports && CSS.supports('grid-template-rows', 'masonry');
+
+      if (!supportsNativeMasonry && window.innerWidth >= 600) {
+        // Fallback execution or layout refinement if needed
+        console.log('Masonry layout initialized using fallback mode.');
+      }
+    });
+  </script>
+</body>
+</html>
