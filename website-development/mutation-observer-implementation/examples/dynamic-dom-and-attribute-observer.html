@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MutationObserver Implementation Example</title>
+  <style>
+    :root {
+      --font-family: system-ui, -apple-system, sans-serif;
+      --bg-color: #f8fafc;
+      --card-bg: #ffffff;
+      --border-color: #e2e8f0;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --primary: #2563eb;
+      --success: #16a34a;
+    }
+
+    body {
+      font-family: var(--font-family);
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    h1, h2 {
+      margin-top: 0;
+    }
+
+    .demo-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1fr solid var(--border-color);
+      border-radius: 8px;
+      padding: 1.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 500;
+      margin-right: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .btn:hover {
+      opacity: 0.9;
+    }
+
+    .btn-secondary {
+      background: #475569;
+    }
+
+    .widget-container {
+      min-height: 120px;
+      border: 2px dashed var(--border-color);
+      border-radius: 6px;
+      padding: 1rem;
+      margin-top: 1rem;
+    }
+
+    .dynamic-item {
+      background: #eff6ff;
+      border-left: 4px solid var(--primary);
+      padding: 0.75rem 1rem;
+      margin-bottom: 0.75rem;
+      border-radius: 0 4px 4px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .dynamic-item[data-enhanced="true"] {
+      border-left-color: var(--success);
+    }
+
+    .badge {
+      font-size: 0.75rem;
+      padding: 0.25rem 0.5rem;
+      border-radius: 9999px;
+      font-weight: 600;
+      background: #e2e8f0;
+      color: #334155;
+    }
+
+    .badge-enhanced {
+      background: #dcfce7;
+      color: #15803d;
+    }
+
+    .log-panel {
+      background: #1e293b;
+      color: #f8fafc;
+      font-family: monospace;
+      font-size: 0.85rem;
+      padding: 1rem;
+      border-radius: 6px;
+      height: 200px;
+      overflow-y: auto;
+      margin-top: 1rem;
+    }
+
+    .log-entry {
+      margin-bottom: 0.35rem;
+      border-bottom: 1px solid #334155;
+      padding-bottom: 0.25rem;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>MutationObserver Implementation Pattern</h1>
+  <p>Demonstrates recursion-guarded dynamic DOM injection, attribute change monitoring, and clean teardown.</p>
+
+  <div class="demo-grid">
+    <!-- Controls Panel -->
+    <div class="card">
+      <h2>Controls</h2>
+      <p>Simulate external/legacy script DOM injections & attribute toggles:</p>
+
+      <button id="btn-inject-single" class="btn">Inject Single Item</button>
+      <button id="btn-inject-nested" class="btn">Inject Nested Subtree</button>
+      <button id="btn-toggle-attr" class="btn btn-secondary">Toggle Widget Attribute</button>
+      <button id="btn-teardown" class="btn btn-secondary" style="background-color: #dc2626;">Disconnect Observer</button>
+
+      <div id="target-widget" class="widget-container" data-status="idle">
+        <p class="placeholder-text" style="color: var(--text-muted); font-size: 0.9rem;">
+          Dynamic widget container (Status: <strong id="status-label">idle</strong>)
+        </p>
+      </div>
+    </div>
+
+    <!-- Observer Activity Log -->
+    <div class="card">
+      <h2>Mutation Observer Log</h2>
+      <p>Real-time microtask records captured by MutationObserver:</p>
+      <div id="log-output" class="log-panel">
+        <div class="log-entry" style="color: #94a3b8;">System initialized. Waiting for mutations...</div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    // --- RECURSION-GUARDED OBSERVER IMPLEMENTATION ---
+
+    class ComponentMutationManager {
+      constructor(targetElement, logFn) {
+        this.target = targetElement;
+        this.log = logFn;
+        this.isMutating = false; // Recursion guard flag
+        this.abortController = new AbortController();
+
+        this.initObserver();
+      }
+
+      initObserver() {
+        const { signal } = this.abortController;
+
+        this.observer = new MutationObserver((mutations) => {
+          this.handleMutations(mutations);
+        });
+
+        // Granular observer configuration to avoid overhead
+        this.observer.observe(this.target, {
+          childList: true,
+          subtree: true,
+          attributes: true,
+          attributeFilter: ['data-status', 'data-enhanced'],
+          attributeOldValue: true
+        });
+
+        // Clean teardown signal listener
+        signal.addEventListener('abort', () => {
+          const pendingRecords = this.observer.takeRecords();
+          if (pendingRecords.length > 0) {
+            this.handleMutations(pendingRecords);
+          }
+          this.observer.disconnect();
+          this.log('Observer disconnected cleanly via AbortController signal.');
+        });
+      }
+
+      handleMutations(mutations) {
+        // Prevent infinite loops if callbacks mutate observed targets
+        if (this.isMutating) return;
+
+        this.isMutating = true;
+        try {
+          for (const mutation of mutations) {
+            if (mutation.type === 'childList') {
+              this.processChildListMutation(mutation);
+            } else if (mutation.type === 'attributes') {
+              this.processAttributeMutation(mutation);
+            }
+          }
+        } finally {
+          this.isMutating = false;
+        }
+      }
+
+      processChildListMutation(mutation) {
+        mutation.addedNodes.forEach((node) => {
+          if (node.nodeType !== Node.ELEMENT_NODE) return;
+
+          // Process direct element match
+          if (node.matches('.dynamic-item') && !node.hasAttribute('data-enhanced')) {
+            this.enhanceItem(node);
+          }
+
+          // Process nested elements inside injected wrapper subtrees
+          const nestedItems = node.querySelectorAll('.dynamic-item:not([data-enhanced="true"])');
+          nestedItems.forEach((nestedNode) => this.enhanceItem(nestedNode));
+        });
+
+        if (mutation.addedNodes.length > 0) {
+          this.log(`childList: Added ${mutation.addedNodes.length} node(s) to container.`);
+        }
+      }
+
+      processAttributeMutation(mutation) {
+        const target = mutation.target;
+        const attrName = mutation.attributeName;
+        const oldVal = mutation.oldValue;
+        const newVal = target.getAttribute(attrName);
+
+        this.log(`attributes: [${attrName}] changed on <${target.tagName.toLowerCase()}> from "${oldVal}" to "${newVal}".`);
+
+        if (attrName === 'data-status') {
+          const statusLabel = document.getElementById('status-label');
+          if (statusLabel) statusLabel.textContent = newVal;
+        }
+      }
+
+      enhanceItem(itemNode) {
+        // Safe mutation inside recursion-guarded try-finally block
+        itemNode.setAttribute('data-enhanced', 'true');
+
+        const badge = document.createElement('span');
+        badge.className = 'badge badge-enhanced';
+        badge.textContent = 'Auto-Enhanced';
+        itemNode.appendChild(badge);
+
+        this.log(`Enhanced dynamic item #${itemNode.dataset.id || 'unknown'}`);
+      }
+
+      destroy() {
+        this.abortController.abort();
+      }
+    }
+
+    // --- DEMO INITIALIZATION & CONTROLS ---
+
+    const widgetContainer = document.getElementById('target-widget');
+    const logOutput = document.getElementById('log-output');
+
+    function appendLog(message) {
+      const entry = document.createElement('div');
+      entry.className = 'log-entry';
+      entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+      logOutput.appendChild(entry);
+      logOutput.scrollTop = logOutput.scrollHeight;
+    }
+
+    let itemIdCounter = 1;
+    const mutationManager = new ComponentMutationManager(widgetContainer, appendLog);
+
+    // Simulate external script adding a single item
+    document.getElementById('btn-inject-single').addEventListener('click', () => {
+      const placeholder = widgetContainer.querySelector('.placeholder-text');
+      if (placeholder) placeholder.remove();
+
+      const item = document.createElement('div');
+      item.className = 'dynamic-item';
+      item.dataset.id = itemIdCounter++;
+      item.innerHTML = `<span>Dynamic Item #${item.dataset.id}</span>`;
+      widgetContainer.appendChild(item);
+    });
+
+    // Simulate external script inserting a nested subtree
+    document.getElementById('btn-inject-nested').addEventListener('click', () => {
+      const placeholder = widgetContainer.querySelector('.placeholder-text');
+      if (placeholder) placeholder.remove();
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'nested-wrapper';
+      wrapper.innerHTML = `
+        <div class="dynamic-item" data-id="${itemIdCounter++}">
+          <span>Nested Item A</span>
+        </div>
+        <div class="dynamic-item" data-id="${itemIdCounter++}">
+          <span>Nested Item B</span>
+        </div>
+      `;
+      widgetContainer.appendChild(wrapper);
+    });
+
+    // Simulate attribute toggle
+    document.getElementById('btn-toggle-attr').addEventListener('click', () => {
+      const currentStatus = widgetContainer.getAttribute('data-status');
+      const nextStatus = currentStatus === 'idle' ? 'active' : 'idle';
+      widgetContainer.setAttribute('data-status', nextStatus);
+    });
+
+    // Handle teardown
+    document.getElementById('btn-teardown').addEventListener('click', () => {
+      mutationManager.destroy();
+    });
+  </script>
+</body>
+</html>
