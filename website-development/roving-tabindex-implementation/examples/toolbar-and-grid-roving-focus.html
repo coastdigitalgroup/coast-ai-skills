@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Roving Tabindex Example - Toolbar & 2D Grid Navigation</title>
+  <style>
+    :root {
+      --bg-color: #0f172a;
+      --card-bg: #1e293b;
+      --text-color: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent-color: #38bdf8;
+      --border-color: #334155;
+      --focus-ring: #0284c7;
+      --active-bg: #0369a1;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      margin: 0;
+      padding: 2rem;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      font-size: 1.75rem;
+      margin-bottom: 0.5rem;
+    }
+
+    p.description {
+      color: var(--text-muted);
+      margin-bottom: 2rem;
+    }
+
+    .demo-section {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    h2 {
+      font-size: 1.25rem;
+      margin-top: 0;
+      margin-bottom: 1rem;
+    }
+
+    /* Form control before composite widget */
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    input[type="text"] {
+      background: #0f172a;
+      border: 1px solid var(--border-color);
+      color: var(--text-color);
+      padding: 0.5rem 0.75rem;
+      border-radius: 4px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    input[type="text"]:focus-visible {
+      outline: 2px solid var(--accent-color);
+      outline-offset: 2px;
+    }
+
+    /* Horizontal Toolbar Styles */
+    .toolbar {
+      display: flex;
+      gap: 0.5rem;
+      background-color: #0f172a;
+      padding: 0.5rem;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+    }
+
+    .toolbar-button {
+      background-color: transparent;
+      color: var(--text-color);
+      border: 1px solid transparent;
+      border-radius: 4px;
+      padding: 0.5rem 0.75rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.15s ease, border-color 0.15s ease;
+    }
+
+    .toolbar-button:hover:not(:disabled) {
+      background-color: var(--border-color);
+    }
+
+    .toolbar-button:focus-visible {
+      outline: 2px solid var(--accent-color);
+      outline-offset: 2px;
+      border-color: var(--accent-color);
+    }
+
+    .toolbar-button[aria-pressed="true"] {
+      background-color: var(--active-bg);
+      border-color: var(--accent-color);
+    }
+
+    .toolbar-button:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    /* 2D Color Grid Styles */
+    .color-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.75rem;
+      background-color: #0f172a;
+      padding: 1rem;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+    }
+
+    .grid-cell {
+      aspect-ratio: 1;
+      border: 2px solid transparent;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 0.875rem;
+      color: #ffffff;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+      transition: transform 0.15s ease, border-color 0.15s ease;
+    }
+
+    .grid-cell:hover {
+      transform: scale(1.03);
+    }
+
+    .grid-cell:focus-visible {
+      outline: 3px solid #ffffff;
+      outline-offset: 2px;
+      border-color: var(--accent-color);
+      z-index: 10;
+    }
+
+    .grid-cell[aria-selected="true"]::after {
+      content: '✓';
+      font-size: 1.25rem;
+    }
+
+    /* Live Announcer Output */
+    .status-log {
+      margin-top: 1rem;
+      font-size: 0.875rem;
+      color: var(--accent-color);
+      min-height: 1.25rem;
+    }
+
+    .controls-row {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      margin-top: 1rem;
+    }
+
+    .btn-secondary {
+      background: var(--border-color);
+      color: var(--text-color);
+      border: none;
+      padding: 0.4rem 0.8rem;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Roving Tabindex Spatial Navigation</h1>
+    <p class="description">
+      Demonstrates accessible keyboard navigation for composite widgets (1D Horizontal Toolbar and 2D Grid) using the Roving Tabindex pattern.
+      Each composite widget acts as a single <code>Tab</code> stop. Use Arrow keys, <code>Home</code>, and <code>End</code> to navigate sub-items.
+    </p>
+
+    <!-- Preceding Form Field -->
+    <div class="demo-section">
+      <div class="form-group">
+        <label for="input-before">1. Start Tab Navigation Here (Input Field):</label>
+        <input type="text" id="input-before" placeholder="Press Tab to reach the Toolbar widget below...">
+      </div>
+    </div>
+
+    <!-- 1D Toolbar Example -->
+    <div class="demo-section">
+      <h2>2. Horizontal Formatting Toolbar (1D Navigation)</h2>
+      <p style="font-size: 0.875rem; color: var(--text-muted);">
+        Keys: <code>ArrowLeft</code> / <code>ArrowRight</code> (or <code>ArrowUp</code> / <code>ArrowDown</code>), <code>Home</code>, <code>End</code>.
+      </p>
+
+      <div role="toolbar" aria-label="Text Formatting Toolbar" class="toolbar" id="text-toolbar" data-direction="ltr">
+        <button type="button" class="toolbar-button" tabindex="0" aria-pressed="false" data-action="bold">Bold</button>
+        <button type="button" class="toolbar-button" tabindex="-1" aria-pressed="false" data-action="italic">Italic</button>
+        <button type="button" class="toolbar-button" tabindex="-1" aria-pressed="false" data-action="underline">Underline</button>
+        <button type="button" class="toolbar-button" tabindex="-1" aria-pressed="disabled" disabled data-action="strikethrough">Strikethrough (Disabled)</button>
+        <button type="button" class="toolbar-button" tabindex="-1" aria-pressed="false" data-action="code">Code Block</button>
+      </div>
+
+      <div class="controls-row">
+        <button type="button" class="btn-secondary" id="toggle-rtl-btn">Toggle RTL Mode (Current: LTR)</button>
+        <button type="button" class="btn-secondary" id="add-toolbar-item-btn">Add Dynamic Button</button>
+      </div>
+      <div class="status-log" id="toolbar-status" aria-live="polite"></div>
+    </div>
+
+    <!-- 2D Color Picker Grid Example -->
+    <div class="demo-section">
+      <h2>3. Interactive Palette Grid (2D Navigation - 4 Columns)</h2>
+      <p style="font-size: 0.875rem; color: var(--text-muted);">
+        Keys: <code>ArrowLeft</code>, <code>ArrowRight</code>, <code>ArrowUp</code>, <code>ArrowDown</code>, <code>Home</code>, <code>End</code>.
+      </p>
+
+      <div role="grid" aria-label="Color Palette Selector" class="color-grid" id="color-grid" data-columns="4">
+        <div role="gridcell" tabindex="0" aria-selected="true" class="grid-cell" style="background-color: #ef4444;" data-color="Red">Red</div>
+        <div role="gridcell" tabindex="-1" aria-selected="false" class="grid-cell" style="background-color: #f97316;" data-color="Orange">Orange</div>
+        <div role="gridcell" tabindex="-1" aria-selected="false" class="grid-cell" style="background-color: #eab308;" data-color="Yellow">Yellow</div>
+        <div role="gridcell" tabindex="-1" aria-selected="false" class="grid-cell" style="background-color: #22c55e;" data-color="Green">Green</div>
+
+        <div role="gridcell" tabindex="-1" aria-selected="false" class="grid-cell" style="background-color: #06b6d4;" data-color="Cyan">Cyan</div>
+        <div role="gridcell" tabindex="-1" aria-selected="false" class="grid-cell" style="background-color: #3b82f6;" data-color="Blue">Blue</div>
+        <div role="gridcell" tabindex="-1" aria-selected="false" class="grid-cell" style="background-color: #6366f1;" data-color="Indigo">Indigo</div>
+        <div role="gridcell" tabindex="-1" aria-selected="false" class="grid-cell" style="background-color: #a855f7;" data-color="Purple">Purple</div>
+      </div>
+      <div class="status-log" id="grid-status" aria-live="polite"></div>
+    </div>
+
+    <!-- Succeeding Form Field -->
+    <div class="demo-section">
+      <div class="form-group">
+        <label for="input-after">4. End Tab Navigation Here (Input Field):</label>
+        <input type="text" id="input-after" placeholder="Focus arrives here when pressing Tab from inside either composite widget.">
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /**
+     * Production-grade Roving Tabindex Manager
+     */
+    class RovingTabindexManager {
+      constructor(container, options = {}) {
+        this.container = container;
+        this.options = {
+          itemSelector: '[tabindex]',
+          orientation: 'horizontal', // 'horizontal' | 'vertical' | 'both'
+          columns: 1,
+          wrap: true,
+          ...options
+        };
+        this.controller = new AbortController();
+        this.init();
+      }
+
+      getItems() {
+        return Array.from(this.container.querySelectorAll(this.options.itemSelector))
+          .filter(el => !el.disabled && el.getAttribute('aria-disabled') !== 'true' && el.offsetParent !== null);
+      }
+
+      init() {
+        const { signal } = this.controller;
+
+        this.container.addEventListener('keydown', (e) => this.handleKeyDown(e), { signal });
+        this.container.addEventListener('click', (e) => this.handleClick(e), { signal });
+
+        // Ensure exactly one tabindex="0" exists on initial setup
+        this.syncFocusableIndex();
+      }
+
+      syncFocusableIndex() {
+        const items = this.getItems();
+        if (items.length === 0) return;
+
+        let hasActive = false;
+        items.forEach((item) => {
+          if (item.getAttribute('tabindex') === '0') {
+            if (!hasActive) hasActive = true;
+            else item.setAttribute('tabindex', '-1');
+          }
+        });
+
+        if (!hasActive && items[0]) {
+          items[0].setAttribute('tabindex', '0');
+        }
+      }
+
+      setActiveItem(targetItem, focus = true) {
+        const items = this.getItems();
+        items.forEach(item => {
+          if (item === targetItem) {
+            item.setAttribute('tabindex', '0');
+            if (focus) item.focus();
+          } else {
+            item.setAttribute('tabindex', '-1');
+          }
+        });
+      }
+
+      handleKeyDown(event) {
+        const items = this.getItems();
+        const currentTarget = event.target.closest(this.options.itemSelector);
+
+        if (!currentTarget || !items.includes(currentTarget)) return;
+
+        const currentIndex = items.indexOf(currentTarget);
+        const { orientation, wrap, columns } = this.options;
+        const isRTL = (this.container.getAttribute('data-direction') || getComputedStyle(this.container).direction) === 'rtl';
+
+        let nextIndex = currentIndex;
+
+        if (orientation === 'both' && columns > 1) {
+          // 2D Spatial Navigation
+          const total = items.length;
+          const totalRows = Math.ceil(total / columns);
+          const currentRow = Math.floor(currentIndex / columns);
+          const currentCol = currentIndex % columns;
+
+          switch (event.key) {
+            case 'ArrowLeft':
+              event.preventDefault();
+              let leftCol = isRTL ? currentCol + 1 : currentCol - 1;
+              let leftRow = currentRow;
+              if (leftCol < 0) {
+                leftCol = columns - 1;
+                leftRow = wrap ? (leftRow > 0 ? leftRow - 1 : totalRows - 1) : 0;
+              } else if (leftCol >= columns) {
+                leftCol = 0;
+                leftRow = wrap ? (leftRow < totalRows - 1 ? leftRow + 1 : 0) : totalRows - 1;
+              }
+              nextIndex = Math.min(leftRow * columns + leftCol, total - 1);
+              break;
+
+            case 'ArrowRight':
+              event.preventDefault();
+              let rightCol = isRTL ? currentCol - 1 : currentCol + 1;
+              let rightRow = currentRow;
+              if (rightCol >= columns) {
+                rightCol = 0;
+                rightRow = wrap ? (rightRow < totalRows - 1 ? rightRow + 1 : 0) : totalRows - 1;
+              } else if (rightCol < 0) {
+                rightCol = columns - 1;
+                rightRow = wrap ? (rightRow > 0 ? rightRow - 1 : totalRows - 1) : 0;
+              }
+              nextIndex = Math.min(rightRow * columns + rightCol, total - 1);
+              break;
+
+            case 'ArrowUp':
+              event.preventDefault();
+              let upRow = currentRow - 1;
+              if (upRow < 0) upRow = wrap ? totalRows - 1 : 0;
+              nextIndex = Math.min(upRow * columns + currentCol, total - 1);
+              break;
+
+            case 'ArrowDown':
+              event.preventDefault();
+              let downRow = currentRow + 1;
+              if (downRow >= totalRows) downRow = wrap ? 0 : totalRows - 1;
+              nextIndex = Math.min(downRow * columns + currentCol, total - 1);
+              break;
+
+            case 'Home':
+              event.preventDefault();
+              nextIndex = 0;
+              break;
+
+            case 'End':
+              event.preventDefault();
+              nextIndex = total - 1;
+              break;
+          }
+        } else {
+          // 1D Spatial Navigation
+          const prevKey = orientation === 'vertical' ? 'ArrowUp' : (isRTL ? 'ArrowRight' : 'ArrowLeft');
+          const nextKey = orientation === 'vertical' ? 'ArrowDown' : (isRTL ? 'ArrowLeft' : 'ArrowRight');
+
+          switch (event.key) {
+            case prevKey:
+            case (orientation === 'horizontal' ? 'ArrowUp' : 'ArrowLeft'):
+              event.preventDefault();
+              nextIndex = currentIndex - 1;
+              if (nextIndex < 0) nextIndex = wrap ? items.length - 1 : 0;
+              break;
+
+            case nextKey:
+            case (orientation === 'horizontal' ? 'ArrowDown' : 'ArrowRight'):
+              event.preventDefault();
+              nextIndex = currentIndex + 1;
+              if (nextIndex >= items.length) nextIndex = wrap ? 0 : items.length - 1;
+              break;
+
+            case 'Home':
+              event.preventDefault();
+              nextIndex = 0;
+              break;
+
+            case 'End':
+              event.preventDefault();
+              nextIndex = items.length - 1;
+              break;
+          }
+        }
+
+        if (nextIndex !== currentIndex && items[nextIndex]) {
+          this.setActiveItem(items[nextIndex], true);
+        }
+      }
+
+      handleClick(event) {
+        const item = event.target.closest(this.options.itemSelector);
+        if (item && this.getItems().includes(item)) {
+          this.setActiveItem(item, false);
+        }
+      }
+
+      destroy() {
+        this.controller.abort();
+      }
+    }
+
+    // Initialize Toolbar Roving Tabindex
+    const toolbarEl = document.getElementById('text-toolbar');
+    const toolbarStatus = document.getElementById('toolbar-status');
+    const toolbarManager = new RovingTabindexManager(toolbarEl, {
+      itemSelector: '.toolbar-button',
+      orientation: 'horizontal'
+    });
+
+    toolbarEl.addEventListener('click', (e) => {
+      const btn = e.target.closest('.toolbar-button');
+      if (!btn || btn.disabled) return;
+
+      const isPressed = btn.getAttribute('aria-pressed') === 'true';
+      btn.setAttribute('aria-pressed', !isPressed);
+      toolbarStatus.textContent = `Action triggered: ${btn.dataset.action} (${!isPressed ? 'Active' : 'Inactive'})`;
+    });
+
+    // Toggle RTL Mode
+    const toggleRTLBtn = document.getElementById('toggle-rtl-btn');
+    toggleRTLBtn.addEventListener('click', () => {
+      const currentDir = toolbarEl.getAttribute('data-direction');
+      const newDir = currentDir === 'rtl' ? 'ltr' : 'rtl';
+      toolbarEl.setAttribute('data-direction', newDir);
+      toolbarEl.dir = newDir;
+      toggleRTLBtn.textContent = `Toggle RTL Mode (Current: ${newDir.toUpperCase()})`;
+    });
+
+    // Add Dynamic Button
+    const addToolbarItemBtn = document.getElementById('add-toolbar-item-btn');
+    addToolbarItemBtn.addEventListener('click', () => {
+      const newBtn = document.createElement('button');
+      newBtn.type = 'button';
+      newBtn.className = 'toolbar-button';
+      newBtn.setAttribute('tabindex', '-1');
+      newBtn.setAttribute('aria-pressed', 'false');
+      newBtn.dataset.action = 'highlight';
+      newBtn.textContent = 'Highlight';
+      toolbarEl.appendChild(newBtn);
+      toolbarManager.syncFocusableIndex();
+      toolbarStatus.textContent = 'Dynamic button "Highlight" added to toolbar.';
+    });
+
+    // Initialize 2D Grid Roving Tabindex
+    const gridEl = document.getElementById('color-grid');
+    const gridStatus = document.getElementById('grid-status');
+    const gridManager = new RovingTabindexManager(gridEl, {
+      itemSelector: '.grid-cell',
+      orientation: 'both',
+      columns: 4
+    });
+
+    gridEl.addEventListener('click', (e) => {
+      const cell = e.target.closest('.grid-cell');
+      if (!cell) return;
+
+      gridEl.querySelectorAll('.grid-cell').forEach(c => c.setAttribute('aria-selected', 'false'));
+      cell.setAttribute('aria-selected', 'true');
+      gridStatus.textContent = `Selected color: ${cell.dataset.color}`;
+    });
+
+    gridEl.addEventListener('keydown', (e) => {
+      if (e.key === ' ' || e.key === 'Enter') {
+        const cell = e.target.closest('.grid-cell');
+        if (cell) {
+          e.preventDefault();
+          cell.click();
+        }
+      }
+    });
+  </script>
+</body>
+</html>
