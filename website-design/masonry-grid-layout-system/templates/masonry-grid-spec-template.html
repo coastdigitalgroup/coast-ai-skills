@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Masonry Grid Layout Specification Template</title>
+  <style>
+    /* ==========================================================================
+       DESIGN SYSTEM TOKENS & CSS VARIABLES
+       ========================================================================== */
+    :root {
+      --bg-surface: #F9FAFB;
+      --surface-card: #FFFFFF;
+      --surface-card-hover: #F3F4F6;
+      --surface-brand-subtle: #EFF6FF;
+
+      --text-primary: #111827;
+      --text-secondary: #4B5563;
+      --text-brand: #1D4ED8;
+
+      --border-subtle: #E5E7EB;
+      --border-brand: #93C5FD;
+
+      --focus-ring: #2563EB;
+      --badge-bg: #E0E7FF;
+      --badge-text: #3730A3;
+
+      --radius-s: 8px;
+      --radius-m: 12px;
+      --radius-l: 16px;
+
+      --gap-masonry: 24px;
+
+      --font-sans: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+      --shadow-card-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+    }
+
+    /* Base Reset */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--bg-surface);
+      color: var(--text-primary);
+      line-height: 1.5;
+      padding: 32px 16px;
+    }
+
+    .container {
+      max-width: 1440px;
+      margin: 0 auto;
+    }
+
+    header.masonry-header {
+      margin-bottom: 32px;
+      text-align: center;
+    }
+
+    header.masonry-header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      color: var(--text-primary);
+    }
+
+    header.masonry-header p {
+      font-size: 1rem;
+      color: var(--text-secondary);
+      margin-top: 8px;
+    }
+
+    /* ==========================================================================
+       MASONRY GRID LAYOUT (MULTI-TRACK FLEX PACKING FOR LOGICAL DOM ORDER)
+       ========================================================================== */
+    .masonry-grid-wrapper {
+      display: flex;
+      gap: var(--gap-masonry);
+      align-items: flex-start;
+      width: 100%;
+    }
+
+    .masonry-column {
+      display: flex;
+      flex-direction: column;
+      gap: var(--gap-masonry);
+      flex: 1;
+      min-width: 0; /* Prevents flex children blowout */
+    }
+
+    /* CSS Multi-Column Fallback (When JS is disabled) */
+    .no-js .masonry-grid-wrapper {
+      display: block;
+      column-count: 1;
+      column-gap: var(--gap-masonry);
+    }
+
+    @media (min-width: 640px) {
+      .no-js .masonry-grid-wrapper {
+        column-count: 2;
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .no-js .masonry-grid-wrapper {
+        column-count: 3;
+      }
+    }
+
+    @media (min-width: 1440px) {
+      .no-js .masonry-grid-wrapper {
+        column-count: 4;
+      }
+    }
+
+    .no-js .masonry-card {
+      break-inside: avoid;
+      margin-bottom: var(--gap-masonry);
+    }
+
+    /* ==========================================================================
+       MASONRY CARD ANATOMY & STYLES
+       ========================================================================== */
+    .masonry-card {
+      background: var(--surface-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-l);
+      box-shadow: var(--shadow-card);
+      overflow: hidden;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      position: relative;
+    }
+
+    .masonry-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-card-hover);
+    }
+
+    /* Media Aspect Ratio Containment Box (Eliminates CLS) */
+    .card-media-wrapper {
+      width: 100%;
+      background-color: var(--border-subtle);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card-media-wrapper img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: opacity 0.3s ease;
+    }
+
+    /* Card Content Area */
+    .card-body {
+      padding: 16px 20px 20px 20px;
+    }
+
+    .card-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      background-color: var(--badge-bg);
+      color: var(--badge-text);
+      font-size: 0.75rem;
+      font-weight: 600;
+      border-radius: 999px;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .card-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 6px;
+    }
+
+    .card-title a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .card-title a:hover {
+      color: var(--text-brand);
+    }
+
+    .card-description {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+
+    /* Card Footer & Action Dock */
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 12px;
+      margin-top: 8px;
+    }
+
+    .author-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .author-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background-color: var(--border-brand);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-brand);
+    }
+
+    .author-name {
+      font-size: 0.8125rem;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .action-btn {
+      background: transparent;
+      border: none;
+      min-width: 44px;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-s);
+      cursor: pointer;
+      color: var(--text-secondary);
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    .action-btn:hover {
+      background-color: var(--surface-card-hover);
+      color: var(--text-primary);
+    }
+
+    /* ==========================================================================
+       ACCESSIBILITY & FOCUS VISIBLE STYLING (WCAG 2.2)
+       ========================================================================== */
+    a:focus-visible,
+    button:focus-visible {
+      outline: 3px solid var(--focus-ring);
+      outline-offset: 2px;
+      border-radius: var(--radius-s);
+      z-index: 10;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    /* Text Quote Card Variant */
+    .card-quote-variant {
+      background: var(--surface-brand-subtle);
+      border-color: var(--border-brand);
+    }
+
+    .card-quote-text {
+      font-size: 1.125rem;
+      font-style: italic;
+      color: var(--text-brand);
+      line-height: 1.4;
+      margin-bottom: 12px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header class="masonry-header">
+      <h1>Responsive Masonry Grid Specification</h1>
+      <p>Multi-column dynamic card packing with pre-allocated aspect ratios and WCAG AA focus sequence.</p>
+    </header>
+
+    <main>
+      <!-- Root Masonry Container -->
+      <div id="masonry-root" class="masonry-grid-wrapper">
+
+        <!-- CARD ITEM 1 (Portrait 3:4) -->
+        <article class="masonry-card" data-card-id="1">
+          <div class="card-media-wrapper" style="aspect-ratio: 3/4;">
+            <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='400' viewBox='0 0 300 400'><rect width='100%' height='100%' fill='%2393C5FD'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='20' fill='%231E3A8A'>3:4 Portrait</text></svg>" alt="Creative UI/UX Wireframe Prototype">
+          </div>
+          <div class="card-body">
+            <span class="card-badge">UI/UX Design</span>
+            <h2 class="card-title">
+              <a href="#card-1">Mobile Banking App Wireframe</a>
+            </h2>
+            <p class="card-description">High-fidelity iOS prototype exploring micro-interactions and dark mode card stacks.</p>
+            <div class="card-footer">
+              <div class="author-info">
+                <div class="author-avatar" aria-hidden="true">EL</div>
+                <span class="author-name">Elena Lin</span>
+              </div>
+              <button type="button" class="action-btn" aria-label="Bookmark Mobile Banking App Wireframe">
+                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path></svg>
+              </button>
+            </div>
+          </div>
+        </article>
+
+        <!-- CARD ITEM 2 (Landscape 16:9) -->
+        <article class="masonry-card" data-card-id="2">
+          <div class="card-media-wrapper" style="aspect-ratio: 16/9;">
+            <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='225' viewBox='0 0 400 225'><rect width='100%' height='100%' fill='%23FDE68A'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='20' fill='%2378350F'>16:9 Landscape</text></svg>" alt="Architectural Render Showcase">
+          </div>
+          <div class="card-body">
+            <span class="card-badge">3D Architecture</span>
+            <h2 class="card-title">
+              <a href="#card-2">Minimalist Timber Pavilion</a>
+            </h2>
+            <p class="card-description">3D Raytraced environmental visualization utilizing natural light diffusion.</p>
+            <div class="card-footer">
+              <div class="author-info">
+                <div class="author-avatar" aria-hidden="true">MK</div>
+                <span class="author-name">Marcus K</span>
+              </div>
+              <button type="button" class="action-btn" aria-label="Bookmark Minimalist Timber Pavilion">
+                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path></svg>
+              </button>
+            </div>
+          </div>
+        </article>
+
+        <!-- CARD ITEM 3 (Text Quote Block - Variable Height) -->
+        <article class="masonry-card card-quote-variant" data-card-id="3">
+          <div class="card-body">
+            <span class="card-badge">Design Insight</span>
+            <blockquote class="card-quote-text">
+              "Good layout design is not merely about arranging elements; it is about establishing a rhythm that guides human attention effortlessly."
+            </blockquote>
+            <div class="card-footer">
+              <div class="author-info">
+                <div class="author-avatar" aria-hidden="true">DA</div>
+                <span class="author-name">Dieter A.</span>
+              </div>
+              <button type="button" class="action-btn" aria-label="Bookmark Design Insight Quote">
+                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path></svg>
+              </button>
+            </div>
+          </div>
+        </article>
+
+        <!-- CARD ITEM 4 (Square 1:1) -->
+        <article class="masonry-card" data-card-id="4">
+          <div class="card-media-wrapper" style="aspect-ratio: 1/1;">
+            <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300' viewBox='0 0 300 300'><rect width='100%' height='100%' fill='%23A7F3D0'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='20' fill='%23065F46'>1:1 Square</text></svg>" alt="Brand Identity Typography Exploration">
+          </div>
+          <div class="card-body">
+            <span class="card-badge">Branding</span>
+            <h2 class="card-title">
+              <a href="#card-4">Monogram & Iconography Scale</a>
+            </h2>
+            <p class="card-description">Grid system exploration for scalable vector brand marks across micro viewports.</p>
+            <div class="card-footer">
+              <div class="author-info">
+                <div class="author-avatar" aria-hidden="true">SJ</div>
+                <span class="author-name">Sarah J.</span>
+              </div>
+              <button type="button" class="action-btn" aria-label="Bookmark Monogram & Iconography Scale">
+                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path></svg>
+              </button>
+            </div>
+          </div>
+        </article>
+
+        <!-- CARD ITEM 5 (Tall Portrait 9:16) -->
+        <article class="masonry-card" data-card-id="5">
+          <div class="card-media-wrapper" style="aspect-ratio: 9/16;">
+            <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='225' height='400' viewBox='0 0 225 400'><rect width='100%' height='100%' fill='%23C084FC'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='20' fill='%233B0764'>9:16 Tall</text></svg>" alt="Vertical Editorial Photography Series">
+          </div>
+          <div class="card-body">
+            <span class="card-badge">Photography</span>
+            <h2 class="card-title">
+              <a href="#card-5">Neon Shadows Urban Series</a>
+            </h2>
+            <p class="card-description">High-contrast nighttime editorial photography captured across Tokyo train hubs.</p>
+            <div class="card-footer">
+              <div class="author-info">
+                <div class="author-avatar" aria-hidden="true">TY</div>
+                <span class="author-name">Taro Y.</span>
+              </div>
+              <button type="button" class="action-btn" aria-label="Bookmark Neon Shadows Urban Series">
+                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path></svg>
+              </button>
+            </div>
+          </div>
+        </article>
+
+        <!-- CARD ITEM 6 (Landscape 4:3) -->
+        <article class="masonry-card" data-card-id="6">
+          <div class="card-media-wrapper" style="aspect-ratio: 4/3;">
+            <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='320' height='240' viewBox='0 0 320 240'><rect width='100%' height='100%' fill='%23F472B6'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='20' fill='%23831843'>4:3 Landscape</text></svg>" alt="Motion Graphic Design Render">
+          </div>
+          <div class="card-body">
+            <span class="card-badge">Motion Graphics</span>
+            <h2 class="card-title">
+              <a href="#card-6">Fluid Gradient Loop 04</a>
+            </h2>
+            <p class="card-description">Procedural shader animations rendered at 60fps for background ambient loops.</p>
+            <div class="card-footer">
+              <div class="author-info">
+                <div class="author-avatar" aria-hidden="true">AR</div>
+                <span class="author-name">Alex Rivera</span>
+              </div>
+              <button type="button" class="action-btn" aria-label="Bookmark Fluid Gradient Loop 04">
+                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path></svg>
+              </button>
+            </div>
+          </div>
+        </article>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- ==========================================================================
+       PROGRESSIVE MASONRY MANAGER SCRIPT
+       - Distributes items into column tracks while maintaining DOM focus parity
+       ========================================================================== -->
+  <script>
+    (function() {
+      const root = document.getElementById('masonry-root');
+      if (!root) return;
+
+      // Extract existing card elements
+      const cards = Array.from(root.querySelectorAll('.masonry-card'));
+
+      function getColumnCount() {
+        const width = window.innerWidth;
+        if (width < 640) return 1;
+        if (width < 1024) return 2;
+        if (width < 1440) return 3;
+        return 4;
+      }
+
+      function layoutMasonry() {
+        const columnCount = getColumnCount();
+
+        // Clear existing column containers and re-append cards directly to root first
+        root.innerHTML = '';
+        const columns = [];
+        const columnHeights = [];
+
+        for (let i = 0; i < columnCount; i++) {
+          const col = document.createElement('div');
+          col.className = 'masonry-column';
+          columns.push(col);
+          columnHeights.push(0);
+          root.appendChild(col);
+        }
+
+        // Distribute cards sequentially to the currently shortest column track
+        cards.forEach(card => {
+          let shortestIndex = 0;
+          let minHeight = columnHeights[0];
+
+          for (let i = 1; i < columnCount; i++) {
+            if (columnHeights[i] < minHeight) {
+              minHeight = columnHeights[i];
+              shortestIndex = i;
+            }
+          }
+
+          columns[shortestIndex].appendChild(card);
+          // Estimate card height based on bounding rect or offsetHeight
+          const estimatedHeight = card.getBoundingClientRect().height || 300;
+          columnHeights[shortestIndex] += estimatedHeight + 24; // Including gap
+        });
+      }
+
+      // Initial layout execution
+      layoutMasonry();
+
+      // Debounced resize handler using ResizeObserver or Window resize
+      let resizeTimer;
+      window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(layoutMasonry, 150);
+      });
+    })();
+  </script>
+</body>
+</html>
