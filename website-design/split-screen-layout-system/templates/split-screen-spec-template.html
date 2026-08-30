@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Split-Screen Layout System - Production Template</title>
+  <style>
+    /* CSS RESET & CUSTOM PROPERTIES */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      /* Fluid Spacing & Typography */
+      --space-xs: clamp(0.5rem, 1vw, 0.75rem);
+      --space-s: clamp(0.75rem, 1.5vw, 1rem);
+      --space-m: clamp(1rem, 2vw, 1.5rem);
+      --space-l: clamp(1.5rem, 3vw, 2.5rem);
+      --space-xl: clamp(2.5rem, 5vw, 4rem);
+
+      /* Typography Tokens */
+      --font-family-base: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-size-sm: 0.875rem;
+      --font-size-base: 1rem;
+      --font-size-lg: 1.25rem;
+      --font-size-xl: clamp(1.75rem, 3vw, 2.5rem);
+
+      /* Dark Panel Tokens (Panel A - Visual/Brand) */
+      --bg-dark-panel: #0B132B;
+      --bg-dark-card: #1C2541;
+      --text-dark-primary: #FFFFFF;
+      --text-dark-secondary: #94A3B8;
+      --border-dark-panel: #3A506B;
+
+      /* Light Panel Tokens (Panel B - Action/Form) */
+      --bg-light-panel: #FFFFFF;
+      --bg-light-input: #F8FAFC;
+      --text-light-primary: #0F172A;
+      --text-light-secondary: #475569;
+      --border-light-panel: #CBD5E1;
+
+      /* Action Tokens */
+      --color-primary: #2563EB;
+      --color-primary-hover: #1D4ED8;
+      --color-focus-ring-dark: #60A5FA;
+      --color-focus-ring-light: #2563EB;
+      --radius-sm: 6px;
+      --radius-md: 12px;
+      --radius-lg: 20px;
+    }
+
+    body {
+      font-family: var(--font-family-base);
+      line-height: 1.5;
+      background-color: var(--bg-light-panel);
+      color: var(--text-light-primary);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* SPLIT-SCREEN LAYOUT SYSTEM GRID CONTAINER */
+    .split-layout {
+      display: grid;
+      grid-template-columns: 1fr;
+      min-height: 100vh; /* Fallback */
+      min-height: 100dvh; /* Dynamic Viewport Height */
+      width: 100%;
+    }
+
+    /* 50/50 Desktop Grid Breakpoint (1024px) */
+    @media (min-width: 1024px) {
+      .split-layout {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      /* Alternate 60/40 modifier option */
+      .split-layout--60-40 {
+        grid-template-columns: 60% 40%;
+      }
+
+      /* Alternate 40/60 modifier option */
+      .split-layout--40-60 {
+        grid-template-columns: 40% 60%;
+      }
+    }
+
+    /* PANEL A: VISUAL & NARRATIVE PANEL (DARK THEME SCOPED) */
+    .panel-visual {
+      background-color: var(--bg-dark-panel);
+      color: var(--text-dark-primary);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: var(--space-l);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .panel-visual__header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-s);
+    }
+
+    .panel-visual__logo {
+      width: 36px;
+      height: 36px;
+      background-color: var(--color-primary);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: #ffffff;
+    }
+
+    .panel-visual__brand-name {
+      font-size: var(--font-size-lg);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .panel-visual__body {
+      margin-block: var(--space-xl);
+    }
+
+    .panel-visual__headline {
+      font-size: var(--font-size-xl);
+      font-weight: 800;
+      line-height: 1.2;
+      letter-spacing: -0.03em;
+      margin-bottom: var(--space-m);
+    }
+
+    .panel-visual__description {
+      font-size: var(--font-size-base);
+      color: var(--text-dark-secondary);
+      max-width: 48ch;
+    }
+
+    .panel-visual__testimonial {
+      background-color: var(--bg-dark-card);
+      border: 1px solid var(--border-dark-panel);
+      border-radius: var(--radius-md);
+      padding: var(--space-m);
+      margin-top: var(--space-l);
+    }
+
+    .panel-visual__quote {
+      font-size: var(--font-size-sm);
+      color: var(--text-dark-primary);
+      font-style: italic;
+      margin-bottom: var(--space-s);
+    }
+
+    .panel-visual__author {
+      font-size: var(--font-size-sm);
+      color: var(--text-dark-secondary);
+      font-weight: 600;
+    }
+
+    .panel-visual__footer {
+      font-size: var(--font-size-sm);
+      color: var(--text-dark-secondary);
+    }
+
+    /* PANEL B: ACTION & FORM PANEL (LIGHT THEME SCOPED) */
+    .panel-action {
+      background-color: var(--bg-light-panel);
+      color: var(--text-light-primary);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: var(--space-l);
+    }
+
+    .panel-action__container {
+      width: 100%;
+      max-width: 420px;
+    }
+
+    .panel-action__title {
+      font-size: var(--font-size-xl);
+      font-weight: 700;
+      margin-bottom: var(--space-xs);
+    }
+
+    .panel-action__subtitle {
+      font-size: var(--font-size-base);
+      color: var(--text-light-secondary);
+      margin-bottom: var(--space-l);
+    }
+
+    /* FORM & ACCESSIBLE INPUT CONTROLS */
+    .form-group {
+      margin-bottom: var(--space-m);
+    }
+
+    .form-label {
+      display: block;
+      font-size: var(--font-size-sm);
+      font-weight: 600;
+      color: var(--text-light-primary);
+      margin-bottom: 0.375rem;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      font-size: var(--font-size-base);
+      background-color: var(--bg-light-input);
+      border: 1px solid var(--border-light-panel);
+      border-radius: var(--radius-sm);
+      color: var(--text-light-primary);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .form-input:focus-visible {
+      outline: None;
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25);
+    }
+
+    .btn-submit {
+      width: 100%;
+      min-height: 48px; /* Minimum mobile touch target */
+      padding: 0.75rem 1.5rem;
+      font-size: var(--font-size-base);
+      font-weight: 600;
+      color: #ffffff;
+      background-color: var(--color-primary);
+      border: none;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: background-color 0.2s;
+      margin-top: var(--space-s);
+    }
+
+    .btn-submit:hover {
+      background-color: var(--color-primary-hover);
+    }
+
+    .btn-submit:focus-visible {
+      outline: 3px solid var(--color-focus-ring-light);
+      outline-offset: 2px;
+    }
+
+    /* RESPONSIVE STACKING RULES (<1024px) */
+    @media (max-width: 1023px) {
+      .split-layout {
+        /* Mobile DOM / Display Order: Action form stacks FIRST, visual panel SECOND */
+        display: flex;
+        flex-direction: column-reverse;
+      }
+
+      .panel-action {
+        padding-block: var(--space-xl);
+      }
+
+      .panel-visual {
+        min-height: auto;
+        padding-block: var(--space-xl);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- SPLIT-SCREEN LAYOUT CONTAINER -->
+  <main class="split-layout">
+
+    <!-- PANEL A: VISUAL & BRAND NARRATIVE (DARK THEME SCOPED) -->
+    <section class="panel-visual" aria-labelledby="visual-heading" data-theme="dark">
+      <header class="panel-visual__header">
+        <div class="panel-visual__logo" aria-hidden="true">S</div>
+        <span class="panel-visual__brand-name">ScaleFlow</span>
+      </header>
+
+      <div class="panel-visual__body">
+        <h2 id="visual-heading" class="panel-visual__headline">
+          Build and deploy intelligent web systems faster.
+        </h2>
+        <p class="panel-visual__description">
+          Join over 40,000 engineering teams who rely on ScaleFlow to automate infrastructure, optimize web components, and guarantee WCAG AA accessibility.
+        </p>
+
+        <blockquote class="panel-visual__testimonial">
+          <p class="panel-visual__quote">
+            "Switching to ScaleFlow cut our design system deployment cycle from weeks to hours."
+          </p>
+          <cite class="panel-visual__author">— Sarah Jenkins, VP of Engineering</cite>
+        </blockquote>
+      </div>
+
+      <footer class="panel-visual__footer">
+        <p>&copy; 2025 ScaleFlow Inc. All rights reserved.</p>
+      </footer>
+    </section>
+
+    <!-- PANEL B: ACTION & AUTH FORM (LIGHT THEME SCOPED) -->
+    <section class="panel-action" aria-labelledby="form-heading" data-theme="light">
+      <div class="panel-action__container">
+        <h1 id="form-heading" class="panel-action__title">Create your account</h1>
+        <p class="panel-action__subtitle">Start your 14-day free trial. No credit card required.</p>
+
+        <form action="#" method="POST" novalidate>
+          <div class="form-group">
+            <label for="full-name" class="form-label">Full Name</label>
+            <input
+              type="text"
+              id="full-name"
+              name="name"
+              class="form-input"
+              placeholder="Alex Morgan"
+              required
+              autocomplete="name"
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="work-email" class="form-label">Work Email</label>
+            <input
+              type="email"
+              id="work-email"
+              name="email"
+              class="form-input"
+              placeholder="alex@company.com"
+              required
+              autocomplete="email"
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="password" class="form-label">Password</label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              class="form-input"
+              placeholder="Minimum 8 characters"
+              required
+              autocomplete="new-password"
+            >
+          </div>
+
+          <button type="submit" class="btn-submit">
+            Get Started Free
+          </button>
+        </form>
+      </div>
+    </section>
+
+  </main>
+
+</body>
+</html>
