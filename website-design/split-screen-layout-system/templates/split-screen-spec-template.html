@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Split-Screen Specification Template</title>
+  <style>
+    /* ==========================================================================
+       SPLIT-SCREEN DESIGN SYSTEM TOKENS & BOILERPLATE
+       ========================================================================== */
+    :root {
+      /* Colors: Light Interactive Panel */
+      --color-form-bg: #ffffff;
+      --color-form-text: #0f172a;
+      --color-form-muted: #475569;
+      --color-form-border: #cbd5e1;
+      --color-form-focus: #2563eb;
+
+      /* Colors: Dark Brand Visual Panel */
+      --color-brand-bg: #0f172a;
+      --color-brand-text: #f8fafc;
+      --color-brand-muted: #94a3b8;
+      --color-brand-accent: #38bdf8;
+      --color-brand-focus: #38bdf8;
+
+      /* Fluid Spacing Scale */
+      --space-xs: clamp(0.5rem, 1vw, 0.75rem);
+      --space-s: clamp(0.75rem, 1.5vw, 1rem);
+      --space-m: clamp(1rem, 2vw, 1.5rem);
+      --space-l: clamp(1.5rem, 3vw, 2.5rem);
+      --space-xl: clamp(2.5rem, 5vw, 4rem);
+
+      /* Typography Scale */
+      --font-family-base: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-size-h1: clamp(1.75rem, 4vw, 2.5rem);
+      --font-size-body: clamp(0.9375rem, 1.2vw, 1.0625rem);
+      --font-size-sm: 0.875rem;
+
+      /* Target Sizes & Borders */
+      --radius-m: 8px;
+      --radius-l: 16px;
+      --touch-target-min: 44px;
+    }
+
+    /* Reset & Base Styles */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-family-base);
+      line-height: 1.5;
+      color: var(--color-form-text);
+      background-color: var(--color-form-bg);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ==========================================================================
+       SPLIT-SCREEN LAYOUT ENGINE (CSS GRID)
+       ========================================================================== */
+    .split-viewport {
+      display: grid;
+      grid-template-columns: 1fr;
+      min-height: 100dvh; /* Dynamic Viewport Height for mobile chrome safety */
+      width: 100%;
+    }
+
+    /* Desktop Viewport (992px+) Split Ratio Options */
+    @media (min-width: 992px) {
+      /* Standard 50/50 Balanced Split */
+      .split-viewport.split-50-50 {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      /* 60/40 Media-Dominant Split */
+      .split-viewport.split-60-40 {
+        grid-template-columns: 60% 40%;
+      }
+
+      /* 35/65 Form-Dominant Split */
+      .split-viewport.split-35-65 {
+        grid-template-columns: 35% 65%;
+      }
+    }
+
+    /* ==========================================================================
+       PANEL 1: INTERACTIVE FORM / MAIN CONTENT PANEL (LIGHT THEME)
+       ========================================================================== */
+    .panel-interactive {
+      background-color: var(--color-form-bg);
+      color: var(--color-form-text);
+      padding: var(--space-l);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      overflow-y: auto;
+    }
+
+    .form-content-wrapper {
+      width: 100%;
+      max-width: 440px;
+    }
+
+    .panel-header {
+      margin-bottom: var(--space-m);
+    }
+
+    .panel-header h1 {
+      font-size: var(--font-size-h1);
+      font-weight: 700;
+      line-height: 1.2;
+      color: var(--color-form-text);
+      margin-bottom: var(--space-xs);
+    }
+
+    .panel-header p {
+      font-size: var(--font-size-body);
+      color: var(--color-form-muted);
+    }
+
+    /* Form Inputs & Buttons */
+    .spec-form {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-m);
+    }
+
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs);
+    }
+
+    .field-group label {
+      font-size: var(--font-size-sm);
+      font-weight: 600;
+      color: var(--color-form-text);
+    }
+
+    .field-group input {
+      width: 100%;
+      min-height: var(--touch-target-min);
+      padding: 0.75rem 1rem;
+      font-size: var(--font-size-body);
+      border: 1px solid var(--color-form-border);
+      border-radius: var(--radius-m);
+      background-color: var(--color-form-bg);
+      color: var(--color-form-text);
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .field-group input:focus-visible {
+      outline: 2px solid var(--color-form-focus);
+      outline-offset: 2px;
+      border-color: var(--color-form-focus);
+    }
+
+    .btn-submit {
+      width: 100%;
+      min-height: var(--touch-target-min);
+      padding: 0.75rem 1.5rem;
+      font-size: var(--font-size-body);
+      font-weight: 600;
+      color: #ffffff;
+      background-color: var(--color-form-focus);
+      border: none;
+      border-radius: var(--radius-m);
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    .btn-submit:hover {
+      background-color: #1d4ed8;
+    }
+
+    .btn-submit:focus-visible {
+      outline: 3px solid #93c5fd;
+      outline-offset: 3px;
+    }
+
+    /* ==========================================================================
+       PANEL 2: BRAND / VISUAL PANEL (DARK THEME)
+       ========================================================================== */
+    .panel-visual {
+      background-color: var(--color-brand-bg);
+      color: var(--color-brand-text);
+      padding: var(--space-l);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+    }
+
+    .visual-header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-s);
+    }
+
+    .brand-logo {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--color-brand-text);
+      text-decoration: none;
+    }
+
+    .visual-body {
+      margin: var(--space-xl) 0;
+    }
+
+    .quote-card {
+      background-color: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: var(--radius-l);
+      padding: var(--space-m);
+      backdrop-filter: blur(8px);
+    }
+
+    .quote-card p {
+      font-size: var(--font-size-body);
+      color: var(--color-brand-text);
+      font-style: italic;
+      margin-bottom: var(--space-xs);
+    }
+
+    .quote-card cite {
+      font-size: var(--font-size-sm);
+      color: var(--color-brand-accent);
+      font-style: normal;
+      font-weight: 600;
+    }
+
+    .visual-footer {
+      display: flex;
+      gap: var(--space-m);
+      font-size: var(--font-size-sm);
+      color: var(--color-brand-muted);
+    }
+
+    /* Focus Override for Dark Panel Interactive Elements */
+    .panel-visual a:focus-visible,
+    .panel-visual button:focus-visible {
+      outline: 2px solid var(--color-brand-focus);
+      outline-offset: 2px;
+    }
+  </style>
+</head>
+<body>
+
+  <!--
+    SPLIT VIEWPORT CONTAINER
+    Classes available: .split-50-50, .split-60-40, .split-35-65
+  -->
+  <div class="split-viewport split-50-50">
+
+    <!--
+      PANEL 1: MAIN INTERACTIVE FORM (PRIMARY LANDMARK)
+      Placed FIRST in DOM order so screen readers and keyboard users reach primary action immediately.
+    -->
+    <main class="panel-interactive">
+      <div class="form-content-wrapper">
+        <header class="panel-header">
+          <h1>Sign in to your account</h1>
+          <p>Enter your details below to access your workspace.</p>
+        </header>
+
+        <form action="/login" method="POST" class="spec-form">
+          <div class="field-group">
+            <label for="user-email">Work Email</label>
+            <input type="email" id="user-email" name="email" required autocomplete="email" placeholder="name@company.com" />
+          </div>
+
+          <div class="field-group">
+            <label for="user-password">Password</label>
+            <input type="password" id="user-password" name="password" required autocomplete="current-password" placeholder="••••••••" />
+          </div>
+
+          <button type="submit" class="btn-submit">Sign In</button>
+        </form>
+      </div>
+    </main>
+
+    <!--
+      PANEL 2: BRAND / VISUAL PANEL (SECONDARY LANDMARK)
+      Placed SECOND in DOM order. Decorative background imagery uses aria-hidden="true".
+    -->
+    <aside class="panel-visual" aria-label="Brand Context and Testimonials">
+      <div class="visual-header">
+        <a href="/" class="brand-logo">CoastAi</a>
+      </div>
+
+      <div class="visual-body">
+        <blockquote class="quote-card">
+          <p>“The split-screen interface made onboarding frictionless for our 500+ team members.”</p>
+          <cite>— Marcus Vance, VP of Engineering</cite>
+        </blockquote>
+      </div>
+
+      <footer class="visual-footer">
+        <span>© 2025 CoastAi Inc.</span>
+        <span>Privacy Policy</span>
+        <span>Terms of Service</span>
+      </footer>
+    </aside>
+
+  </div>
+
+</body>
+</html>

@@ -5,6 +5,10 @@ All notable changes to this project will be documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- `split-screen-layout-system` skill to `website-design` category, defining a systematic, accessible, and responsive dual-panel split-screen layout framework for structuring asymmetric visual and interactive content, managing scrolling mechanics, mobile stacking, viewport height safety (`min-height: 100dvh`), and WCAG AA contrast compliance.
+
 ## [0.3.0] — 2026-08-16
 
 ### Added
