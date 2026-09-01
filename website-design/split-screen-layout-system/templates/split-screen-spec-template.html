@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Accessible Split-Screen Layout Template</title>
+  <style>
+    /* ==========================================================================
+       SPLIT-SCREEN DESIGN SYSTEM TOKENS & RESET
+       ========================================================================== */
+    :root {
+      /* Fluid Spacing Scale */
+      --space-xs: clamp(0.5rem, 1vw, 0.75rem);
+      --space-s: clamp(0.75rem, 1.5vw, 1rem);
+      --space-m: clamp(1.25rem, 2.5vw, 2rem);
+      --space-l: clamp(2rem, 4vw, 3.5rem);
+      --space-xl: clamp(3rem, 6vw, 5rem);
+
+      /* Typography Scale */
+      --font-size-sm: clamp(0.875rem, 0.8rem + 0.375vw, 1rem);
+      --font-size-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+      --font-size-h2: clamp(1.5rem, 1.2rem + 1.5vw, 2.25rem);
+      --font-size-h1: clamp(2rem, 1.5rem + 2.5vw, 3.5rem);
+
+      /* Left Panel Theme (Light) */
+      --panel-light-bg: #F8FAFC;
+      --panel-light-text: #0F172A;
+      --panel-light-muted: #475569;
+      --panel-light-border: #E2E8F0;
+      --panel-light-focus: #2563EB;
+
+      /* Right Panel Theme (Dark) */
+      --panel-dark-bg: #0F172A;
+      --panel-dark-text: #F8FAFC;
+      --panel-dark-muted: #94A3B8;
+      --panel-dark-border: #1E293B;
+      --panel-dark-focus: #60A5FA;
+
+      /* Brand Accent Colors */
+      --color-primary: #2563EB;
+      --color-primary-hover: #1D4ED8;
+      --radius-m: 8px;
+      --radius-l: 16px;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.5;
+      color: var(--panel-light-text);
+      background-color: var(--panel-light-bg);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ==========================================================================
+       SPLIT-SCREEN LAYOUT ENGINE
+       ========================================================================== */
+    .split-screen-container {
+      display: grid;
+      grid-template-columns: 1fr;
+      min-height: 100dvh;
+      width: 100%;
+    }
+
+    /* Desktop Viewport Split (768px+) */
+    @media (min-width: 768px) {
+      .split-screen-container--50-50 {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .split-screen-container--60-40 {
+        grid-template-columns: 6fr 4fr;
+      }
+
+      .split-screen-container--40-60 {
+        grid-template-columns: 4fr 6fr;
+      }
+    }
+
+    /* Panel Base Component */
+    .split-panel {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: var(--space-l);
+      position: relative;
+    }
+
+    /* Light Theme Panel */
+    .split-panel--light {
+      background-color: var(--panel-light-bg);
+      color: var(--panel-light-text);
+    }
+
+    /* Dark Theme Panel */
+    .split-panel--dark {
+      background-color: var(--panel-dark-bg);
+      color: var(--panel-dark-text);
+    }
+
+    /* Sticky Scroll Variant for Long Pages */
+    @media (min-width: 768px) {
+      .split-panel--sticky {
+        position: sticky;
+        top: 0;
+        height: 100dvh;
+        overflow-y: auto;
+      }
+    }
+
+    /* ==========================================================================
+       INTERNAL TYPOGRAPHY & COMPONENTS
+       ========================================================================== */
+    .panel-content {
+      width: 100%;
+      max-width: 560px;
+      margin-inline: auto;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      border-radius: 9999px;
+      margin-bottom: var(--space-s);
+    }
+
+    .split-panel--light .badge {
+      background-color: #DBEAFE;
+      color: #1E40AF;
+    }
+
+    .split-panel--dark .badge {
+      background-color: #1E293B;
+      color: #93C5FD;
+      border: 1px solid #334155;
+    }
+
+    h1, h2 {
+      font-size: var(--font-size-h1);
+      line-height: 1.15;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: var(--space-m);
+    }
+
+    .subtitle {
+      font-size: var(--font-size-base);
+      margin-bottom: var(--space-l);
+      max-width: 50ch;
+    }
+
+    .split-panel--light .subtitle {
+      color: var(--panel-light-muted);
+    }
+
+    .split-panel--dark .subtitle {
+      color: var(--panel-dark-muted);
+    }
+
+    /* Form Controls & High-Contrast Focus States */
+    .form-group {
+      margin-bottom: var(--space-m);
+    }
+
+    label {
+      display: block;
+      font-size: var(--font-size-sm);
+      font-weight: 600;
+      margin-bottom: var(--space-xs);
+    }
+
+    input[type="email"],
+    input[type="password"],
+    input[type="text"] {
+      width: 100%;
+      padding: 0.875rem 1rem;
+      font-size: var(--font-size-base);
+      border-radius: var(--radius-m);
+      border: 1px solid var(--panel-light-border);
+      background-color: #FFFFFF;
+      color: var(--panel-light-text);
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    /* WCAG AA High Contrast Focus Ring */
+    .split-panel--light input:focus-visible,
+    .split-panel--light button:focus-visible {
+      outline: 3px solid var(--panel-light-focus);
+      outline-offset: 2px;
+    }
+
+    .split-panel--dark button:focus-visible,
+    .split-panel--dark a:focus-visible {
+      outline: 3px solid var(--panel-dark-focus);
+      outline-offset: 2px;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      min-height: 48px; /* 48px Touch Target Minimum */
+      padding: 0.875rem 1.5rem;
+      font-size: var(--font-size-base);
+      font-weight: 600;
+      color: #FFFFFF;
+      background-color: var(--color-primary);
+      border: none;
+      border-radius: var(--radius-m);
+      cursor: pointer;
+      text-decoration: none;
+      transition: background-color 0.15s ease;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--color-primary-hover);
+    }
+
+    /* Visual Media / Terminal Card Mockup */
+    .showcase-card {
+      background-color: #1E293B;
+      border: 1px solid #334155;
+      border-radius: var(--radius-l);
+      padding: var(--space-m);
+      color: #E2E8F0;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+    }
+
+    .showcase-card pre {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: var(--font-size-sm);
+      line-height: 1.6;
+      overflow-x: auto;
+    }
+
+    /* ==========================================================================
+       RESPONSIVE MOBILE STACKING (Below 768px)
+       ========================================================================== */
+    @media (max-width: 767px) {
+      .split-panel {
+        padding: var(--space-m) var(--space-s);
+      }
+
+      /* Stack action panel first on mobile viewports */
+      .split-panel--action-first {
+        order: -1;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!--
+    SPLIT-SCREEN LAYOUT CONTAINER
+    Modifier classes available:
+    - split-screen-container--50-50 (Equal split)
+    - split-screen-container--60-40 (Action heavy)
+    - split-screen-container--40-60 (Media heavy)
+  -->
+  <main class="split-screen-container split-screen-container--50-50">
+
+    <!-- LEFT PANEL: Light Action / Conversion Panel -->
+    <section class="split-panel split-panel--light split-panel--action-first" aria-labelledby="form-heading">
+      <div class="panel-content">
+        <span class="badge">Coast Platform</span>
+        <h1 id="form-heading">Sign in to your workspace</h1>
+        <p class="subtitle">Enter your corporate credentials to access real-time analytics and infrastructure controls.</p>
+
+        <form action="#" method="POST" novalidate>
+          <div class="form-group">
+            <label for="work-email">Work Email Address</label>
+            <input type="email" id="work-email" name="email" required placeholder="alex@company.com" autocomplete="email">
+          </div>
+
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" required autocomplete="current-password">
+          </div>
+
+          <button type="submit" class="btn-primary">Sign In to Dashboard</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- RIGHT PANEL: Dark Media / Social Proof Panel -->
+    <section class="split-panel split-panel--dark" aria-labelledby="media-heading">
+      <div class="panel-content">
+        <span class="badge">Live Infrastructure</span>
+        <h2 id="media-heading">Trusted by high-growth engineering teams</h2>
+        <p class="subtitle">Process millions of requests per second with built-in sub-millisecond edge routing.</p>
+
+        <div class="showcase-card">
+          <pre><code>// Live API Gateway Config
+import { EdgeRouter } from '@coast/gateway';
+
+export default new EdgeRouter({
+  region: 'us-east-1',
+  rateLimit: 10000,
+  tls: 'strict'
+});</code></pre>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+</body>
+</html>
