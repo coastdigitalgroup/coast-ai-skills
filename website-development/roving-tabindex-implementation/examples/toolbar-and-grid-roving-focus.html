@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Roving Tabindex Implementation - Before & After Example</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --card-border: #334155;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent-blue: #38bdf8;
+      --accent-green: #4ade80;
+      --accent-red: #f87171;
+      --focus-ring: #0284c7;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg);
+      color: var(--text-main);
+      padding: 2rem;
+      line-height: 1.5;
+    }
+
+    h1, h2, h3 {
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    p {
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+      font-size: 0.95rem;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 2.5rem;
+    }
+
+    .demo-card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.6rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.75rem;
+    }
+
+    .badge-bad {
+      background-color: rgba(248, 113, 113, 0.2);
+      color: var(--accent-red);
+      border: 1px solid rgba(248, 113, 113, 0.4);
+    }
+
+    .badge-good {
+      background-color: rgba(74, 222, 128, 0.2);
+      color: var(--accent-green);
+      border: 1px solid rgba(74, 222, 128, 0.4);
+    }
+
+    /* Toolbar Styling */
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      background: #0f172a;
+      padding: 0.75rem;
+      border-radius: 0.5rem;
+      border: 1px solid var(--card-border);
+    }
+
+    .toolbar-button {
+      background: #1e293b;
+      color: var(--text-main);
+      border: 1px solid #475569;
+      padding: 0.5rem 0.85rem;
+      border-radius: 0.375rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s ease, border-color 0.15s ease;
+    }
+
+    .toolbar-button:hover:not(:disabled) {
+      background: #334155;
+      border-color: var(--accent-blue);
+    }
+
+    .toolbar-button:disabled,
+    .toolbar-button[aria-disabled="true"] {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    /* Standard WCAG Focus visible styling */
+    .toolbar-button:focus-visible {
+      outline: 2px solid var(--accent-blue);
+      outline-offset: 2px;
+    }
+
+    /* Dynamic Chip Grid */
+    .grid-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 0.75rem;
+      background: #0f172a;
+      padding: 0.75rem;
+      border-radius: 0.5rem;
+      border: 1px solid var(--card-border);
+      margin-top: 1rem;
+    }
+
+    .grid-item {
+      background: #1e293b;
+      color: var(--text-main);
+      border: 1px solid #475569;
+      padding: 0.75rem;
+      border-radius: 0.375rem;
+      text-align: center;
+      font-size: 0.875rem;
+      cursor: pointer;
+    }
+
+    .grid-item:focus-visible {
+      outline: 2px solid var(--accent-green);
+      outline-offset: 2px;
+    }
+
+    .log-panel {
+      margin-top: 1rem;
+      background: #090d16;
+      border: 1px solid #1e293b;
+      border-radius: 0.375rem;
+      padding: 0.75rem;
+      font-family: monospace;
+      font-size: 0.8rem;
+      color: var(--accent-blue);
+      max-height: 120px;
+      overflow-y: auto;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <h1>Roving Tabindex Focus Management</h1>
+      <p>Demonstration of composite widget accessibility before and after applying the roving tabindex pattern.</p>
+    </header>
+
+    <!-- BEFORE REFACTOR -->
+    <section class="demo-card">
+      <span class="badge badge-bad">Before: Default Tabstop Explosion</span>
+      <h2>Unmanaged Action Toolbar</h2>
+      <p>Every single button has default <code>tabindex="0"</code>. Keyboard users are forced to press <kbd>Tab</kbd> through <strong>every individual button</strong> to pass through the toolbar.</p>
+
+      <div class="toolbar" id="toolbar-before" aria-label="Formatting tools (unmanaged)">
+        <button class="toolbar-button" type="button">Bold</button>
+        <button class="toolbar-button" type="button">Italic</button>
+        <button class="toolbar-button" type="button">Underline</button>
+        <button class="toolbar-button" type="button">Strikethrough</button>
+        <button class="toolbar-button" type="button">Align Left</button>
+        <button class="toolbar-button" type="button">Align Center</button>
+        <button class="toolbar-button" type="button">Align Right</button>
+        <button class="toolbar-button" type="button">Insert Link</button>
+        <button class="toolbar-button" type="button">Clear Formatting</button>
+      </div>
+    </section>
+
+    <!-- AFTER REFACTOR -->
+    <section class="demo-card">
+      <span class="badge badge-good">After: Single Tab Stop + Arrow Key Roving</span>
+      <h2>Managed Composite Toolbar</h2>
+      <p>Presents a <strong>single Tab stop</strong>. Press <kbd>Tab</kbd> to enter/exit. Use <kbd>←</kbd> <kbd>→</kbd> <kbd>Home</kbd> <kbd>End</kbd> to navigate buttons seamlessly inside.</p>
+
+      <div class="toolbar" role="toolbar" id="toolbar-after" aria-label="Formatting tools (roving tabindex)">
+        <button class="toolbar-button" type="button" data-action="bold">Bold</button>
+        <button class="toolbar-button" type="button" data-action="italic">Italic</button>
+        <button class="toolbar-button" type="button" data-action="underline" disabled>Underline (Disabled)</button>
+        <button class="toolbar-button" type="button" data-action="strikethrough">Strikethrough</button>
+        <button class="toolbar-button" type="button" data-action="align-left">Align Left</button>
+        <button class="toolbar-button" type="button" data-action="align-center">Align Center</button>
+        <button class="toolbar-button" type="button" data-action="align-right">Align Right</button>
+        <button class="toolbar-button" type="button" data-action="insert-link">Insert Link</button>
+        <button class="toolbar-button" type="button" id="delete-btn" data-action="delete-item">Delete Next Item</button>
+      </div>
+
+      <div class="log-panel" id="log-toolbar">Focus Event Log: Idle</div>
+    </section>
+
+    <!-- 2D GRID EXAMPLE -->
+    <section class="demo-card">
+      <span class="badge badge-good">2D Matrix Spatial Roving Focus</span>
+      <h2>Interactive Media/Tag Grid</h2>
+      <p>Press <kbd>Tab</kbd> into the grid. Use 4-way directional keys (<kbd>↑</kbd> <kbd>↓</kbd> <kbd>←</kbd> <kbd>→</kbd>) to navigate in 2D space across rows and columns.</p>
+
+      <div class="grid-container" role="grid" id="grid-demo" aria-label="Tag Grid">
+        <div role="gridcell" class="grid-item" tabindex="0">Item 1</div>
+        <div role="gridcell" class="grid-item" tabindex="-1">Item 2</div>
+        <div role="gridcell" class="grid-item" tabindex="-1">Item 3</div>
+        <div role="gridcell" class="grid-item" tabindex="-1">Item 4</div>
+        <div role="gridcell" class="grid-item" tabindex="-1">Item 5</div>
+        <div role="gridcell" class="grid-item" tabindex="-1">Item 6</div>
+        <div role="gridcell" class="grid-item" tabindex="-1">Item 7</div>
+        <div role="gridcell" class="grid-item" tabindex="-1">Item 8</div>
+      </div>
+    </section>
+
+  </div>
+
+  <script type="module">
+    import { RovingTabindexManager } from '../templates/roving-tabindex-manager.js';
+
+    const logToolbar = document.getElementById('log-toolbar');
+
+    function appendLog(msg) {
+      const time = new Date().toLocaleTimeString();
+      logToolbar.textContent = `[${time}] ${msg}\n` + logToolbar.textContent;
+    }
+
+    // Initialize Roving Tabindex for Managed Toolbar
+    const toolbarManager = new RovingTabindexManager({
+      container: document.getElementById('toolbar-after'),
+      itemSelector: '.toolbar-button',
+      orientation: 'horizontal',
+      wrap: true
+    });
+
+    document.getElementById('toolbar-after').addEventListener('focusin', (e) => {
+      if (e.target.classList.contains('toolbar-button')) {
+        appendLog(`Focused: ${e.target.textContent.trim()} (tabindex="${e.target.getAttribute('tabindex')}")`);
+      }
+    });
+
+    // Dynamic Mutation Test: Handle 'Delete Next Item' button
+    const deleteBtn = document.getElementById('delete-btn');
+    deleteBtn.addEventListener('click', () => {
+      const buttons = Array.from(document.querySelectorAll('#toolbar-after .toolbar-button'));
+      const lastNormalBtn = buttons[buttons.length - 2];
+      if (lastNormalBtn && lastNormalBtn !== deleteBtn) {
+        appendLog(`Dynamically removing button: ${lastNormalBtn.textContent}`);
+        lastNormalBtn.remove();
+      }
+    });
+
+    // Initialize Roving Tabindex for 2D Grid
+    const gridManager = new RovingTabindexManager({
+      container: document.getElementById('grid-demo'),
+      itemSelector: '.grid-item',
+      orientation: 'grid',
+      columns: 4,
+      wrap: true
+    });
+  </script>
+</body>
+</html>
