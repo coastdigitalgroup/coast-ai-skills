@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Masonry Grid Layout System - Accessible Specification Template</title>
+  <style>
+    /* CSS Custom Properties / Design Tokens */
+    :root {
+      --bg-surface: #0f172a;
+      --bg-card: #1e293b;
+      --bg-card-hover: #334155;
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --brand-primary: #38bdf8;
+      --brand-focus: #f43f5e;
+      --border-subtle: rgba(255, 255, 255, 0.1);
+
+      --space-xs: 8px;
+      --space-sm: 12px;
+      --space-md: 16px;
+      --space-lg: 24px;
+      --space-xl: 32px;
+
+      --radius-card: 16px;
+      --radius-btn: 8px;
+
+      --font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    /* Base Reset & Typography */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-surface);
+      color: var(--text-primary);
+      font-family: var(--font-family);
+      line-height: 1.5;
+      padding: var(--space-xl) var(--space-md);
+    }
+
+    header {
+      max-width: 1200px;
+      margin: 0 auto var(--space-xl) auto;
+    }
+
+    h1 {
+      font-size: clamp(1.75rem, 4vw, 2.5rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: var(--space-xs);
+    }
+
+    p.subtitle {
+      color: var(--text-secondary);
+      font-size: 1.125rem;
+      max-width: 65ch;
+    }
+
+    /* Layout Toggle Controls */
+    .controls-bar {
+      max-width: 1200px;
+      margin: 0 auto var(--space-lg) auto;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-md);
+      padding: var(--space-md);
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-card);
+    }
+
+    .mode-switch {
+      display: flex;
+      gap: var(--space-xs);
+    }
+
+    .btn-toggle {
+      background-color: transparent;
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      padding: var(--space-xs) var(--space-md);
+      border-radius: var(--radius-btn);
+      font-weight: 600;
+      cursor: pointer;
+      min-height: 44px; /* WCAG 2.5.8 Touch Target Floor */
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.2s ease, border-color 0.2s ease;
+    }
+
+    .btn-toggle[aria-pressed="true"] {
+      background-color: var(--brand-primary);
+      color: #0284c7;
+      color: #000;
+      border-color: var(--brand-primary);
+    }
+
+    .btn-toggle:focus-visible {
+      outline: 3px solid var(--brand-focus);
+      outline-offset: 2px;
+    }
+
+    /* Masonry Outer Container */
+    .masonry-shell {
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* Strategy 1: JS Flex Column Distribution (Default for Interactive) */
+    .masonry-flex-container {
+      display: flex;
+      gap: var(--space-lg);
+      width: 100%;
+    }
+
+    .masonry-flex-column {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-lg);
+      flex: 1;
+      min-width: 0;
+    }
+
+    /* Strategy 2: CSS Multi-Column (Toggled) */
+    .masonry-css-columns {
+      column-count: 3;
+      column-gap: var(--space-lg);
+      width: 100%;
+    }
+
+    @media (max-width: 1024px) {
+      .masonry-css-columns { column-count: 2; }
+    }
+    @media (max-width: 640px) {
+      .masonry-css-columns { column-count: 1; }
+    }
+
+    .masonry-css-columns .masonry-card {
+      break-inside: avoid;
+      margin-bottom: var(--space-lg);
+    }
+
+    /* Generic Masonry Card Design */
+    .masonry-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-card);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .masonry-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 24px -10px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Media Aspect Ratios & Placeholders */
+    .card-media {
+      width: 100%;
+      position: relative;
+      background-color: #334155;
+      overflow: hidden;
+    }
+
+    .card-media img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* Explicit Aspect Ratio Utilities (CLS Prevention) */
+    .aspect-portrait { aspect-ratio: 3 / 4; }
+    .aspect-landscape { aspect-ratio: 16 / 9; }
+    .aspect-square { aspect-ratio: 1 / 1; }
+    .aspect-tall { aspect-ratio: 9 / 16; }
+
+    /* Card Body Content */
+    .card-body {
+      padding: var(--space-md);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs);
+      flex-grow: 1;
+    }
+
+    .card-tag {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--brand-primary);
+    }
+
+    .card-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      line-height: 1.3;
+    }
+
+    .card-text {
+      color: var(--text-secondary);
+      font-size: 0.9375rem;
+      line-height: 1.4;
+    }
+
+    /* Inner Card Actions (Interactive) */
+    .card-actions {
+      margin-top: var(--space-sm);
+      padding-top: var(--space-xs);
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .action-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-size: 0.875rem;
+      padding: var(--space-xs);
+      border-radius: var(--radius-btn);
+      min-height: 44px; /* WCAG Touch Target */
+      min-width: 44px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-xs);
+      transition: color 0.2s ease, background-color 0.2s ease;
+    }
+
+    .action-btn:hover {
+      color: var(--text-primary);
+      background-color: var(--bg-card-hover);
+    }
+
+    .action-btn:focus-visible {
+      outline: 2px solid var(--brand-focus);
+      outline-offset: -2px;
+    }
+
+    /* Screen Reader Live Region */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Masonry Grid Layout System</h1>
+    <p class="subtitle">An accessible, responsive masonry blueprint demonstrating zero-gap visual packing and proper keyboard focus order.</p>
+  </header>
+
+  <!-- Mode Control Switcher -->
+  <div class="controls-bar">
+    <div>
+      <strong style="font-size: 0.9375rem;">Layout Architecture Mode:</strong>
+    </div>
+    <div class="mode-switch" role="group" aria-label="Layout Architecture Selection">
+      <button id="btn-js-mode" class="btn-toggle" aria-pressed="true">
+        JS Shortest-Column (Interactive Safe)
+      </button>
+      <button id="btn-css-mode" class="btn-toggle" aria-pressed="false">
+        CSS Multi-Column (Pure Visual)
+      </button>
+    </div>
+  </div>
+
+  <div id="live-announcer" class="sr-only" aria-live="polite"></div>
+
+  <!-- Main Masonry Shell -->
+  <main class="masonry-shell">
+    <div id="masonry-root" class="masonry-flex-container">
+
+      <!-- Card Item 1 -->
+      <article class="masonry-card" tabindex="0" aria-labelledby="title-1">
+        <div class="card-media aspect-portrait">
+          <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='400' viewBox='0 0 300 400'><rect width='100%' height='100%' fill='%231e293b'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='%2338bdf8' font-size='20'>3:4 Portrait</text></svg>" alt="Portrait placeholder graphic" />
+        </div>
+        <div class="card-body">
+          <span class="card-tag">Photography</span>
+          <h2 id="title-1" class="card-title">Alpine Dusk Expedition</h2>
+          <p class="card-text">Capturing the fading crimson light across high-altitude mountain passes.</p>
+          <div class="card-actions">
+            <button class="action-btn" aria-label="Bookmark Alpine Dusk Expedition">
+              🔖 <span>Save</span>
+            </button>
+            <button class="action-btn" aria-label="Share Alpine Dusk Expedition">
+              🔗 <span>Share</span>
+            </button>
+          </div>
+        </div>
+      </article>
+
+      <!-- Card Item 2 -->
+      <article class="masonry-card" tabindex="0" aria-labelledby="title-2">
+        <div class="card-media aspect-landscape">
+          <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='225' viewBox='0 0 400 225'><rect width='100%' height='100%' fill='%231e293b'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='%2338bdf8' font-size='20'>16:9 Landscape</text></svg>" alt="Landscape placeholder graphic" />
+        </div>
+        <div class="card-body">
+          <span class="card-tag">Architecture</span>
+          <h2 id="title-2" class="card-title">Symmetrical Horizons</h2>
+          <p class="card-text">Exploring modern brutalist facades in central Copenhagen.</p>
+          <div class="card-actions">
+            <button class="action-btn" aria-label="Bookmark Symmetrical Horizons">
+              🔖 <span>Save</span>
+            </button>
+            <button class="action-btn" aria-label="Share Symmetrical Horizons">
+              🔗 <span>Share</span>
+            </button>
+          </div>
+        </div>
+      </article>
+
+      <!-- Card Item 3 -->
+      <article class="masonry-card" tabindex="0" aria-labelledby="title-3">
+        <div class="card-body">
+          <span class="card-tag">Thought Piece</span>
+          <h2 id="title-3" class="card-title">The Death of Uniform Grids</h2>
+          <p class="card-text">Why rigid square viewports fail to capture the fluid dynamic nature of modern web content editorial experiences.</p>
+          <div class="card-actions">
+            <button class="action-btn" aria-label="Bookmark The Death of Uniform Grids">
+              🔖 <span>Save</span>
+            </button>
+            <button class="action-btn" aria-label="Share The Death of Uniform Grids">
+              🔗 <span>Share</span>
+            </button>
+          </div>
+        </div>
+      </article>
+
+      <!-- Card Item 4 -->
+      <article class="masonry-card" tabindex="0" aria-labelledby="title-4">
+        <div class="card-media aspect-tall">
+          <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='225' height='400' viewBox='0 0 225 400'><rect width='100%' height='100%' fill='%231e293b'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='%2338bdf8' font-size='20'>9:16 Vertical</text></svg>" alt="Vertical panorama placeholder graphic" />
+        </div>
+        <div class="card-body">
+          <span class="card-tag">Urban Exploration</span>
+          <h2 id="title-4" class="card-title">Vertical Monoliths</h2>
+          <p class="card-text">Looking straight up into the glass canyon of Financial District skyscrapers.</p>
+          <div class="card-actions">
+            <button class="action-btn" aria-label="Bookmark Vertical Monoliths">
+              🔖 <span>Save</span>
+            </button>
+            <button class="action-btn" aria-label="Share Vertical Monoliths">
+              🔗 <span>Share</span>
+            </button>
+          </div>
+        </div>
+      </article>
+
+      <!-- Card Item 5 -->
+      <article class="masonry-card" tabindex="0" aria-labelledby="title-5">
+        <div class="card-media aspect-square">
+          <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300' viewBox='0 0 300 300'><rect width='100%' height='100%' fill='%231e293b'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='%2338bdf8' font-size='20'>1:1 Square</text></svg>" alt="Square placeholder graphic" />
+        </div>
+        <div class="card-body">
+          <span class="card-tag">Minimalism</span>
+          <h2 id="title-5" class="card-title">Solitude in White</h2>
+          <p class="card-text">Minimalist snowscapes from Scandinavian winter wanderings.</p>
+          <div class="card-actions">
+            <button class="action-btn" aria-label="Bookmark Solitude in White">
+              🔖 <span>Save</span>
+            </button>
+            <button class="action-btn" aria-label="Share Solitude in White">
+              🔗 <span>Share</span>
+            </button>
+          </div>
+        </div>
+      </article>
+
+    </div>
+  </main>
+
+  <script>
+    /**
+     * Masonry Layout Engine
+     * Handles dynamic column distribution and mode toggling.
+     */
+    class AccessibleMasonry {
+      constructor(rootElement) {
+        this.root = rootElement;
+        this.rawCards = Array.from(this.root.querySelectorAll('.masonry-card'));
+        this.gap = 24;
+        this.mode = 'js'; // 'js' | 'css'
+
+        this.btnJs = document.getElementById('btn-js-mode');
+        this.btnCss = document.getElementById('btn-css-mode');
+        this.announcer = document.getElementById('live-announcer');
+
+        this.init();
+      }
+
+      init() {
+        this.bindEvents();
+        this.render();
+      }
+
+      bindEvents() {
+        this.btnJs.addEventListener('click', () => this.switchMode('js'));
+        this.btnCss.addEventListener('click', () => this.switchMode('css'));
+        window.addEventListener('resize', this.debounce(() => {
+          if (this.mode === 'js') this.renderJSColumns();
+        }, 150));
+      }
+
+      switchMode(newMode) {
+        if (this.mode === newMode) return;
+        this.mode = newMode;
+
+        this.btnJs.setAttribute('aria-pressed', newMode === 'js');
+        this.btnCss.setAttribute('aria-pressed', newMode === 'css');
+
+        this.announcer.textContent = `Switched layout mode to ${newMode === 'js' ? 'JavaScript Shortest-Column' : 'CSS Multi-Column'}`;
+
+        this.render();
+      }
+
+      getColumnCount() {
+        const width = window.innerWidth;
+        if (width >= 1024) return 3;
+        if (width >= 640) return 2;
+        return 1;
+      }
+
+      render() {
+        if (this.mode === 'css') {
+          this.renderCSSColumns();
+        } else {
+          this.renderJSColumns();
+        }
+      }
+
+      renderCSSColumns() {
+        this.root.className = 'masonry-css-columns';
+        this.root.innerHTML = '';
+        this.rawCards.forEach(card => this.root.appendChild(card));
+      }
+
+      renderJSColumns() {
+        this.root.className = 'masonry-flex-container';
+        this.root.innerHTML = '';
+
+        const targetCols = this.getColumnCount();
+        const colTracks = [];
+
+        for (let i = 0; i < targetCols; i++) {
+          const col = document.createElement('div');
+          col.className = 'masonry-flex-column';
+          this.root.appendChild(col);
+          colTracks.push(col);
+        }
+
+        // Shortest-column packing loop
+        this.rawCards.forEach(card => {
+          if (colTracks.length === 1) {
+            colTracks[0].appendChild(card);
+            return;
+          }
+
+          let shortest = colTracks[0];
+          let minH = shortest.offsetHeight;
+
+          for (let i = 1; i < colTracks.length; i++) {
+            const h = colTracks[i].offsetHeight;
+            if (h < minH) {
+              minH = h;
+              shortest = colTracks[i];
+            }
+          }
+
+          shortest.appendChild(card);
+        });
+      }
+
+      debounce(func, wait) {
+        let timeout;
+        return (...args) => {
+          clearTimeout(timeout);
+          timeout = setTimeout(() => func.apply(this, args), wait);
+        };
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const root = document.getElementById('masonry-root');
+      if (root) new AccessibleMasonry(root);
+    });
+  </script>
+</body>
+</html>
