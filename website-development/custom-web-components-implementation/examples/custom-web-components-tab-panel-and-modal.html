@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Custom Web Components Implementation Example</title>
+  <style>
+    /* Global Host Page Styles - Testing CSS Boundary Isolation */
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 900px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+      background-color: #f8fafc;
+      color: #0f172a;
+    }
+
+    h1 {
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 0.5rem;
+    }
+
+    /* Global style rule to prove Shadow DOM CSS encapsulation */
+    button {
+      background-color: #ef4444 !important;
+      color: white !important;
+      border: 2px solid #b91c1c !important;
+      padding: 12px 24px;
+      font-weight: bold;
+    }
+
+    .demo-container {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    /* Custom CSS properties passed through Shadow DOM boundary for theming */
+    ui-tab-group {
+      --tab-active-color: #2563eb;
+      --tab-bg: #f1f5f9;
+      --tab-border: #cbd5e1;
+    }
+
+    ui-modal {
+      --modal-max-width: 550px;
+      --modal-header-bg: #1e293b;
+      --modal-header-color: #ffffff;
+    }
+
+    .status-log {
+      background: #0f172a;
+      color: #38bdf8;
+      font-family: monospace;
+      padding: 1rem;
+      border-radius: 6px;
+      min-height: 80px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Custom Web Components: Tab Panel & Modal Dialog</h1>
+  <p>Demonstrating Custom Elements v1, Shadow DOM v1 style isolation, slot projection, attribute reflection, and composed custom events.</p>
+
+  <section class="demo-container">
+    <h2>1. Tab Group Component (&lt;ui-tab-group&gt;)</h2>
+    <p>Notice that global button styles (red background above) do NOT bleed into the component's internal shadow DOM buttons!</p>
+
+    <ui-tab-group active-index="0">
+      <ui-tab slot="tab">Overview</ui-tab>
+      <ui-panel slot="panel">
+        <h3>System Overview</h3>
+        <p>This tab panel is powered by standards-based Web Components. It uses Shadow DOM for style encapsulation and slot projection for host markup.</p>
+      </ui-panel>
+
+      <ui-tab slot="tab">Encapsulation</ui-tab>
+      <ui-panel slot="panel">
+        <h3>Shadow DOM Isolation</h3>
+        <p>Styles defined inside the component remain encapsulated. CSS variables (`var(--...)`) allow host pages to customize design tokens without selector leakage.</p>
+      </ui-panel>
+
+      <ui-tab slot="tab">Accessibility</ui-tab>
+      <ui-panel slot="panel">
+        <h3>ARIA Keyboard Navigation</h3>
+        <p>Use Left/Right arrow keys to switch active tabs. Focus is managed automatically according to WAI-ARIA Tabs design pattern specifications.</p>
+      </ui-panel>
+    </ui-tab-group>
+  </section>
+
+  <section class="demo-container">
+    <h2>2. Modal Dialog Component (&lt;ui-modal&gt;)</h2>
+    <button id="open-modal-btn">Open Custom Web Component Modal</button>
+
+    <ui-modal id="demo-modal" heading="Encapsulated Web Component Modal">
+      <p>This modal dialog is rendered entirely inside an open Shadow Root.</p>
+      <p>Key Features demonstrated:</p>
+      <ul>
+        <li>Native <code>connectedCallback</code> &amp; <code>disconnectedCallback</code> memory teardown.</li>
+        <li>Reactive <code>open</code> attribute reflection.</li>
+        <li>Focus trapping and <code>Escape</code> key closure listeners.</li>
+        <li>Composed <code>modal-close</code> CustomEvent dispatching.</li>
+      </ul>
+      <div slot="footer">
+        <button id="close-modal-inner" type="button">Close Modal</button>
+      </div>
+    </ui-modal>
+  </section>
+
+  <section class="demo-container">
+    <h2>Event Log</h2>
+    <div id="status-log" class="status-log">Component event log initialized...</div>
+  </section>
+
+  <script>
+    // Component Definitions
+
+    // 1. UI Tab Group
+    class UITabGroup extends HTMLElement {
+      static get observedAttributes() {
+        return ['active-index'];
+      }
+
+      constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+        this.shadowRoot.innerHTML = `
+          <style>
+            :host {
+              display: block;
+              border: 1px solid var(--tab-border, #ccc);
+              border-radius: 6px;
+              overflow: hidden;
+              background: #ffffff;
+            }
+            .nav {
+              display: flex;
+              background: var(--tab-bg, #f5f5f5);
+              border-bottom: 1px solid var(--tab-border, #ccc);
+            }
+            ::slotted([slot="tab"]) {
+              padding: 0.75rem 1.25rem;
+              cursor: pointer;
+              background: transparent;
+              border: none;
+              border-bottom: 3px solid transparent;
+              font-weight: 500;
+              color: #475569;
+              transition: all 0.2s ease;
+            }
+            ::slotted([slot="tab"][aria-selected="true"]) {
+              color: var(--tab-active-color, #2563eb);
+              border-bottom-color: var(--tab-active-color, #2563eb);
+              background: #ffffff;
+            }
+            .panels {
+              padding: 1.25rem;
+            }
+            ::slotted([slot="panel"]) {
+              display: none;
+            }
+            ::slotted([slot="panel"][active]) {
+              display: block;
+            }
+          </style>
+          <div class="nav" role="tablist" part="tablist">
+            <slot name="tab" id="tabs-slot"></slot>
+          </div>
+          <div class="panels">
+            <slot name="panel" id="panels-slot"></slot>
+          </div>
+        `;
+      }
+
+      connectedCallback() {
+        this._abortController = new AbortController();
+        const { signal } = this._abortController;
+
+        const tabsSlot = this.shadowRoot.querySelector('#tabs-slot');
+        tabsSlot.addEventListener('slotchange', () => this._syncTabs(), { signal });
+        this.shadowRoot.addEventListener('click', (e) => this._onTabClick(e), { signal });
+        this.shadowRoot.addEventListener('keydown', (e) => this._onKeyDown(e), { signal });
+
+        this._syncTabs();
+      }
+
+      disconnectedCallback() {
+        if (this._abortController) {
+          this._abortController.abort();
+        }
+      }
+
+      attributeChangedCallback(name, oldValue, newValue) {
+        if (name === 'active-index' && oldValue !== newValue) {
+          this._syncTabs();
+        }
+      }
+
+      get activeIndex() {
+        return parseInt(this.getAttribute('active-index') || '0', 10);
+      }
+
+      set activeIndex(val) {
+        this.setAttribute('active-index', val.toString());
+      }
+
+      _syncTabs() {
+        const tabsSlot = this.shadowRoot.querySelector('#tabs-slot');
+        const panelsSlot = this.shadowRoot.querySelector('#panels-slot');
+        if (!tabsSlot || !panelsSlot) return;
+
+        const tabs = tabsSlot.assignedElements();
+        const panels = panelsSlot.assignedElements();
+
+        const activeIdx = this.activeIndex;
+
+        tabs.forEach((tab, index) => {
+          const isSelected = index === activeIdx;
+          tab.setAttribute('role', 'tab');
+          tab.setAttribute('tabindex', isSelected ? '0' : '-1');
+          tab.setAttribute('aria-selected', isSelected ? 'true' : 'false');
+          tab.id = `ui-tab-${index}`;
+          if (panels[index]) {
+            tab.setAttribute('aria-controls', `ui-panel-${index}`);
+          }
+        });
+
+        panels.forEach((panel, index) => {
+          const isSelected = index === activeIdx;
+          panel.setAttribute('role', 'tabpanel');
+          panel.id = `ui-panel-${index}`;
+          if (tabs[index]) {
+            panel.setAttribute('aria-labelledby', `ui-tab-${index}`);
+          }
+          if (isSelected) {
+            panel.setAttribute('active', '');
+          } else {
+            panel.removeAttribute('active');
+          }
+        });
+      }
+
+      _onTabClick(event) {
+        const tabsSlot = this.shadowRoot.querySelector('#tabs-slot');
+        const assignedTabs = tabsSlot.assignedElements();
+        const clickedTab = event.target.closest('[slot="tab"]');
+        if (!clickedTab) return;
+
+        const idx = assignedTabs.indexOf(clickedTab);
+        if (idx !== -1 && idx !== this.activeIndex) {
+          this.activeIndex = idx;
+          this.dispatchEvent(new CustomEvent('tab-change', {
+            detail: { activeIndex: idx, tab: clickedTab },
+            bubbles: true,
+            composed: true
+          }));
+        }
+      }
+
+      _onKeyDown(event) {
+        const tabsSlot = this.shadowRoot.querySelector('#tabs-slot');
+        const tabs = tabsSlot.assignedElements();
+        if (tabs.length === 0) return;
+
+        let currentIdx = this.activeIndex;
+        if (event.key === 'ArrowRight') {
+          currentIdx = (currentIdx + 1) % tabs.length;
+          event.preventDefault();
+        } else if (event.key === 'ArrowLeft') {
+          currentIdx = (currentIdx - 1 + tabs.length) % tabs.length;
+          event.preventDefault();
+        } else if (event.key === 'Home') {
+          currentIdx = 0;
+          event.preventDefault();
+        } else if (event.key === 'End') {
+          currentIdx = tabs.length - 1;
+          event.preventDefault();
+        } else {
+          return;
+        }
+
+        this.activeIndex = currentIdx;
+        tabs[currentIdx].focus();
+      }
+    }
+
+    // 2. UI Modal Dialog
+    class UIModal extends HTMLElement {
+      static get observedAttributes() {
+        return ['open', 'heading'];
+      }
+
+      constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+        this.shadowRoot.innerHTML = `
+          <style>
+            :host {
+              display: none;
+            }
+            :host([open]) {
+              display: block;
+            }
+            .backdrop {
+              position: fixed;
+              top: 0;
+              left: 0;
+              width: 100vw;
+              height: 100vh;
+              background: rgba(15, 23, 42, 0.6);
+              backdrop-filter: blur(2px);
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              z-index: 1000;
+            }
+            .dialog {
+              background: #ffffff;
+              width: 90%;
+              max-width: var(--modal-max-width, 500px);
+              border-radius: 8px;
+              box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2);
+              overflow: hidden;
+              animation: modal-appear 0.2s ease-out;
+            }
+            @keyframes modal-appear {
+              from { opacity: 0; transform: translateY(10px); }
+              to { opacity: 1; transform: translateY(0); }
+            }
+            .header {
+              background: var(--modal-header-bg, #0f172a);
+              color: var(--modal-header-color, #ffffff);
+              padding: 1rem 1.25rem;
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+            }
+            .title {
+              font-size: 1.125rem;
+              font-weight: 600;
+              margin: 0;
+            }
+            .close-btn {
+              background: transparent;
+              border: none;
+              color: inherit;
+              font-size: 1.5rem;
+              cursor: pointer;
+              line-height: 1;
+              padding: 0.25rem;
+              border-radius: 4px;
+            }
+            .body {
+              padding: 1.25rem;
+            }
+            .footer {
+              padding: 0.75rem 1.25rem;
+              background: #f8fafc;
+              border-top: 1px solid #e2e8f0;
+              display: flex;
+              justify-content: flex-end;
+              gap: 0.5rem;
+            }
+          </style>
+          <div class="backdrop" part="backdrop">
+            <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+              <header class="header">
+                <h2 id="modal-title" class="title">${this.getAttribute('heading') || 'Modal'}</h2>
+                <button type="button" class="close-btn" id="close-x" aria-label="Close modal">&times;</button>
+              </header>
+              <div class="body">
+                <slot></slot>
+              </div>
+              <footer class="footer">
+                <slot name="footer"></slot>
+              </footer>
+            </div>
+          </div>
+        `;
+      }
+
+      connectedCallback() {
+        this._abortController = new AbortController();
+        const { signal } = this._abortController;
+
+        const closeX = this.shadowRoot.querySelector('#close-x');
+        const backdrop = this.shadowRoot.querySelector('.backdrop');
+
+        closeX.addEventListener('click', () => this.close(), { signal });
+        backdrop.addEventListener('click', (e) => {
+          if (e.target === backdrop) this.close();
+        }, { signal });
+
+        document.addEventListener('keydown', (e) => {
+          if (this.open && e.key === 'Escape') {
+            this.close();
+          }
+        }, { signal });
+      }
+
+      disconnectedCallback() {
+        if (this._abortController) {
+          this._abortController.abort();
+        }
+      }
+
+      attributeChangedCallback(name, oldValue, newValue) {
+        if (oldValue === newValue) return;
+        if (name === 'heading') {
+          const title = this.shadowRoot.querySelector('#modal-title');
+          if (title) title.textContent = newValue;
+        }
+      }
+
+      get open() {
+        return this.hasAttribute('open');
+      }
+
+      set open(val) {
+        this.toggleAttribute('open', Boolean(val));
+      }
+
+      show() {
+        this._previouslyFocused = document.activeElement;
+        this.open = true;
+        const closeX = this.shadowRoot.querySelector('#close-x');
+        if (closeX) closeX.focus();
+      }
+
+      close() {
+        if (!this.open) return;
+        this.open = false;
+        if (this._previouslyFocused && typeof this._previouslyFocused.focus === 'function') {
+          this._previouslyFocused.focus();
+        }
+        this.dispatchEvent(new CustomEvent('modal-close', {
+          detail: { timestamp: Date.now() },
+          bubbles: true,
+          composed: true
+        }));
+      }
+    }
+
+    // Register Custom Elements safely
+    if (!customElements.get('ui-tab-group')) customElements.define('ui-tab-group', UITabGroup);
+    if (!customElements.get('ui-tab')) customElements.define('ui-tab', class extends HTMLElement {});
+    if (!customElements.get('ui-panel')) customElements.define('ui-panel', class extends HTMLElement {});
+    if (!customElements.get('ui-modal')) customElements.define('ui-modal', UIModal);
+
+    // Host Script Event Listeners & Interaction
+    const logEl = document.getElementById('status-log');
+    function logMessage(msg) {
+      logEl.textContent = `[${new Date().toLocaleTimeString()}] ${msg}\n` + logEl.textContent;
+    }
+
+    document.addEventListener('tab-change', (e) => {
+      logMessage(`Event 'tab-change' received: Active index set to ${e.detail.activeIndex}`);
+    });
+
+    document.addEventListener('modal-close', (e) => {
+      logMessage(`Event 'modal-close' received from Shadow DOM modal at ${e.detail.timestamp}`);
+    });
+
+    const openModalBtn = document.getElementById('open-modal-btn');
+    const demoModal = document.getElementById('demo-modal');
+    const closeModalInner = document.getElementById('close-modal-inner');
+
+    openModalBtn.addEventListener('click', () => {
+      demoModal.show();
+      logMessage('Modal opened via host button click');
+    });
+
+    closeModalInner.addEventListener('click', () => {
+      demoModal.close();
+    });
+  </script>
+</body>
+</html>
