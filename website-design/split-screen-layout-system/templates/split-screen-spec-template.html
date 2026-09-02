@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Split-Screen Layout Spec Template</title>
+  <style>
+    /* CSS Custom Properties & Design Tokens */
+    :root {
+      /* Colors */
+      --color-brand-primary: #2563eb;
+      --color-brand-hover: #1d4ed8;
+      --color-brand-focus: rgba(37, 99, 235, 0.35);
+
+      /* Primary Panel (Light Theme) */
+      --panel-primary-bg: #ffffff;
+      --panel-primary-text: #0f172a;
+      --panel-primary-muted: #475569;
+      --panel-primary-border: #e2e8f0;
+
+      /* Supporting Panel (Dark Theme) */
+      --panel-secondary-bg: #0f172a;
+      --panel-secondary-text: #f8fafc;
+      --panel-secondary-muted: #94a3b8;
+      --panel-secondary-accent: #38bdf8;
+
+      /* Typography & Spacing */
+      --font-family-base: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --space-xs: 0.5rem;
+      --space-sm: 1rem;
+      --space-md: 1.5rem;
+      --space-lg: 2.5rem;
+      --space-xl: 4rem;
+
+      --border-radius-md: 0.5rem;
+      --border-radius-lg: 0.75rem;
+    }
+
+    /* Reset & Core Setup */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-family-base);
+      line-height: 1.5;
+      background-color: var(--panel-primary-bg);
+      color: var(--panel-primary-text);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Split-Screen Container Setup */
+    .split-screen-container {
+      display: grid;
+      grid-template-columns: 1fr; /* Mobile default: single column stack */
+      min-height: 100vh;
+      min-height: 100dvh; /* Dynamic Viewport Height for mobile browsers */
+    }
+
+    /* Desktop Viewport Layout (≥1024px) */
+    @media (min-width: 1024px) {
+      .split-screen-container {
+        grid-template-columns: 1fr 1fr; /* 50/50 Split */
+        height: 100dvh;
+        overflow: hidden;
+      }
+
+      /* 60/40 Split Variation */
+      .split-screen-container--60-40 {
+        grid-template-columns: 3fr 2fr;
+      }
+
+      /* 40/60 Split Variation */
+      .split-screen-container--40-60 {
+        grid-template-columns: 2fr 3fr;
+      }
+    }
+
+    /* Primary Interactive Panel (Form Side) */
+    .split-panel--primary {
+      background-color: var(--panel-primary-bg);
+      color: var(--panel-primary-text);
+      padding: var(--space-lg) var(--space-md);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      overflow-y: auto;
+    }
+
+    .split-panel__content {
+      width: 100%;
+      max-width: 440px;
+    }
+
+    .split-panel__logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--color-brand-primary);
+      margin-bottom: var(--space-lg);
+      display: inline-block;
+      text-decoration: none;
+    }
+
+    .split-panel__title {
+      font-size: clamp(1.75rem, 2.5vw, 2.25rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: var(--space-xs);
+    }
+
+    .split-panel__subtitle {
+      color: var(--panel-primary-muted);
+      margin-bottom: var(--space-lg);
+      font-size: 0.95rem;
+    }
+
+    /* Form Design & Input Styling */
+    .form-group {
+      margin-bottom: var(--space-md);
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 600;
+      margin-bottom: var(--space-xs);
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      font-size: 1rem;
+      font-family: inherit;
+      color: var(--panel-primary-text);
+      background-color: var(--panel-primary-bg);
+      border: 1px solid var(--panel-primary-border);
+      border-radius: var(--border-radius-md);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .form-input:focus-visible {
+      outline: none;
+      border-color: var(--color-brand-primary);
+      box-shadow: 0 0 0 4px var(--color-brand-focus);
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 0.875rem 1.5rem;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #ffffff;
+      background-color: var(--color-brand-primary);
+      border: none;
+      border-radius: var(--border-radius-md);
+      cursor: pointer;
+      transition: background-color 0.2s, box-shadow 0.2s;
+    }
+
+    .btn-submit:hover {
+      background-color: var(--color-brand-hover);
+    }
+
+    .btn-submit:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 4px var(--color-brand-focus);
+    }
+
+    /* Secondary Supporting Panel (Visual / Brand Side) */
+    .split-panel--secondary {
+      background-color: var(--panel-secondary-bg);
+      color: var(--panel-secondary-text);
+      padding: var(--space-lg) var(--space-md);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .testimonial-card {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: var(--border-radius-lg);
+      padding: var(--space-md);
+      margin-top: auto;
+    }
+
+    .testimonial-card__quote {
+      font-size: 1.125rem;
+      font-weight: 500;
+      line-height: 1.6;
+      margin-bottom: var(--space-sm);
+    }
+
+    .testimonial-card__author {
+      font-size: 0.875rem;
+      color: var(--panel-secondary-muted);
+    }
+
+    /* Visually Hidden Helper Class */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Split-Screen Outer Container -->
+  <div class="split-screen-container">
+
+    <!-- Primary Interactive Panel (DOM First for Accessibility) -->
+    <main class="split-panel split-panel--primary" id="main-content">
+      <div class="split-panel__content">
+        <a href="/" class="split-panel__logo">Coast AI</a>
+
+        <h1 class="split-panel__title">Sign in to workspace</h1>
+        <p class="split-panel__subtitle">Enter your credentials to access your account.</p>
+
+        <form action="#" method="POST" novalidate>
+          <div class="form-group">
+            <label for="email" class="form-label">Email address</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              class="form-input"
+              autocomplete="email"
+              required
+              aria-required="true"
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="password" class="form-label">Password</label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              class="form-input"
+              autocomplete="current-password"
+              required
+              aria-required="true"
+            >
+          </div>
+
+          <button type="submit" class="btn-submit">Sign In</button>
+        </form>
+      </div>
+    </main>
+
+    <!-- Secondary Supporting / Brand Panel -->
+    <aside class="split-panel split-panel--secondary" aria-label="Customer Highlights">
+      <div>
+        <h2 class="sr-only">Customer Feedback and Proof</h2>
+      </div>
+
+      <div class="testimonial-card">
+        <p class="testimonial-card__quote">
+          &ldquo;Switching to Coast AI completely transformed our development speed and team productivity.&rdquo;
+        </p>
+        <p class="testimonial-card__author">&mdash; Elena Rostova, CTO at CloudTech</p>
+      </div>
+    </aside>
+
+  </div>
+
+</body>
+</html>
