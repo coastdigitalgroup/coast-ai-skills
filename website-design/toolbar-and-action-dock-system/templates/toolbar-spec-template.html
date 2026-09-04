@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Toolbar and Action Dock System Template</title>
+  <style>
+    :root {
+      /* Color Tokens */
+      --tb-bg: #ffffff;
+      --tb-border: #e2e8f0;
+      --tb-text: #334155;
+      --tb-text-muted: #64748b;
+      --tb-hover-bg: #f1f5f9;
+      --tb-active-bg: #eff6ff;
+      --tb-active-text: #1d4ed8;
+      --tb-active-border: #bfdbfe;
+      --tb-focus-ring: #2563eb;
+      --tb-divider: #cbd5e1;
+
+      /* Bulk Dock Tokens */
+      --dock-bg: #0f172a;
+      --dock-text: #f8fafc;
+      --dock-border: #334155;
+      --dock-hover: #1e293b;
+      --dock-danger: #ef4444;
+      --dock-danger-hover: #dc2626;
+
+      /* Spacing & Layout */
+      --tb-radius: 8px;
+      --tb-btn-radius: 6px;
+      --tb-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+      --dock-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.25), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --tb-bg: #0f172a;
+        --tb-border: #334155;
+        --tb-text: #f1f5f9;
+        --tb-text-muted: #94a3b8;
+        --tb-hover-bg: #1e293b;
+        --tb-active-bg: #1e3a8a;
+        --tb-active-text: #93c5fd;
+        --tb-active-border: #1d4ed8;
+        --tb-focus-ring: #60a5fa;
+        --tb-divider: #334155;
+      }
+    }
+
+    /* Base Reset */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 24px; background: #f8fafc; color: #0f172a; }
+
+    /* --- Inline Formatting Toolbar --- */
+    .toolbar-container {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px;
+      background: var(--tb-bg);
+      border: 1px solid var(--tb-border);
+      border-radius: var(--tb-radius);
+      box-shadow: var(--tb-shadow);
+      flex-wrap: wrap;
+    }
+
+    .toolbar-group {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .toolbar-divider {
+      width: 1px;
+      height: 20px;
+      background: var(--tb-divider);
+      margin: 0 4px;
+    }
+
+    .tb-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      min-width: 32px;
+      height: 32px;
+      padding: 0 8px;
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: var(--tb-btn-radius);
+      color: var(--tb-text);
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      user-select: none;
+      transition: background 150ms ease, color 150ms ease, border-color 150ms ease;
+    }
+
+    .tb-btn:hover:not(:disabled) {
+      background: var(--tb-hover-bg);
+      color: var(--tb-text);
+    }
+
+    .tb-btn:focus-visible {
+      outline: 2px solid var(--tb-focus-ring);
+      outline-offset: 1px;
+      z-index: 2;
+    }
+
+    .tb-btn.is-active,
+    .tb-btn[aria-pressed="true"] {
+      background: var(--tb-active-bg);
+      color: var(--tb-active-text);
+      border-color: var(--tb-active-border);
+    }
+
+    .tb-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .tb-btn svg {
+      width: 16px;
+      height: 16px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    /* --- Floating Bulk Action Dock --- */
+    .bulk-dock-container {
+      position: fixed;
+      bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1000;
+      transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1), opacity 150ms ease;
+    }
+
+    .bulk-dock-container.is-hidden {
+      transform: translate(-50%, 32px) scale(0.95);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .bulk-dock {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 6px 12px 6px 16px;
+      background: var(--dock-bg);
+      color: var(--dock-text);
+      border: 1px solid var(--dock-border);
+      border-radius: 999px;
+      box-shadow: var(--dock-shadow);
+    }
+
+    .dock-badge-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .dock-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 22px;
+      height: 22px;
+      padding: 0 6px;
+      background: var(--tb-focus-ring);
+      color: #ffffff;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+
+    .dock-divider {
+      width: 1px;
+      height: 20px;
+      background: var(--dock-border);
+    }
+
+    .dock-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .dock-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      height: 36px;
+      padding: 0 12px;
+      background: var(--dock-hover);
+      border: 1px solid var(--dock-border);
+      border-radius: 999px;
+      color: var(--dock-text);
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 150ms ease;
+    }
+
+    .dock-btn:hover {
+      background: #334155;
+    }
+
+    .dock-btn:focus-visible {
+      outline: 2px solid var(--tb-focus-ring);
+      outline-offset: 2px;
+    }
+
+    .dock-btn-danger {
+      background: var(--dock-danger);
+      border-color: var(--dock-danger);
+      color: #ffffff;
+    }
+
+    .dock-btn-danger:hover {
+      background: var(--dock-danger-hover);
+    }
+
+    .dock-close-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      background: transparent;
+      border: none;
+      border-radius: 50%;
+      color: #94a3b8;
+      cursor: pointer;
+      transition: color 150ms ease, background 150ms ease;
+    }
+
+    .dock-close-btn:hover {
+      color: #ffffff;
+      background: var(--dock-hover);
+    }
+
+    .dock-close-btn:focus-visible {
+      outline: 2px solid var(--tb-focus-ring);
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Toolbar Spec Template</h2>
+  <p style="margin-bottom: 20px; color: var(--tb-text-muted);">
+    Demonstrating a horizontal rich text editor toolbar with roving <code>tabindex</code> and a floating contextual bulk action dock.
+  </p>
+
+  <!-- Component 1: Editor Toolbar -->
+  <div role="toolbar" aria-label="Text formatting tools" class="toolbar-container" id="editor-toolbar">
+    <!-- Group 1: Undo / Redo -->
+    <div class="toolbar-group">
+      <button type="button" tabindex="0" aria-label="Undo" class="tb-btn" title="Undo (Ctrl+Z)">
+        <svg viewBox="0 0 24 24"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg>
+      </button>
+      <button type="button" tabindex="-1" aria-label="Redo" class="tb-btn" title="Redo (Ctrl+Y)" disabled>
+        <svg viewBox="0 0 24 24"><path d="M21 7v6h-6"/><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7"/></svg>
+      </button>
+    </div>
+
+    <span class="toolbar-divider" aria-hidden="true"></span>
+
+    <!-- Group 2: Inline Formatting Toggles -->
+    <div class="toolbar-group">
+      <button type="button" tabindex="-1" aria-label="Bold" aria-pressed="true" class="tb-btn" title="Bold (Ctrl+B)">
+        <svg viewBox="0 0 24 24"><path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"/><path d="M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"/></svg>
+      </button>
+      <button type="button" tabindex="-1" aria-label="Italic" aria-pressed="false" class="tb-btn" title="Italic (Ctrl+I)">
+        <svg viewBox="0 0 24 24"><line x1="19" y1="4" x2="10" y2="4"/><line x1="14" y1="20" x2="5" y2="20"/><line x1="15" y1="4" x2="9" y2="20"/></svg>
+      </button>
+      <button type="button" tabindex="-1" aria-label="Underline" aria-pressed="false" class="tb-btn" title="Underline (Ctrl+U)">
+        <svg viewBox="0 0 24 24"><path d="M6 3v7a6 6 0 0 0 6 6 6 6 0 0 0 6-6V3"/><line x1="4" y1="21" x2="20" y2="21"/></svg>
+      </button>
+    </div>
+
+    <span class="toolbar-divider" aria-hidden="true"></span>
+
+    <!-- Group 3: Lists & Insert -->
+    <div class="toolbar-group">
+      <button type="button" tabindex="-1" aria-label="Bullet list" aria-pressed="false" class="tb-btn" title="Bullet List">
+        <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      </button>
+      <button type="button" tabindex="-1" aria-label="Insert Link" class="tb-btn" title="Insert Link">
+        <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Component 2: Floating Bulk Action Dock -->
+  <aside class="bulk-dock-container" aria-label="Selected items bulk actions">
+    <div role="toolbar" aria-label="Bulk actions toolbar" class="bulk-dock">
+      <div class="dock-badge-group">
+        <span class="dock-badge" id="dock-count">3</span>
+        <span>items selected</span>
+      </div>
+
+      <span class="dock-divider" aria-hidden="true"></span>
+
+      <div class="dock-actions">
+        <button type="button" tabindex="0" class="dock-btn">
+          <svg style="width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2;" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export
+        </button>
+        <button type="button" tabindex="-1" class="dock-btn dock-btn-danger">
+          <svg style="width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2;" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          Delete
+        </button>
+      </div>
+
+      <span class="dock-divider" aria-hidden="true"></span>
+
+      <button type="button" tabindex="-1" aria-label="Deselect all items" class="dock-close-btn" title="Clear selection">
+        <svg style="width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2;" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+  </aside>
+
+  <script>
+    // Roving Tabindex & Arrow Key Controller Implementation
+    function initToolbarRovingTabindex(toolbarEl) {
+      const buttons = Array.from(toolbarEl.querySelectorAll('button:not(:disabled)'));
+
+      toolbarEl.addEventListener('keydown', (e) => {
+        const currentBtn = document.activeElement;
+        const currentIndex = buttons.indexOf(currentBtn);
+        if (currentIndex === -1) return;
+
+        let nextIndex = null;
+
+        if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+          e.preventDefault();
+          nextIndex = (currentIndex + 1) % buttons.length;
+        } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+          e.preventDefault();
+          nextIndex = (currentIndex - 1 + buttons.length) % buttons.length;
+        } else if (e.key === 'Home') {
+          e.preventDefault();
+          nextIndex = 0;
+        } else if (e.key === 'End') {
+          e.preventDefault();
+          nextIndex = buttons.length - 1;
+        }
+
+        if (nextIndex !== null) {
+          buttons[currentIndex].setAttribute('tabindex', '-1');
+          buttons[nextIndex].setAttribute('tabindex', '0');
+          buttons[nextIndex].focus();
+        }
+      });
+    }
+
+    // Initialize Toolbars
+    document.querySelectorAll('[role="toolbar"]').forEach(initToolbarRovingTabindex);
+
+    // Toggle button press state handler
+    document.querySelectorAll('.tb-btn[aria-pressed]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const isPressed = btn.getAttribute('aria-pressed') === 'true';
+        btn.setAttribute('aria-pressed', (!isPressed).toString());
+        btn.classList.toggle('is-active', !isPressed);
+      });
+    });
+  </script>
+</body>
+</html>
