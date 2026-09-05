@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Mobile Chat & Visual Viewport Keyboard Dock Example</title>
+  <style>
+    /* CSS Reset & Variables */
+    :root {
+      --bg-primary: #0f172a;
+      --bg-surface: #1e293b;
+      --bg-message-user: #2563eb;
+      --bg-message-bot: #334155;
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --accent: #38bdf8;
+      --border-color: #334155;
+
+      /* Visual Viewport Synchronized Variables (Defaults before JS runs) */
+      --vv-height: 100dvh;
+      --keyboard-height: 0px;
+      --vv-offset-top: 0px;
+      --vv-scale: 1;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      height: 100%;
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      overflow: hidden; /* Prevent body scroll bouncing on iOS */
+    }
+
+    /* Outer Container bound to visual viewport height */
+    .chat-app {
+      display: flex;
+      flex-direction: column;
+      height: var(--vv-height, 100vh);
+      width: 100%;
+      position: relative;
+    }
+
+    /* Header */
+    .chat-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background-color: var(--bg-surface);
+      border-bottom: 1px solid var(--border-color);
+      flex-shrink: 0;
+    }
+
+    .chat-header h1 {
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    .status-badge {
+      font-size: 0.75rem;
+      padding: 4px 8px;
+      border-radius: 12px;
+      background-color: rgba(56, 189, 248, 0.1);
+      color: var(--accent);
+      border: 1px solid rgba(56, 189, 248, 0.2);
+    }
+
+    /* Scrollable Message List */
+    .message-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .message {
+      max-width: 80%;
+      padding: 10px 14px;
+      border-radius: 16px;
+      font-size: 0.95rem;
+      line-height: 1.4;
+      word-break: break-word;
+    }
+
+    .message-bot {
+      align-self: flex-start;
+      background-color: var(--bg-message-bot);
+      border-bottom-left-radius: 4px;
+    }
+
+    .message-user {
+      align-self: flex-end;
+      background-color: var(--bg-message-user);
+      border-bottom-right-radius: 4px;
+    }
+
+    .message-time {
+      font-size: 0.7rem;
+      color: var(--text-secondary);
+      margin-top: 4px;
+      text-align: right;
+    }
+
+    /* Viewport Debug Stats Overlay */
+    .viewport-debug {
+      background-color: rgba(15, 23, 42, 0.9);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-family: monospace;
+      font-size: 0.75rem;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+
+    /* Fixed Bottom Input Dock anchored above soft keyboard */
+    .input-dock {
+      background-color: var(--bg-surface);
+      border-top: 1px solid var(--border-color);
+      padding: 12px 16px;
+      padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+      flex-shrink: 0;
+      width: 100%;
+    }
+
+    /* When soft keyboard is active, zero out safe-area inset to avoid excessive gap */
+    html[data-keyboard-open="true"] .input-dock {
+      padding-bottom: 12px;
+    }
+
+    .input-form {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .chat-input {
+      flex: 1;
+      background-color: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 10px 16px;
+      color: var(--text-primary);
+      font-size: 16px; /* 16px prevents automatic iOS Safari zoom-on-focus */
+      outline: none;
+      transition: border-color 0.2s ease;
+    }
+
+    .chat-input:focus {
+      border-color: var(--accent);
+    }
+
+    .send-btn {
+      background-color: var(--accent);
+      color: #0f172a;
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .send-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="chat-app" id="chatApp">
+    <!-- Header -->
+    <header class="chat-header">
+      <h1>Support Chat</h1>
+      <span class="status-badge" id="keyboardStatus">Keyboard: Closed</span>
+    </header>
+
+    <!-- Messages -->
+    <main class="message-list" id="messageList">
+      <div class="viewport-debug" id="debugConsole">
+        Visual Viewport Stats Loading...
+      </div>
+
+      <div class="message message-bot">
+        Hello! Welcome to the Visual Viewport API demo page.
+        <div class="message-time">10:00 AM</div>
+      </div>
+
+      <div class="message message-bot">
+        Try tapping the input field at the bottom on an iOS Safari or Android Chrome device to see how the chat layout and input dock adapt seamlessly without hiding content or jumping off-screen.
+        <div class="message-time">10:01 AM</div>
+      </div>
+
+      <div class="message message-user">
+        Is layout viewport (`100vh`) enough for mobile soft keyboards?
+        <div class="message-time">10:02 AM</div>
+      </div>
+
+      <div class="message message-bot">
+        No! `100vh` and `100dvh` do not account for mobile virtual soft keyboard overlays consistently on iOS Safari. The Visual Viewport API (`window.visualViewport`) provides real-time visible coordinates to adjust dimensions dynamically.
+        <div class="message-time">10:03 AM</div>
+      </div>
+    </main>
+
+    <!-- Bottom Fixed Input Dock -->
+    <footer class="input-dock" id="inputDock">
+      <form class="input-form" id="chatForm">
+        <input
+          type="text"
+          class="chat-input"
+          id="chatInput"
+          placeholder="Type a message..."
+          autocomplete="off"
+        >
+        <button type="submit" class="send-btn" aria-label="Send Message">
+          &rarr;
+        </button>
+      </form>
+    </footer>
+  </div>
+
+  <script>
+    /**
+     * Visual Viewport Controller Integration
+     */
+    class MobileChatViewportManager {
+      constructor() {
+        this.appContainer = document.getElementById('chatApp');
+        this.messageList = document.getElementById('messageList');
+        this.chatInput = document.getElementById('chatInput');
+        this.statusBadge = document.getElementById('keyboardStatus');
+        this.debugConsole = document.getElementById('debugConsole');
+        this.controller = new AbortController();
+        this.rafId = null;
+
+        this.init();
+      }
+
+      init() {
+        if (!window.visualViewport) {
+          this.debugConsole.textContent = 'Visual Viewport API is NOT supported in this browser.';
+          return;
+        }
+
+        const { signal } = this.controller;
+
+        // Visual Viewport event listeners
+        window.visualViewport.addEventListener('resize', () => this.scheduleUpdate(), { passive: true, signal });
+        window.visualViewport.addEventListener('scroll', () => this.scheduleUpdate(), { passive: true, signal });
+
+        // Scroll to bottom on input focus
+        this.chatInput.addEventListener('focus', () => {
+          setTimeout(() => this.scrollToBottom(), 300);
+        }, { signal });
+
+        // Form submission demo
+        document.getElementById('chatForm').addEventListener('submit', (e) => {
+          e.preventDefault();
+          this.sendMessage();
+        }, { signal });
+
+        // Initial sync
+        this.update();
+      }
+
+      scheduleUpdate() {
+        if (this.rafId) return;
+        this.rafId = requestAnimationFrame(() => {
+          this.rafId = null;
+          this.update();
+        });
+      }
+
+      update() {
+        const vv = window.visualViewport;
+        const layoutHeight = window.innerHeight;
+
+        // Calculate virtual keyboard height
+        const keyboardHeight = Math.max(0, layoutHeight - vv.height - vv.offsetTop);
+        const isKeyboardOpen = keyboardHeight > 100;
+
+        // Apply synchronized CSS variables to document body
+        document.documentElement.style.setProperty('--vv-height', `${vv.height}px`);
+        document.documentElement.style.setProperty('--keyboard-height', `${keyboardHeight}px`);
+        document.documentElement.style.setProperty('--vv-offset-top', `${vv.offsetTop}px`);
+        document.documentElement.style.setProperty('--vv-scale', `${vv.scale}`);
+
+        // Set state attribute on <html> element
+        document.documentElement.setAttribute('data-keyboard-open', isKeyboardOpen ? 'true' : 'false');
+
+        // Update status badge UI
+        if (isKeyboardOpen) {
+          this.statusBadge.textContent = `Keyboard: Open (${Math.round(keyboardHeight)}px)`;
+          this.statusBadge.style.color = '#4ade80';
+        } else {
+          this.statusBadge.textContent = 'Keyboard: Closed';
+          this.statusBadge.style.color = 'var(--accent)';
+        }
+
+        // Output debug statistics
+        this.debugConsole.innerHTML = `
+          <strong>Visual Viewport Measurements:</strong><br>
+          • vv.height: ${Math.round(vv.height)}px<br>
+          • layoutHeight: ${Math.round(layoutHeight)}px<br>
+          • Computed Keyboard: ${Math.round(keyboardHeight)}px<br>
+          • vv.offsetTop: ${Math.round(vv.offsetTop)}px<br>
+          • vv.scale: ${vv.scale.toFixed(2)}
+        `;
+
+        // Maintain bottom scroll positioning
+        this.scrollToBottom();
+      }
+
+      scrollToBottom() {
+        this.messageList.scrollTop = this.messageList.scrollHeight;
+      }
+
+      sendMessage() {
+        const text = this.chatInput.value.trim();
+        if (!text) return;
+
+        const userMsg = document.createElement('div');
+        userMsg.className = 'message message-user';
+        userMsg.innerHTML = `${this.escapeHTML(text)}<div class="message-time">Just now</div>`;
+        this.messageList.appendChild(userMsg);
+
+        this.chatInput.value = '';
+        this.scrollToBottom();
+
+        // Simulate automated response
+        setTimeout(() => {
+          const botMsg = document.createElement('div');
+          botMsg.className = 'message message-bot';
+          botMsg.innerHTML = `Received: "${this.escapeHTML(text)}". Viewport remains stably aligned!<div class="message-time">Just now</div>`;
+          this.messageList.appendChild(botMsg);
+          this.scrollToBottom();
+        }, 600);
+      }
+
+      escapeHTML(str) {
+        return str.replace(/[&<>'"]/g,
+          tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag));
+      }
+
+      destroy() {
+        if (this.rafId) cancelAnimationFrame(this.rafId);
+        this.controller.abort();
+      }
+    }
+
+    // Initialize controller on DOMContentLoaded
+    document.addEventListener('DOMContentLoaded', () => {
+      window.chatViewportManager = new MobileChatViewportManager();
+    });
+  </script>
+</body>
+</html>
