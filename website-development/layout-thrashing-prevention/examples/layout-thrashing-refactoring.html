@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Layout Thrashing Prevention - Before vs. After Example</title>
+  <style>
+    :root {
+      --font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --color-bg: #0f172a;
+      --color-surface: #1e293b;
+      --color-surface-hover: #334155;
+      --color-primary: #38bdf8;
+      --color-accent: #f43f5e;
+      --color-text: #f8fafc;
+      --color-text-muted: #94a3b8;
+      --color-success: #22c55e;
+      --border-radius: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-family);
+      background-color: var(--color-bg);
+      color: var(--color-text);
+      line-height: 1.6;
+      padding: 2rem;
+    }
+
+    header {
+      max-width: 1000px;
+      margin: 0 auto 2rem;
+    }
+
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+      color: var(--color-primary);
+    }
+
+    p.description {
+      color: var(--color-text-muted);
+      margin-bottom: 1.5rem;
+    }
+
+    .controls {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      background: var(--color-surface);
+      padding: 1.25rem;
+      border-radius: var(--border-radius);
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    button {
+      background: var(--color-primary);
+      color: #0f172a;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      font-weight: 700;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    button.bad {
+      background: var(--color-accent);
+      color: white;
+    }
+
+    .metrics-panel {
+      display: flex;
+      gap: 2rem;
+      margin-left: auto;
+      font-family: monospace;
+    }
+
+    .metric {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .metric-value {
+      font-size: 1.25rem;
+      font-weight: bold;
+    }
+
+    .grid-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 1.5rem;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--color-surface);
+      border-radius: var(--border-radius);
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      transition: background 0.2s;
+    }
+
+    .card h3 {
+      font-size: 1.1rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .card p {
+      color: var(--color-text-muted);
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+    }
+
+    .card-footer {
+      font-size: 0.8rem;
+      color: var(--color-primary);
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Layout Thrashing Prevention Demo</h1>
+    <p class="description">
+      This interactive test panel demonstrates the performance impact of interleaved DOM reads/writes (Layout Thrashing) versus two-pass batched operations across 100+ dynamic grid cards.
+    </p>
+
+    <div class="controls">
+      <button id="btn-bad" class="bad">Run Naive (Thrashing)</button>
+      <button id="btn-good">Run Batched (Optimized)</button>
+      <button id="btn-reset">Reset Layout</button>
+
+      <div class="metrics-panel">
+        <div class="metric">
+          <span style="color: var(--color-text-muted);">Duration:</span>
+          <span id="metric-duration" class="metric-value">0.00 ms</span>
+        </div>
+        <div class="metric">
+          <span style="color: var(--color-text-muted);">Status:</span>
+          <span id="metric-status" class="metric-value">Ready</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div id="card-grid" class="grid-container"></div>
+  </main>
+
+  <script>
+    const GRID_SIZE = 120;
+    const gridContainer = document.getElementById('card-grid');
+    const metricDuration = document.getElementById('metric-duration');
+    const metricStatus = document.getElementById('metric-status');
+
+    // Sample content generators
+    const titles = ['Analytics Engine', 'User Microservice', 'Cache Cluster', 'Auth Gateway', 'Billing Webhook', 'Realtime Pipeline'];
+    const textSnippets = [
+      'Monitors real-time stream ingestion and automatically scales worker nodes based on incoming volume metrics.',
+      'Handles user session management, OAuth tokens, and fine-grained role-based permission checks.',
+      'High-throughput in-memory Redis cluster providing sub-millisecond query caching for popular API routes.',
+      'Stripe integration endpoint processing recurring subscription renewals and handling invoice payment retries.'
+    ];
+
+    // Seed DOM cards
+    function initCards() {
+      gridContainer.innerHTML = '';
+      const fragment = document.createDocumentFragment();
+
+      for (let i = 0; i < GRID_SIZE; i++) {
+        const card = document.createElement('article');
+        card.className = 'card';
+        card.style.height = 'auto'; // Reset height
+
+        const randomTitle = titles[i % titles.length];
+        const randomText = textSnippets[(i + Math.floor(Math.random() * textSnippets.length)) % textSnippets.length];
+
+        card.innerHTML = `
+          <div>
+            <h3>${randomTitle} #${i + 1}</h3>
+            <p>${randomText}</p>
+          </div>
+          <div class="card-footer">Status: Operational</div>
+        `;
+        fragment.appendChild(card);
+      }
+      gridContainer.appendChild(fragment);
+    }
+
+    initCards();
+
+    // =========================================================================
+    // BEFORE: Naive Layout Thrashing Implementation
+    // Interleaves reading card.offsetHeight with setting card.style.height
+    // =========================================================================
+    document.getElementById('btn-bad').addEventListener('click', () => {
+      metricStatus.textContent = 'Running (Thrashing)...';
+      metricStatus.style.color = 'var(--color-accent)';
+
+      // Force frame start timing
+      requestAnimationFrame(() => {
+        const start = performance.now();
+        const cards = document.querySelectorAll('.card');
+
+        // BAD: Reading offsetHeight then writing style.height on each iteration!
+        cards.forEach((card) => {
+          // Read (Forces Layout if previous iteration dirty)
+          const currentHeight = card.offsetHeight;
+
+          // Write (Dirties Layout Tree)
+          card.style.height = `${currentHeight + 15}px`;
+          card.style.backgroundColor = '#1e293b';
+        });
+
+        const end = performance.now();
+        const duration = (end - start).toFixed(2);
+        metricDuration.textContent = `${duration} ms`;
+        metricStatus.textContent = 'Complete (Thrashing)';
+      });
+    });
+
+    // =========================================================================
+    // AFTER: Batched Layout Implementation
+    // Phase 1: Read all dimensions into memory
+    // Phase 2: Apply all mutations in a single write pass
+    // =========================================================================
+    document.getElementById('btn-good').addEventListener('click', () => {
+      metricStatus.textContent = 'Running (Batched)...';
+      metricStatus.style.color = 'var(--color-success)';
+
+      requestAnimationFrame(() => {
+        const start = performance.now();
+        const cards = Array.from(document.querySelectorAll('.card'));
+
+        // PHASE 1: READ BATCH
+        // Query all layout geometry first without touching styles
+        const heights = cards.map((card) => card.offsetHeight);
+
+        // PHASE 2: WRITE BATCH
+        // Mutate styles all together without reading geometry
+        cards.forEach((card, index) => {
+          card.style.height = `${heights[index] + 15}px`;
+          card.style.backgroundColor = '#1e293b';
+        });
+
+        const end = performance.now();
+        const duration = (end - start).toFixed(2);
+        metricDuration.textContent = `${duration} ms`;
+        metricStatus.textContent = 'Complete (Batched)';
+      });
+    });
+
+    // Reset button
+    document.getElementById('btn-reset').addEventListener('click', () => {
+      initCards();
+      metricDuration.textContent = '0.00 ms';
+      metricStatus.textContent = 'Ready';
+      metricStatus.style.color = 'var(--color-text)';
+    });
+  </script>
+</body>
+</html>
