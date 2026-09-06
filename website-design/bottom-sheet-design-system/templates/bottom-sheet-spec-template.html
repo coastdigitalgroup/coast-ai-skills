@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bottom Sheet Design System Template</title>
+  <style>
+    /* CSS Design System Tokens */
+    :root {
+      --sheet-bg: #ffffff;
+      --sheet-text-primary: #111827;
+      --sheet-text-secondary: #4b5563;
+      --sheet-border: #e5e7eb;
+      --sheet-drag-handle: #9ca3af;
+      --sheet-overlay: rgba(0, 0, 0, 0.5);
+      --sheet-primary-accent: #2563eb;
+      --sheet-primary-accent-hover: #1d4ed8;
+      --sheet-danger: #dc2626;
+      --sheet-radius: 20px;
+      --sheet-shadow: 0 -10px 25px -5px rgba(0, 0, 0, 0.1), 0 -8px 10px -6px rgba(0, 0, 0, 0.1);
+      --sheet-transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --sheet-bg: #1f2937;
+        --sheet-text-primary: #f9fafb;
+        --sheet-text-secondary: #9ca3af;
+        --sheet-border: #374151;
+        --sheet-drag-handle: #6b7280;
+        --sheet-overlay: rgba(0, 0, 0, 0.7);
+        --sheet-primary-accent: #3b82f6;
+        --sheet-primary-accent-hover: #60a5fa;
+      }
+    }
+
+    /* Page Reset & Base Demo Styling */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: #f3f4f6;
+      color: #111827;
+      padding: 24px;
+      line-height: 1.5;
+    }
+
+    .demo-trigger-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 48px;
+      padding: 12px 24px;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #ffffff;
+      background-color: var(--sheet-primary-accent);
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.15s ease;
+    }
+
+    .demo-trigger-btn:hover {
+      background-color: var(--sheet-primary-accent-hover);
+    }
+
+    .demo-trigger-btn:focus-visible {
+      outline: 3px solid var(--sheet-primary-accent);
+      outline-offset: 2px;
+    }
+
+    /* ==========================================================================
+       BOTTOM SHEET COMPONENT CSS
+       ========================================================================== */
+
+    /* Backdrop Overlay Scrim */
+    .bottom-sheet-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 1000;
+      background-color: var(--sheet-overlay);
+      backdrop-filter: blur(4px);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.25s ease, visibility 0.25s ease;
+    }
+
+    .bottom-sheet-backdrop.is-visible {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    /* Sheet Main Container (Mobile-First) */
+    .bottom-sheet {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 1001;
+      display: flex;
+      flex-direction: column;
+      max-height: 90vh;
+      background-color: var(--sheet-bg);
+      color: var(--sheet-text-primary);
+      border-radius: var(--sheet-radius) var(--sheet-radius) 0 0;
+      box-shadow: var(--sheet-shadow);
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+      transform: translateY(100%);
+      transition: var(--sheet-transition);
+      overscroll-behavior: contain;
+    }
+
+    .bottom-sheet.is-open {
+      transform: translateY(0);
+    }
+
+    /* Drag Handle Touch Area & Indicator */
+    .bottom-sheet-drag-zone {
+      width: 100%;
+      min-height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding-top: 10px;
+      padding-bottom: 6px;
+      cursor: grab;
+      touch-action: none;
+    }
+
+    .bottom-sheet-drag-handle {
+      width: 40px;
+      height: 4px;
+      background-color: var(--sheet-drag-handle);
+      border-radius: 999px;
+    }
+
+    /* Header Bar */
+    .bottom-sheet-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 20px 16px 20px;
+      border-bottom: 1px solid var(--sheet-border);
+    }
+
+    .bottom-sheet-title {
+      font-size: 1.125rem;
+      font-weight: 700;
+      line-height: 1.3;
+    }
+
+    .bottom-sheet-close-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      background: transparent;
+      border: none;
+      border-radius: 50%;
+      color: var(--sheet-text-secondary);
+      cursor: pointer;
+    }
+
+    .bottom-sheet-close-btn:hover {
+      background-color: var(--sheet-border);
+    }
+
+    .bottom-sheet-close-btn:focus-visible {
+      outline: 2px solid var(--sheet-primary-accent);
+      outline-offset: 2px;
+    }
+
+    /* Scrollable Body Content */
+    .bottom-sheet-body {
+      flex: 1 1 auto;
+      padding: 20px;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .filter-group {
+      margin-bottom: 20px;
+    }
+
+    .filter-label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--sheet-text-secondary);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .pill-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .pill-option {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 8px 16px;
+      font-size: 0.9375rem;
+      font-weight: 500;
+      border: 1px solid var(--sheet-border);
+      border-radius: 8px;
+      background: transparent;
+      color: var(--sheet-text-primary);
+      cursor: pointer;
+    }
+
+    .pill-option.is-selected {
+      background-color: var(--sheet-primary-accent);
+      color: #ffffff;
+      border-color: var(--sheet-primary-accent);
+    }
+
+    /* Sticky Footer CTA Bar */
+    .bottom-sheet-footer {
+      display: flex;
+      gap: 12px;
+      padding: 16px 20px calc(16px + env(safe-area-inset-bottom, 0px)) 20px;
+      border-top: 1px solid var(--sheet-border);
+      background-color: var(--sheet-bg);
+    }
+
+    .btn-secondary {
+      flex: 1;
+      min-height: 48px;
+      font-size: 1rem;
+      font-weight: 600;
+      background: transparent;
+      border: 1px solid var(--sheet-border);
+      color: var(--sheet-text-primary);
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      flex: 2;
+      min-height: 48px;
+      font-size: 1rem;
+      font-weight: 600;
+      background: var(--sheet-primary-accent);
+      border: none;
+      color: #ffffff;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    /* ==========================================================================
+       RESPONSIVE DESKTOP ADAPTATION (>= 768px)
+       ========================================================================== */
+    @media (min-width: 768px) {
+      .bottom-sheet {
+        top: 50%;
+        left: 50%;
+        right: auto;
+        bottom: auto;
+        width: 100%;
+        max-width: 540px;
+        max-height: 85vh;
+        border-radius: 16px;
+        transform: translate(-50%, -40%) scale(0.95);
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .bottom-sheet.is-open {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      .bottom-sheet-drag-zone {
+        display: none; /* Hide drag handle on desktop modal */
+      }
+    }
+
+    /* Motion Accessibility Reduction */
+    @media (prefers-reduced-motion: reduce) {
+      .bottom-sheet, .bottom-sheet-backdrop {
+        transition: opacity 0.1s linear !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Page Trigger Button -->
+  <button type="button" class="demo-trigger-btn" id="open-sheet-btn" aria-haspopup="dialog">
+    Open Filter Bottom Sheet
+  </button>
+
+  <!-- Backdrop Scrim Overlay -->
+  <div class="bottom-sheet-backdrop" id="sheet-backdrop" aria-hidden="true"></div>
+
+  <!-- Bottom Sheet Container Component -->
+  <div
+    class="bottom-sheet"
+    id="bottom-sheet"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="sheet-title"
+    aria-hidden="true"
+  >
+    <!-- Drag Handle Affordance Zone -->
+    <div class="bottom-sheet-drag-zone" id="sheet-drag-zone" aria-hidden="true">
+      <div class="bottom-sheet-drag-handle"></div>
+    </div>
+
+    <!-- Header Bar -->
+    <div class="bottom-sheet-header">
+      <h2 class="bottom-sheet-title" id="sheet-title">Filter Catalog</h2>
+      <button type="button" class="bottom-sheet-close-btn" id="close-sheet-btn" aria-label="Close sheet">
+        ✕
+      </button>
+    </div>
+
+    <!-- Scrollable Body Content -->
+    <div class="bottom-sheet-body">
+      <div class="filter-group">
+        <span class="filter-label">Select Size</span>
+        <div class="pill-grid">
+          <button type="button" class="pill-option">XS</button>
+          <button type="button" class="pill-option is-selected">S</button>
+          <button type="button" class="pill-option is-selected">M</button>
+          <button type="button" class="pill-option">L</button>
+          <button type="button" class="pill-option">XL</button>
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <span class="filter-label">Category</span>
+        <div class="pill-grid">
+          <button type="button" class="pill-option is-selected">Jackets & Coats</button>
+          <button type="button" class="pill-option">Denim</button>
+          <button type="button" class="pill-option">Knitwear</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sticky Footer Action Bar -->
+    <div class="bottom-sheet-footer">
+      <button type="button" class="btn-secondary" id="clear-filters-btn">Clear All</button>
+      <button type="button" class="btn-primary" id="apply-filters-btn">Apply (128 Results)</button>
+    </div>
+  </div>
+
+  <script>
+    // Focus Trap and Interactive Sheet Logic
+    (function() {
+      const openBtn = document.getElementById('open-sheet-btn');
+      const closeBtn = document.getElementById('close-sheet-btn');
+      const sheet = document.getElementById('bottom-sheet');
+      const backdrop = document.getElementById('sheet-backdrop');
+      let previousActiveElement = null;
+
+      function openSheet() {
+        previousActiveElement = document.activeElement;
+        backdrop.classList.add('is-visible');
+        sheet.classList.add('is-open');
+        sheet.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+        closeBtn.focus();
+      }
+
+      function closeSheet() {
+        backdrop.classList.remove('is-visible');
+        sheet.classList.remove('is-open');
+        sheet.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+        if (previousActiveElement) {
+          previousActiveElement.focus();
+        }
+      }
+
+      openBtn.addEventListener('click', openSheet);
+      closeBtn.addEventListener('click', closeSheet);
+      backdrop.addEventListener('click', closeSheet);
+
+      document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape' && sheet.classList.contains('is-open')) {
+          closeSheet();
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
