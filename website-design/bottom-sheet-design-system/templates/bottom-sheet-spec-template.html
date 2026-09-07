@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Accessible Bottom Sheet Design Template</title>
+  <style>
+    :root {
+      --sheet-bg: #ffffff;
+      --sheet-text: #111827;
+      --sheet-muted: #6b7280;
+      --sheet-border: #e5e7eb;
+      --sheet-primary: #2563eb;
+      --sheet-primary-hover: #1d4ed8;
+      --sheet-scrim: rgba(0, 0, 0, 0.45);
+      --sheet-radius: 20px;
+      --sheet-max-height: 85dvh;
+      --sheet-shadow: 0 -10px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Prevent body scrolling when sheet is open */
+    body.sheet-open {
+      overflow: hidden;
+    }
+
+    /* Scrim Backdrop Overlay */
+    .sheet-backdrop {
+      position: fixed;
+      inset: 0;
+      background-color: var(--sheet-scrim);
+      backdrop-filter: blur(2px);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 250ms ease, visibility 250ms ease;
+      z-index: 999;
+    }
+
+    .sheet-backdrop.is-active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    /* Mobile Bottom Sheet Container */
+    .bottom-sheet {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      width: 100%;
+      max-height: var(--sheet-max-height);
+      background-color: var(--sheet-bg);
+      color: var(--sheet-text);
+      border-radius: var(--sheet-radius) var(--sheet-radius) 0 0;
+      box-shadow: var(--sheet-shadow);
+      display: flex;
+      flex-direction: column;
+      z-index: 1000;
+      transform: translateY(100%);
+      transition: transform 300ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .bottom-sheet.is-open {
+      transform: translateY(0);
+    }
+
+    /* Header & Drag Handle */
+    .sheet-header {
+      padding: 12px 20px 16px 20px;
+      border-bottom: 1px solid var(--sheet-border);
+      flex-shrink: 0;
+    }
+
+    .sheet-drag-handle {
+      width: 40px;
+      height: 4px;
+      background-color: #d1d5db;
+      border-radius: 999px;
+      margin: 0 auto 12px auto;
+      cursor: grab;
+    }
+
+    .sheet-title-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .sheet-title {
+      margin: 0;
+      font-size: 1.125rem;
+      font-weight: 600;
+    }
+
+    .sheet-close-btn {
+      background: transparent;
+      border: none;
+      padding: 8px;
+      min-width: 44px;
+      min-height: 44px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--sheet-muted);
+    }
+
+    .sheet-close-btn:focus-visible {
+      outline: 2px solid var(--sheet-primary);
+      outline-offset: 2px;
+    }
+
+    /* Scrollable Body Content */
+    .sheet-body {
+      padding: 20px;
+      overflow-y: auto;
+      overscroll-behavior-y: contain;
+      flex-grow: 1;
+    }
+
+    /* Sticky Footer Action Dock with Safe Area Padding */
+    .sheet-footer {
+      padding: 16px 20px calc(16px + env(safe-area-inset-bottom, 0px)) 20px;
+      border-top: 1px solid var(--sheet-border);
+      background-color: var(--sheet-bg);
+      flex-shrink: 0;
+      display: flex;
+      gap: 12px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 48px;
+      padding: 0 20px;
+      font-size: 1rem;
+      font-weight: 500;
+      border-radius: 10px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      width: 100%;
+    }
+
+    .btn-primary {
+      background-color: var(--sheet-primary);
+      color: #ffffff;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--sheet-primary-hover);
+    }
+
+    .btn-secondary {
+      background-color: #f3f4f6;
+      color: var(--sheet-text);
+      border-color: var(--sheet-border);
+    }
+
+    /* Desktop Adaptation Media Query (>= 768px) */
+    @media (min-width: 768px) {
+      .bottom-sheet {
+        bottom: auto;
+        top: 50%;
+        left: 50%;
+        right: auto;
+        max-width: 520px;
+        max-height: 80vh;
+        border-radius: 16px;
+        transform: translate(-50%, -45%) scale(0.95);
+        opacity: 0;
+        transition: transform 200ms ease, opacity 200ms ease;
+      }
+
+      .bottom-sheet.is-open {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+      }
+
+      .sheet-drag-handle {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Trigger Button Example -->
+  <button type="button" class="btn btn-primary" id="open-sheet-trigger" style="max-width: 240px; margin: 40px auto; display: block;">
+    Open Bottom Sheet
+  </button>
+
+  <!-- Backdrop -->
+  <div class="sheet-backdrop" id="sheet-backdrop" data-dismiss="sheet"></div>
+
+  <!-- Bottom Sheet Container -->
+  <div
+    class="bottom-sheet"
+    id="demo-bottom-sheet"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="sheet-title-heading"
+    aria-hidden="true"
+  >
+    <!-- Header Zone -->
+    <div class="sheet-header">
+      <div class="sheet-drag-handle" aria-hidden="true"></div>
+      <div class="sheet-title-row">
+        <h2 id="sheet-title-heading" class="sheet-title">Filter Search Results</h2>
+        <button type="button" class="sheet-close-btn" id="sheet-close-trigger" aria-label="Close sheet">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M18 6L6 18M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Scrollable Body Zone -->
+    <div class="sheet-body">
+      <p>Configure filters to refine your search parameters across categories and dates.</p>
+      <!-- Example Form Controls -->
+      <div style="margin-top: 16px;">
+        <label for="category-select" style="display: block; font-weight: 500; margin-bottom: 6px;">Category</label>
+        <select id="category-select" style="width: 100%; min-height: 44px; padding: 8px 12px; border-radius: 8px; border: 1px solid #d1d5db;">
+          <option value="all">All Categories</option>
+          <option value="electronics">Electronics</option>
+          <option value="apparel">Apparel</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Sticky Footer Action Dock -->
+    <div class="sheet-footer">
+      <button type="button" class="btn btn-secondary" id="sheet-cancel-btn">Reset</button>
+      <button type="button" class="btn btn-primary" id="sheet-apply-btn">Apply Filters</button>
+    </div>
+  </div>
+
+</body>
+</html>
