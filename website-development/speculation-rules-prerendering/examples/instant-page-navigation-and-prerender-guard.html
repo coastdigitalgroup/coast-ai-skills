@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Speculation Rules & Prerender Guard Example</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --border: #334155;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --primary: #38bdf8;
+      --success: #4ade80;
+      --danger: #f87171;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      max-width: 900px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+      line-height: 1.6;
+    }
+
+    h1, h2, h3 {
+      color: var(--text);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .badge-before { background-color: rgba(248, 113, 113, 0.2); color: var(--danger); border: 1px solid var(--danger); }
+    .badge-after { background-color: rgba(74, 222, 128, 0.2); color: var(--success); border: 1px solid var(--success); }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+    }
+
+    @media (min-width: 768px) {
+      .grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.5rem;
+    }
+
+    .product-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      margin: 1rem 0;
+    }
+
+    .product-link {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem 1rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--primary);
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .product-link:hover {
+      background: rgba(56, 189, 248, 0.1);
+      border-color: var(--primary);
+    }
+
+    .log-panel {
+      background: #020617;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1rem;
+      font-family: monospace;
+      font-size: 0.85rem;
+      height: 180px;
+      overflow-y: auto;
+      color: var(--text-muted);
+    }
+
+    .log-entry { margin-bottom: 0.4rem; }
+    .log-entry.info { color: var(--primary); }
+    .log-entry.success { color: var(--success); }
+    .log-entry.warn { color: #facc15; }
+    .log-entry.error { color: var(--danger); }
+
+    code {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-size: 0.85em;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Speculation Rules API & Destination Prerender Guard</h1>
+  <p>
+    This demonstration shows how to implement document-level Speculation Rules for instant sub-100ms page navigations while safely isolating background script side effects using <code>document.prerendering</code>.
+  </p>
+
+  <div class="grid">
+    <!-- BEFORE: Un-guarded or Naive Speculative Pre-loading -->
+    <div class="card">
+      <span class="badge badge-before">BEFORE: Naive / Un-guarded</span>
+      <h3>Premature Side Effects & Metrics Corruption</h3>
+      <p>
+        Naively preloading or pre-executing background documents causes analytics page views to double-fire and video/audio scripts to throw autoplay errors before the user even clicks.
+      </p>
+
+      <div class="product-list">
+        <a href="#product-1" class="product-link no-guard">
+          <span>Wireless Headphones</span>
+          <span>$199</span>
+        </a>
+        <a href="#product-2" class="product-link no-guard">
+          <span>Mechanical Keyboard</span>
+          <span>$149</span>
+        </a>
+      </div>
+
+      <h4>Simulated Background Log:</h4>
+      <div id="log-before" class="log-panel">
+        <div class="log-entry warn">[0ms] Background prefetch triggered...</div>
+        <div class="log-entry error">[5ms] ERROR: GA4 PageView fired for un-clicked page!</div>
+        <div class="log-entry error">[8ms] ERROR: Uncaught NotAllowedError: play() failed without user gesture.</div>
+      </div>
+    </div>
+
+    <!-- AFTER: Production Speculation Rules with Prerender Guards -->
+    <div class="card">
+      <span class="badge badge-after">AFTER: Speculation Rules + Guard</span>
+      <h3>Instant Navigation with Deferred Activation</h3>
+      <p>
+        Speculation Rules prerender the target document in an isolated background tab. JavaScript side effects wait for the <code>prerenderchange</code> activation event.
+      </p>
+
+      <div class="product-list">
+        <a href="?page=pdp-wireless-headphones" class="product-link pdp-link" data-prerender="true">
+          <span>Wireless Headphones</span>
+          <span>$199</span>
+        </a>
+        <a href="?page=pdp-mechanical-keyboard" class="product-link pdp-link" data-prerender="true">
+          <span>Mechanical Keyboard</span>
+          <span>$149</span>
+        </a>
+      </div>
+
+      <h4>Real-Time Execution Log:</h4>
+      <div id="log-after" class="log-panel"></div>
+    </div>
+  </div>
+
+  <!-- Declarative Speculation Rules Definition -->
+  <script type="speculationrules">
+  {
+    "prerender": [
+      {
+        "source": "document",
+        "where": {
+          "and": [
+            { "href_matches": "*page=pdp-*" },
+            { "not": { "selector_matches": ".no-prerender" } }
+          ]
+        },
+        "eagerness": "moderate"
+      }
+    ],
+    "prefetch": [
+      {
+        "source": "document",
+        "where": {
+          "href_matches": "*page=cart*"
+        },
+        "eagerness": "conservative"
+      }
+    ]
+  }
+  </script>
+
+  <!-- Destination & Origin Script with Prerender Protection -->
+  <script>
+    const logAfter = document.getElementById('log-after');
+
+    function log(msg, type = 'info') {
+      const entry = document.createElement('div');
+      entry.className = `log-entry ${type}`;
+      entry.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+      logAfter.appendChild(entry);
+      logAfter.scrollTop = logAfter.scrollHeight;
+    }
+
+    // 1. Detect Speculation Rules Support
+    if (HTMLScriptElement.supports && HTMLScriptElement.supports('speculationrules')) {
+      log('Speculation Rules API supported natively!', 'success');
+    } else {
+      log('Speculation Rules API not supported in this browser. Falling back to native link hints.', 'warn');
+    }
+
+    // 2. Destination Page Simulation Guard
+    function initPageScript() {
+      // Step A: DOM Rendering (Safe during prerender)
+      log('UI Rendered & Interactive State Ready (Safe)', 'info');
+
+      // Step B: Guard Side Effects (Analytics, WebSockets, Audio/Video)
+      if (document.prerendering) {
+        log('DOCUMENT IS PRERENDERING IN BACKGROUND. Deferring analytics & socket connection...', 'warn');
+
+        document.addEventListener('prerenderchange', () => {
+          log('DOCUMENT ACTIVATED BY USER! Firing deferred pageview & sockets now.', 'success');
+          fireAnalyticsPageView();
+          connectWebSocket();
+        }, { once: true });
+      } else {
+        log('DOCUMENT LOADED IN FOREGROUND. Firing analytics immediately.', 'success');
+        fireAnalyticsPageView();
+        connectWebSocket();
+      }
+    }
+
+    function fireAnalyticsPageView() {
+      log('Analytics Event Fired: page_view (PDP Destination)', 'success');
+    }
+
+    function connectWebSocket() {
+      log('WebSocket Connection Established (Real-time stock watcher)', 'info');
+    }
+
+    // Run page lifecycle handler
+    initPageScript();
+  </script>
+
+</body>
+</html>
